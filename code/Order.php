@@ -856,9 +856,7 @@
 				$productgroupPageLvl2->write();
 				$productgroupPageLvl2->publish('Stage', 'Live');
 				
-				if(!Database::$supressOutput) {
-					echo "<li style=\"color: orange\">ProductGroup (ID = {$productgroupPageLvl2->ID}) page created.</li>";
-				}
+				Database::alteration_message("ProductGroup (ID = {$productgroupPageLvl2->ID}) page created.","created");
 
 				// Create a child Product of our ProductGroup page nested inside another ProductGroup page
 				// Create it as a featured product as an example of how the feature works
@@ -876,10 +874,8 @@
 				$productPage->Status = 'Published';
 				$productPage->write();
 				$productPage->publish('Stage', 'Live');
+				Database::alteration_message("Product (ID = {$productPage->ID}, ParentID = {$productgroupPageLvl2->ID}) page created.","created");
 				
-				if(!Database::$supressOutput) {
-					echo "<li style=\"color: orange\">Product (ID = {$productPage->ID}, ParentID = {$productgroupPageLvl2->ID}) page created.</li>";
-				}
 				// Create a child Product of our ProductGroup page nested inside another ProductGroup page
 				$productPage2 = new Product();
 				$productPage2->Title = 'Example product 2';
@@ -893,10 +889,7 @@
 				$productPage2->Status = 'Published';
 				$productPage2->write();
 				$productPage2->publish('Stage', 'Live');
-				
-				if(!Database::$supressOutput) {
-					echo "<li style=\"color: orange\">Product (ID = {$productPage2->ID}, ParentID = {$productgroupPageLvl2->ID}) page created.</li>";
-				}
+				Database::alteration_message("Product (ID = {$productPage2->ID}, ParentID = {$productgroupPageLvl2->ID}) page created.","created");		
 			}			
 		}		
 		
@@ -912,10 +905,7 @@
 			$checkoutPage->Status = 'Published';
 			$checkoutPage->write();
 			$checkoutPage->publish('Stage', 'Live');
-			
-			if(!Database::$supressOutput) {
-				echo '<li style="color: orange">Checkout page created.</li>';
-			}
+			Database::alteration_message("Checkout page created","created");
 		}
 
 		// Create an AccountPage page
@@ -928,10 +918,7 @@
 			$accountPage->Status = 'Published';
 			$accountPage->write();
 			$accountPage->publish('Stage', 'Live');
-			
-			if(!Database::$supressOutput) {
-				echo '<li style="color: orange">Account page created.</li>';
-			}
+			Database::alteration_message("Account page created.","created");
 		}
 		
 		// Create a shop terms and conditions page
@@ -945,10 +932,7 @@
 			$termsPage->Status = 'Published';
 			$termsPage->write();
 			$termsPage->publish('Stage', 'Live');
-			
-			if(!Database::$supressOutput) {
-				echo '<li style="color: orange">Terms and conditions page created.</li>';
-			}
+			Database::alteration_message("Terms and conditions page created.","created");
 		}
 	}
 
