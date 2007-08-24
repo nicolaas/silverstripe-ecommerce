@@ -1,0 +1,61 @@
+#ReportFilter {
+	/*border: 1px solid red;*/
+	margin-bottom: 2em;
+	width:500px;
+}
+	#ReportFilter label {
+		width:60px;
+		float:left;
+	}
+	#ReportFilter div {
+		margin-bottom:10px;
+	}
+	
+	#ReportFilter #To {
+		display: inline;
+	}
+
+	#ReportFilter #From {
+		display: inline;
+	}
+	
+	
+#Root_Report h3 {
+	color:#81A7E8;
+	font-size:1.6em;
+}
+
+#Root_Report a.viewAll {
+	font-size:1.3em;
+	font-weight:bold;
+}
+	
+#Root_Report td.Cheque {
+	color:red;
+}
+	
+	
+table#ReportList {
+	width:530px;
+	margin:7px 0 7px 0;
+}
+	table#ReportList th {
+		font-size:12px;
+		background:#81A7E8;
+		color:#fff;
+		font-weight:bold;
+		padding:3px 10px 3px 3px;
+	}
+	table#ReportList td {
+		padding:3px;
+	}
+		table#ReportList td a {
+			color:blue;
+		}
+	#Status {
+		clear: left;
+	}
+
+.right form #ReportFilter div.field.CompositeField {
+	margin-left: 0;
+}

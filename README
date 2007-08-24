@@ -1,0 +1,12 @@
+SilverStripe E-commerce Module 0.5 beta
+=======================================
+
+RELEASE NOTES
+
+Known issues:
+
+* You cannot use multiple modules (forum and e-commerce) on the same site.
+* If you have multiple DataObjectDecorator role's (ForumRole and EcommerceRole) then it only
+  uses one or the other (related to the problem above).
+* Daily builds does not work with the module. There are problems with Shopping cart and Orders.
+* WorldPay - Email receipt is not sent after being redirected back from payment gateway.

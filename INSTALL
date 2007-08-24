@@ -1,0 +1,143 @@
+SilverStripe E-commerce Module 0.5 beta
+=======================================
+
+
+INSTALLATION
+------------
+
+1. Unzip this file (ecommerce-0.5.tar.gz) inside your SilverStripe installation directory.
+It should be at the same level as 'jsparty', 'cms' and 'sapphire' modules.
+
+2. Ensure the directory name for the module is 'ecommerce'. 
+
+3. Visit your SilverStripe site (you require 2.0.2+ to operate this module).
+
+4. Add db/build to the end of the website URL. For example: http://localhost:8888/mysite/db/build.
+
+5. Go back to your site (the home page, for example). You will now find there are some example
+product groups and products created after the build.
+
+6. We now need to setup some basic features to get the module up and running. Open up _config.php
+inside your project directory (typically 'mysite/_config.php') with your favourite text editor.
+Read the instructions below to setup the initial configuration of the module.
+
+A more expanded guide to the module functions, include tax calculation and shipping can be
+found on the SilverStripe wiki at: http://doc.silverstripe.com/doku.php?id=ecommerce-module
+
+
+
+SETTING UP THE ADMIN EMAIL ADDRESS (in mysite/_config.php)
+----------------------------------------------------------
+
+<<<< CODE STARTS >>>>
+
+// Set the email of the admin who looks after receiving the order emails.
+Order::set_email('bob@mygreatshop.com');
+
+<<<< CODE ENDS >>>>
+
+What does this do?
+------------------
+
+After a user purchases their order they receive an email from the system showing a summary of what
+they ordered, and the details that they submitted on the order form.
+
+Below is an example of how to choose the email customers will see (the from address) when they
+receive their emails. This email address also receives a copy of the receipt the customer will
+get (with their order details).
+
+If you don't define Order::set_email() then it will attempt to get the admin email address as
+defined in Email::setAdminEmail(). Failing that, it won't send any admin emails at all until you
+define one, it will still send the customer an email, but will have a blank 'from' address.
+
+
+
+SETTING UP PAYMENT METHODS (in mysite/_config.php)
+--------------------------------------------------
+
+<<<< CODE STARTS >>>>
+
+// 1. Define which payment methods your site uses.
+Payment::set_supported_methods(array(
+	'WorldpayPayment' => 'Credit card (WorldPay)',
+	'DPSPayment' => 'Credit Card (DPS)',
+	'ChequePayment' => 'Cheque'
+));
+
+<<<< CODE ENDS >>>>
+
+What this code does:
+--------------------
+
+The example above enables all the default payment methods. It's generally best to only use one or the
+other, in terms of credit card payment gateways like DPS or WorldPay.
+
+Simply comment out lines of the array if you don't want a particular one. If you don't specify any
+Payment::set_supported_methods() inside your _config.php file, then it will default to just cheque
+as a payment method only.
+
+Keep in mind that if you're signing up to DPS, the account type needs to be PxPost.
+For more information, check this page here: http://www.dps.co.nz/technical_resources/ecommerce_nonhosted/pxpost.html
+
+
+SETTING UP WORLDPAY
+-------------------
+
+<<<< CODE STARTS >>>>
+
+// 1. Set the installation ID of your WorldPay account.
+WorldpayPayment::set_installation_id(111111);
+
+// 2. Check if the site is in 'live' mode, use WP live mode.
+// otherwise, use WP test mode instead to be careful.
+if(Director::isLive()) {
+	WorldpayPayment::set_testmode(0);
+} else {
+	WorldpayPayment::set_testmode(100);
+}
+
+// 3. Set the callback password for your account
+WorldpayPayment::set_callback_password(blahblah);
+
+<<<< CODE ENDS >>>>
+
+What does code does:
+--------------------
+
+(1.) This sets the installation ID of your WorldPay account if you require WorldPay.
+If you don't require WorldPay, simply comment out or remove this line of code.
+
+(2.) This sets the test mode of the site. If the site is in 'live' mode it uses live
+mode. If it's not in 'live' mode - for example, you're developing on your localhost environment,
+or a host with the word 'dev' in it, then it uses test mode. You can also manually change your site
+to be a particular mode, by adding Director::set_environment_type('dev') in your _config.php file.
+It can either be 'dev', 'test', or 'live'. Don't forget to put it to 'live' before putting your site
+live on the internet if you do this!
+
+(3.) This sets the callback password from your WorldPay account so that redirects back
+to SilverStripe can occur after payment processing has occured at WorldPay. Simply comment out this
+line of code, or remove it, if you don't require WorldPay.
+
+
+SETTING UP DPS
+--------------
+
+<<<< CODE STARTS >>>>
+
+// Check if the site is in 'live' mode, use the live credentials.
+// otherwise, use test credentials instead to be careful.
+if(Director::isLive()) {
+	DPSPayment::set_account('MyDPSAccountLive', '11111111');
+} else {
+	DPSPayment::set_account('MyDPSAccountDev', '11111111');
+}
+
+<<<< CODE ENDS >>>>
+
+
+What this code does:
+--------------------
+
+These are the credentials the module uses to communicate with DPS whenever a credit card transaction
+is processed. You need to replace these with the test and live credentials for your DPS account.
+
