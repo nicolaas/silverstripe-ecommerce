@@ -17,12 +17,12 @@ class ShoppingCart extends Object {
 	 */
 	function setQuantity($order, $product, $quantity){
 		if($quantity) {
-			$_SESSION['cartContents'][$product->ID] = $quantity;
-			if($_SESSION['cartContents'][$product->ID] < 0) {
-				unset($_SESSION['cartContents'][$product->ID]);
+			Session::set('cartContents.'.$product->ID, $quantity);
+			if(Session::get('cartContents.'.$product->ID) < 0) {
+				Session::clear('cartContents.'.$product->ID);
 			} 
 		} else { 
-			unset($_SESSION['cartContents'][$product->ID]);
+			Session::clear('cartContents.'.$product->ID);
 		}
 	}
 	
@@ -31,37 +31,39 @@ class ShoppingCart extends Object {
 	 */
 	function getField($order, $fieldName){
 		// Get a default values from the order if there's nothing in the session
-		if(!isset($_SESSION['cartDetails']) || !is_array($_SESSION['cartDetails'])) {
-			$_SESSION['cartDetails'] = $order->toMap();
+		$tmp = Session::get('cartDetails');
+		if(!isset($tmp) || !is_array($tmp)) {
+			Session::set('cartDetails', $order->toMap());
 		}
-		return $_SESSION['cartDetails'][$fieldName];
+		return Session::get('cartDetails.'.$fieldName);
 	}
 	
 	/**
 	 * Sets associated order information to be stored in session
 	 */
 	function setField($order, $fieldName, $fieldValue){
-		$_SESSION['cartDetails'][$fieldName] = $fieldValue;
+		Session::set('cartDetails.'.$fieldName, $fieldValue);
 	}
 	
 	/**
 	 * Stores order item information in session
 	 */
 	function items($order) {
-		if(!isset($_SESSION['cartDetails']) || !is_array($_SESSION['cartDetails'])) {
-			$_SESSION['cartContents'] = $order->items();
+		$tmp = Session::get('cartDetails');
+		if(!isset($tmp) || !is_array($tmp)) {
+			Session::set('cartContents',$order->items());
 		}
-		return $_SESSION['cartContents'];
+		return Session::get('cartContents');
 	}
 	
 	/**
 	 * Returns the associated order information from session
 	 */
 	function getRecord($order) {
-		if(!is_array($_SESSION['cartDetails'])) 
+		if(!is_array(Session::get('cartDetails'))) 
 			return array();
 		else 
-			return $_SESSION['cartDetails'];
+			return Session::get('cartDetails');
 	}
 	
 	/**
@@ -70,7 +72,7 @@ class ShoppingCart extends Object {
 	function add($product) {
 		$id = $product->ID;
 		$this->items[$id]++;
-		$_SESSION['cartContents'][$id]++;
+		Session::set('cartContents.'.$id, Session::get('cartContents.'.$id)+1);
 	}
 	
 	/**
@@ -79,59 +81,59 @@ class ShoppingCart extends Object {
 	function remove($product){
 		$id = $product->ID;
 		$this->items[$id]--;
-		$_SESSION['cartContents'][$id]--;
-		if($_SESSION['cartContents'][$id]==0)
-			unset($_SESSION['cartContents'][$id]);
-		}
+		Session::set('cartContents.'.$id, Session::get('cartContents.'.$id)-1);
+		if(Session::get('cartContents.'.$id)==0)
+			Session::clear('cartContents.'.$id);
+	}
 	 
 	/**
 	 * Removes all the products from session
 	 */
 	function removeall($product){
 		$id = $product->ID;
-		unset($_SESSION['cartContents'][$id]);
+		Session::clear('cartContents.'.$id);
 	}
 	
 	/**
 	 * @TODO Same as above. Deprecated?
 	 */
 	function removeAllProducts(){
-		unset($_SESSION['cartContents']);
+		Session::clear('cartContents');
 	}
 	
 	/**
 	 * Sets the order ID (for when you have saved a order)
 	 */ 
 	function setID($ID){
-		$_SESSION['CartInfo']['OrderID'] = $ID;
+		Session::set('CartInfo.OrderID', $ID);
 	}
 	
 	/**
 	 * Returns the order ID
 	 */
 	function getID(){
-		return $_SESSION['CartInfo']['OrderID'];
+		return Session::get('CartInfo.OrderID');
 	}
 
 	/**
 	 * Returns the order error message
 	 */
 	function OrderError(){
-		return $_SESSION['OrderError'];
+		return Session::get('OrderError');
 	}
 	
 	/**
 	 * Returns the cart contents from session
 	 */
 	function sourceItems() {
-		return $_SESSION['cartContents'];
+		return Session::get('cartContents');
 	}
 	
 	/**
 	 * Returns information about the cart
 	 */
 	function getData() {
-		return $_SESSION['cartInfo'];
+		return Session::get('cartInfo');
 	}
 	  
 	/**

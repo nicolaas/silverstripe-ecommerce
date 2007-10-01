@@ -148,7 +148,7 @@ class CheckoutPage_Controller extends Page_Controller{
 	 */
 	function orderID() {
 		$orderID = $this->urlParams["ID"];
-		if(!$orderID) $orderID = $_SESSION['Order']['OrderID'];
+		if(!$orderID) $orderID = Session::get('Order.OrderID');
 		return $orderID;
 	}
 	

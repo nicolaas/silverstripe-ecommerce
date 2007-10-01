@@ -36,8 +36,8 @@ class PayPalPayment_Handler extends Controller {
 			$payment->DpsTxnRef = $_REQUEST[txn_id];
 			
 			$paymentID = $payment->write();
-	  		$_SESSION['Order']['OrderID'] = $order->ID;
-			$_SESSION['Order']['PurchaseComplete'] = true;
+	  		Session::set('Order.OrderID', $order->ID);
+			Session::set('Order.PurchaseComplete',true);
 				
 			$order->sendReceipt();
 			$order->isComplete();

@@ -427,7 +427,7 @@
 		$paymentData['OrderID'] = $this->ID;
 
 		// NOTE: The reference to $_SESSION is bad.  We need to work out how the shopping cart in session can be linked to a saved order.  
-		$_SESSION['CartInfo']['OrderID'] = $order->ID;
+		Session::set('CartInfo.OrderID', $order->ID);
 
 		$payment = new Payment($paymentData);
 		$payment->OrderID = $this->ID;
@@ -451,7 +451,7 @@
 	 **/
 	function OrderTitle(){
 		if($member = Member::currentMember()){
-			if($_SESSION['Order']['PurchaseComplete'] == 1){
+			if(Session::get('Order.PurchaseComplete') == 1){
 				return "Purchase Complete";
 			}else{
 				return "Order Error";
@@ -471,7 +471,7 @@
 	function OrderContent(){
 		if($member = Member::currentUser()){
 			// If the order was successful, get the appropriate checkout text
-			if($_SESSION['Order']['PurchaseComplete'] == 1){
+			if(Session::get('Order.PurchaseComplete') == 1){
 				$Checkout = DataObject::get("Checkout");
 				return $Checkout->PurchaseComplete;
 			}else{

@@ -200,7 +200,7 @@ class OrderForm extends Form{
 		
 		// Check to see if there are still items in the shopping cart
 		if($sc->Items()){
-			$cartContents = $_SESSION['cartContents'];
+			$cartContents = Session::get('cartContents');
 			$member = EcommerceRole::createOrMerge($data);
 			$member->write();
 			$member->logIn();
@@ -232,8 +232,8 @@ class OrderForm extends Form{
 							
 			// Successful payment
 			if($result['Success']) {
-			  	$_SESSION['Order']['OrderID'] = $order->ID;
-				$_SESSION['Order']['PurchaseComplete'] = true;
+			  	Session::set('Order.OrderID',$order->ID);
+				Session::set('Order.PurchaseComplete', true);
 				
 				$order->sendReceipt();
 				$order->isComplete();
@@ -248,9 +248,9 @@ class OrderForm extends Form{
 	 		
 			// Failed payment
 			} else {
-				$_SESSION['cartContents'] = $cartContents;
-				$_SESSION['Order']['OrderID'] = $order->ID;
-				unset($_SESSION['Order']['PurchaseComplete']);
+				Session::set('cartContents',$cartContents);
+				Session::set('Order.OrderID', $order->ID);
+				Session::clear('Order.PurchaseComplete');
 				$form->sessionMessage("Sorry, your payment was not accepted, please try again<br/><strong>$result[HelpText]:</strong> $result[MerchantHelpText]","bad");
 	 			Director::redirect(CheckoutPage::find_link() . "$order->ID");
 	 			return;

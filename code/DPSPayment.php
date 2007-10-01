@@ -113,7 +113,7 @@ class DPSPayment extends Payment {
 			$logEntry->write();
 	  	} else {
 	  		$this->Status = "Failure";
-	  		$_SESSION['Message'] = $result['HelpText'];
+	  		Session::set('Message', $result['HelpText']);
 	  	}
 
 		if($result['Success']) {
