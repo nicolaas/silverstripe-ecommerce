@@ -1,0 +1,9 @@
+Ecommerce ChangeLog
+
+0.5.1
+  - Use the Session class rather than accessing $_SESSION directly
+  - Template changes for 2.1.0
+  - Use themes
+
+0.5
+  - Initial release
