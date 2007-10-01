@@ -348,17 +348,8 @@ class Product_Controller extends Page_Controller {
 		Requirements::javascript('jsparty/behaviour.js');
 		Requirements::javascript('ecommerce/javascript/Product.js');
 		
-		if(Director::fileExists(project() . '/css/Product.css')) {
-			Requirements::css(project() . '/css/Product.css');
-		} else {
-			Requirements::css('ecommerce/css/Product.css');
-		}
-
-		if(Director::fileExists(project() . '/css/Cart.css')) {
-			Requirements::css(project(). '/css/Cart.css');
-		} else {
-			Requirements::css('ecommerce/css/Cart.css');
-		}
+		Requirements::themedCSS('Product');
+		Requirements::themedCSS('Cart');
 
 		parent::init();
 	}

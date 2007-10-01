@@ -21,11 +21,7 @@ class AccountPage_Controller extends Page_Controller {
 	 */
 	function init() {
 		parent::init();
-		if(Director::fileExists(project() . '/css/AccountPage.css')) {
-			Requirements::css(project() . '/css/AccountPage.css');
-		} else {
-			Requirements::css('ecommerce/css/AccountPage.css');
-		}
+		Requirements::themedCSS('AccountPage');
 	}
 
 	/**

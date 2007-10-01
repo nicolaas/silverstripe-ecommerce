@@ -73,11 +73,7 @@ class CheckoutPage_Controller extends Page_Controller{
 	 */
 	public function init() {
 		// include stylesheet for the checkout page
-		if(Director::fileExists(project(). '/css/CheckoutPage.css')) {
-			Requirements::css(project() . '/css/CheckoutPage.css');
-		} else {
-			Requirements::css('ecommerce/css/CheckoutPage.css');
-		}
+		Requirements::themedCSS('CheckoutPage');
 		$sc = Order::Shoppingcart();
 		$country = Geoip::visitor_country();
 

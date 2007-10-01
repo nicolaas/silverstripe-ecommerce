@@ -167,17 +167,8 @@ class ProductGroup_Controller extends Page_Controller {
 		Requirements::javascript('jsparty/behaviour.js');
 		Requirements::javascript('ecommerce/javascript/ProductGroup.js');
 
-		if(Director::fileExists(project() . '/css/ProductGroup.css')) {
-			Requirements::css(project() . '/css/ProductGroup.css');
-		} else {
-			Requirements::css('ecommerce/css/ProductGroup.css');
-		}
-		
-		if(Director::fileExists(project() . '/css/Cart.css')) {
-			Requirements::css(project(). '/css/Cart.css');
-		} else {
-			Requirements::css('ecommerce/css/Cart.css');
-		}
+		Requirements::themedCSS('ProductGroup');
+		Requirements::themedCSS('Cart');
 		
 		parent::init();
 	}
