@@ -1,5 +1,5 @@
 <div id="Sidebar" class="typography">
-	<div class="sidebar_Box">
+	<div class="sidebarBox">
  		<h3>
 			<% control Level(1) %>
 				$Title
@@ -34,12 +34,12 @@
   		</ul>
 		<div class="clear"></div>
 		</div>
-	<div class="sidebarRounded"></div>
+	<div class="sidebarBottom"></div>
 
-<div class="sidebar_Box cart">
+<div class="sidebarBox cart">
 	<% include Cart %>
 </div>
-<div class="sidebarRounded"></div>
+<div class="sidebarBottom"></div>
 
 </div>
   

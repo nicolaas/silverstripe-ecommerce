@@ -1,4 +1,3 @@
-<% if Cart %>
 	<% control Cart %>
 		<div id="ShoppingCart">
 			<h3>My Cart</h3>
@@ -25,4 +24,4 @@
 			<% end_if %>
 		</div>
 	<% end_control %>
-<% end_if %>
+
