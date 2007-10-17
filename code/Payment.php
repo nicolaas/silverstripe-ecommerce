@@ -12,7 +12,6 @@ class Payment extends DataObject {
 	static $casting = array(
 		"Amount" => "Currency",
 		"LastEdited" => "Datetime"
-		//"GST" => "Currency"
 	);
 	 
 	static $db = array (
@@ -20,11 +19,7 @@ class Payment extends DataObject {
 		"Status" =>"Enum(array('Success', 'Failure', 'Incomplete', 'Pending'), 'Incomplete')",
 		"Amount" => "Decimal",
 		"Currency" =>"Varchar(3)",
-		// Let's use class to represent payment method
-		//"PaymentMethod" =>"Enum(array('CC', 'WorldPay', 'PayStation', 'Cheque', 'Invoice', 'CreditAccount', 'PayPal'), 'CC')",
 		"TxnRef" => "Text",
-		// Let's use a more generic name
-		// "DpsTxnRef" => "Text"
 	);
 	
 	/**
@@ -57,15 +52,6 @@ class Payment extends DataObject {
 	function setAmount($val){
 		$this->setField('Amount', number_format(ereg_replace("[^0-9.]", "", $val), 2, ".", ""));
 	}
-	
-	/**
-	 * Returns the GST proportion of this order
-	 * ASSUMPTION: Amount must be set and marked up with GST
-	 * TODO: Fix this, I think this is bad if we're dealing with international shopping sites
-	 */
-	/*function _GST(){
-  		return number_format($this->Amount / 9, 2);
-	}*/
 	
 	/**
 	 * Subclasses of Payment that are allowed to be used on this site.

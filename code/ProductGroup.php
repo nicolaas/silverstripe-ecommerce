@@ -14,16 +14,16 @@ class ProductGroup extends Page {
 	
 	static $casting = array();
 	
-	static $allowed_children = array("Product", "ProductGroup");
+	static $allowed_children = array('Product', 'ProductGroup');
 	
 	static $default_child = 'Product';
 	
-	static $icon = "cms/images/treeicons/folder";
+	static $icon = 'cms/images/treeicons/folder';
 
 	static $db = array();
 
 	static $belongs_many_many = array(
-		"ChildProducts" => "Product"
+		'ChildProducts' => 'Product'
 	);
 
 	/**
@@ -115,19 +115,7 @@ class ProductGroup extends Page {
 		}
 		return $productGroups;
 	}
-	
-	/**
-	 * Returns the child products from across the many-many join
-	 * @return unknown
-	 */
-	/*public function childProducts() {
-		if(is_numeric($this->ID)) {
-			return DataObject::get("Product", "", "", 
-				"INNER JOIN `Product_Parents` ON `SiteTree`.ID = `Product_Parents`.ProductID AND 
-				`Product_Parents`.SiteTreeID = $this->ID");
-		}			
-	}*/
-	
+
 	/**
 	 * Returns the Products as children of the current page.
 	 */
@@ -161,7 +149,6 @@ class ProductGroup_Controller extends Page_Controller {
 	 * otherwise use the module one instead
 	 */
 	function init() {
-
 		Requirements::javascript('jsparty/prototype.js');
 		Requirements::javascript('jsparty/prototype_improvements.js');
 		Requirements::javascript('jsparty/behaviour.js');

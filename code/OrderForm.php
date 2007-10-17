@@ -180,15 +180,6 @@ class OrderForm extends Form{
 	 * the member from the database, and then processes the payment.
 	 */
 	function processOrder($data, $form) {
-		if(Director::isDev() && $data['PaymentMethod'] == 'WorldpayPayment') {
-/*			Debug::message(
-				"Please don't use WorldPay in dev-mode (use test-mode instead). 
-				The redirection will fail because the dev-enviroments are protected by htaccess. 
-				Further payment-redirections will marked as 'Callback suspended' in the Worldpay-configuration."
-			);
-			die();*/
-		}
-		
 		// if the password and confirm password don't match, then return an error
 		if($data['Password'] != $data['ConfirmPassword']) {
 			$form->addErrorMessage('ConfirmPassword', 'The passwords do not match', 'bad');

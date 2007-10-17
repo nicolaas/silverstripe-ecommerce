@@ -33,16 +33,16 @@ class CheckoutPage extends Page{
 		$fields = parent::getCMSFields();
 
 		// information about these images		
-		$shopmessagecomplete = "<p>This message is shown, along with order information after they submit the checkout:<p>";
-		$shopchequemessage = "<p>This message is shown when a user selects cheque as a payment option on the checkout:</p>";
-						
+		$shopmessagecomplete = '<p>This message is shown, along with order information after they submit the checkout:<p>';
+		$shopchequemessage = '<p>This message is shown when a user selects cheque as a payment option on the checkout:</p>';
+
 		// add the editable message fields
 		$fields->addFieldToTab("Root.Content.Messages", new HeaderField("Checkout Messages",2));
 		$fields->addFieldToTab("Root.Content.Messages", new LiteralField("shop", $shopmessagecomplete));
 		$fields->addFieldToTab("Root.Content.Messages", new HtmlEditorField("PurchaseComplete", ""));
 		$fields->addFieldToTab("Root.Content.Messages", new LiteralField("shop", $shopchequemessage));
 		$fields->addFieldToTab("Root.Content.Messages", new HtmlEditorField("ChequeMessage", "", 5));
-		
+
 		return $fields;
 	}
 
@@ -74,14 +74,10 @@ class CheckoutPage_Controller extends Page_Controller{
 	public function init() {
 		// include stylesheet for the checkout page
 		Requirements::themedCSS('CheckoutPage');
+
 		$sc = Order::Shoppingcart();
 		$country = Geoip::visitor_country();
 
-		/*if($country != "NZ") {
-			$sc->hasGST = false;	
-		} else {
-			$sc->hasGST = true;
-		}*/
 		parent::init();
 	}
 	
@@ -256,15 +252,6 @@ class CheckoutPage_Controller extends Page_Controller{
 		$sc = Order::ShoppingCart();
 		
 		$form->saveInto($sc);
-		
-		// this is a big assumption - commented out (Sean 28/7/07)
-		// UseShippingAddress doesn't mean true if the country is
-		// different from the ShippingCountry - it could be the same!
-		
-		//if($sc->ShippingCountry != $sc->Country) {
-		//	$sc->UseShippingAddress = true;
-		//}
-		
 		
 		// if Order exists, recalculate shipping because country changed
 		if($sc) {

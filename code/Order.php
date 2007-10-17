@@ -189,9 +189,7 @@
 		// @todo - find out why this was here.		
 		//$member = $this->Member();
 
-		if(!$member->ID) {
-			$member = Member::currentUser();
-		}
+		$member = Member::currentUser();
 		
 		$this->MemberID = $member->ID;
 		$this->TotalOrderValue = $this->Total();
@@ -239,19 +237,19 @@
 		if($className){
 			return new $className($data);
 		}else{
-			USER_ERROR("ORDER::createOrderItem() - Order lass Not defined in _config.php ");
+			USER_ERROR("ORDER::createOrderItem() - Order class Not defined in _config.php ");
 		}
 	}
 	
 	/**
 	 * Creates the shopping cart object
 	 */
-	static function ShoppingCart(){
+	static function ShoppingCart() {
 		$order = Order::create();
 		if($order){
 			$order->changeToShoppingCart();
 		}else{
-			USER_ERROR("ORDER::ShoppingCart() - Could not create order from base class",E_USER_ERROR);
+			USER_ERROR("ORDER::ShoppingCart() - Could not create order from base class", E_USER_ERROR);
 		}
 		return $order;
 	}
@@ -396,21 +394,19 @@
 	}
 	
 	function createOrderItems(array $sourceItems){
-	  	if($sourceItems) $ids = implode(",", array_keys($sourceItems));
-	    if($ids) {
-	    	$products = DataObject::get("Product", "`SiteTree`.ID IN ($ids)", "Title");
-	      	if($products) {
-	      		$items = new DataObjectSet();
-	      		foreach($products as $product) {
-			        $item = $this->createOrderItem($product, $sourceItems[$product->ID]);
+	  	if($sourceItems) $ids = implode(',', array_keys($sourceItems));
+		if($ids) {
+			$products = DataObject::get("Product", "`SiteTree`.ID IN ($ids)", "Title");
+			if($products) {
+				$items = new DataObjectSet();
+				foreach($products as $product) {
+					$item = $this->createOrderItem($product, $sourceItems[$product->ID]);
 					$item->setCart($this);
 					$items->push($item);
-			    }
-		    	return $items;
-		    } /*else {
-		    	user_error("None of the following products could be found: $ids", E_USER_WARNING);
-		    }*/
-	    }	
+				}
+				return $items;
+			}
+		}
 	}
 	
 	
@@ -518,28 +514,9 @@
 	 		    DB::query("UPDATE `Order` SET Shipping = '$SQL_shipping' WHERE ID = $this->ID");
 	 		}
 		}
-        
-        return $shipping;
+		return $shipping;
 	}
-     
-	
-	/**
-	 * Returns the amount of GST included in the order.
-	 * ASSUMPTION: GST marked up in price for each item.
-	 * TODO: Fix this, I think this is bad if we're dealing with international shopping sites
-	 */
-	
-	/*
-	function GST(){
-		if($this->hasGST) {
-			$shippingCost = $this->Shipping();
-			$gstcalc = $this->_Subtotal() + $shippingCost;
-			return number_format($gstcalc / 9, 2);
-		} else {
-			return false;
-		}
-	}
-	*/
+
 	
 	/**
 	 * Calculate the amount of tax that should be added to the order total.
@@ -566,12 +543,8 @@
 	function TaxInfo() {
 		// Find the country from the member - falls back to GeoIP if it can't find anything
 		$country = EcommerceRole::findCountry();
- 		
- 		// This won't work if there isn't an Order set - once you submit the order
- 		// form it will then show on the OrderSuccessful page, but just adding items to the cart won't,
- 		// because it can't find a country for $this->Country.
- 		//$country = $this->Country;
- 		
+
+		// return the tax calculator based on country
  		return Object::create('TaxCalculator', $this->_Subtotal() + $this->Shipping(), $country);
 	}
   	
@@ -598,16 +571,16 @@
 			// we HAVE to do this, because we use $Title.Nice on the front end which is inconsistent
 			// with the calculation in php
 			
-			// TODO - find a better way to do this. Sean and Hayden had a crack at it, but couldn't
+			// TODO - find a better way to do this. Sean and Hayden @ SS had a crack at it, but couldn't
 			// get anywhere but do this
 			$difference = (round($total * 100) - round($payment->Amount * 100)) / 100;
 			
-			if($payment->Status == 'Success'){
+			if($payment->Status == 'Success') {
 				return $difference;
-			}else{
+			} else {
 				return $total;
-			} 
-		}else{
+			}
+		} else {
 			return $total;
 		}
 	}
@@ -619,8 +592,6 @@
 	 * @param $copyToAdmin - true by default, whether it should send a copy to the admin
 	 */
 	protected function sendEmail($emailClass, $copyToAdmin = true) {
-		//global $_project_orderfromemail;
- 		
  		// define the member and set_email() address of the admin
  		$member = $this->Member();
  		
@@ -658,7 +629,7 @@
 	}
 	
 	function sendReceipt() {
-		$this->sendEmail("Order_ReceiptEmail");		
+		$this->sendEmail('Order_receiptEmail');
 	}
 	
 	/**
@@ -674,7 +645,7 @@
 			$note = $latestLog->Note;
 		}
 		
-		$member = $this->Member();		
+		$member = $this->Member();
 		
  		if(self::$receiptEmail) {
  			$adminEmail = self::$receiptEmail;
@@ -760,7 +731,7 @@
 	
 	public function _Logo(){
 		global $projectLogo;
-		return Director::AbsoluteBaseURL().$projectLogo;
+		return Director::AbsoluteBaseURL() . $projectLogo;
 	}
 
 	/**
@@ -961,6 +932,18 @@
 	}
 }
 
+/**
+ * Our controller points us to the correct order information
+ */
+class Order_Controller extends Page_Controller{
+
+	function Link($action) {
+		return 'Order/'. $this->ID . "/$action";
+	}
+
+}
+
+
 /** 
  * An order item is a product which has been added to an order, 
  * ready for purchase. An order item is typically a product itself,
@@ -988,9 +971,6 @@ class Order_Item extends DataObject {
 		"Product" => "Product",
 	);
 	static $has_many = array(
-	);
-	static $many_many = array(
-		"Attributes" => "Order_Item_Attribute",
 	);
 	
 	
@@ -1034,16 +1014,17 @@ class Order_Item extends DataObject {
 	}
 	
 	public function AjaxQuantityField() {
-		if($this->failover->hasMethod('AjaxQuantityField'))
+		if($this->failover->hasMethod('AjaxQuantityField')) {
 			return $this->failover->AjaxQuantityField();
+		}
 	}
 
 	public function getSubTotal(){
-		return ( $this->quantity * $this->Price );	
+		return ($this->quantity * $this->Price);	
 	}
 
 	public function addToCart($items = 1) {
-   		$this->quantity += $items;
+   	$this->quantity += $items;
 	}
 
 	public function write() {
@@ -1132,10 +1113,8 @@ class Order_Item_Attribute extends Product_Attribute{
  * You can call it by issuing Order::sendReceipt().
  */  
 class Order_receiptEmail extends Email_Template {
-	protected
 
-	$ss_template = "Order_receiptEmail",
-	$body = null;
+	protected $ss_template = 'Order_receiptEmail';
 	
 	public function __construct($to = null, $from = null, $subject = null) {
 		$this->to = $to ? $to : '$Member.Email';
@@ -1148,20 +1127,6 @@ class Order_receiptEmail extends Email_Template {
 		
 		parent::__construct();
 	}
-		
-    //@TODO Replace with member data specific to this site.
-//	function MemberData() {
-//		return $this->template_data->listOfFields(
-//			"FirstName",
-//			"Surname",
-//			"Email",
-//			"Phone",
-//			"Mobile",
-//			"Street",
-//			"Suburb",
-//			"City"
-//		);
-//	}
 }
 
 /**
@@ -1170,30 +1135,8 @@ class Order_receiptEmail extends Email_Template {
  */ 
 class Order_statusEmail extends Email_Template {
 
-	protected $ss_template = "Order_statusEmail";
-	protected $body = null;
-	
-	//@TODO Replace with member data specific to this site.
-//	function MemberData() {
-//		return $this->template_data->listOfFields(
-//			"FirstName",
-//			"Surname",
-//			"Email",
-//			"Phone",
-//			"Mobile",
-//			"Street",
-//			"Suburb",
-//			"City"
-//		);
-//	}
+	protected $ss_template = 'Order_statusEmail';
+
 }
 
-/**
- * Our controller points us to the correct order information
- */
-class Order_Controller extends Page_Controller{
-	function Link($action) {
-		return 'Order/'. $this->ID . "/$action";
-	}
-}
 ?>
