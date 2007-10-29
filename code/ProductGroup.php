@@ -77,12 +77,18 @@ class ProductGroup extends Page {
 	 * @param showAll Inlcude all of the elements, even those not shown in the menus.
 	 */
 	public function stageChildren($showAll = false) {
-		if($showAll) $filter = " AND ShowInMenus = 1";
+		if($showAll) {
+			$filter = " AND ShowInMenus = 1";
+		} else {
+			$filter = null;
+		}
 		
-		$productGroups = DataObject::get("ProductGroup","ParentID = $this->ID" . $filter);
-		if(!$productGroups) 
+		if(DataObject::get('ProductGroup', "ParentID = $this->ID" . $filter)) {
+			$productGroups = DataObject::get('ProductGroup', "ParentID = $this->ID" . $filter);
+		} else {
 			$productGroups = new DataObjectSet();
-			
+		}
+
 		$childproducts = $this->childProducts();
 		if($childproducts){
 			if($childproducts->Count()){
@@ -99,9 +105,13 @@ class ProductGroup extends Page {
 	 * @param showAll Inlcude all of the elements, even those not shown in the menus.
 	 */
 	public function liveChildren($showAll = false) {
-		if($showAll) $filter = " AND ShowInMenus = 1";
+		if($showAll) {
+			$filter = " AND ShowInMenus = 1";
+		} else {
+			$filter = null;
+		}
 		
-		$productGroups = Versioned::get_by_stage("ProductGroup","Live","ParentID = $this->ID","Sort");
+		$productGroups = Versioned::get_by_stage("ProductGroup","Live","ParentID = $this->ID" . $filter,"Sort");
 		if(!$productGroups) 
 			$productGroups = new DataObjectSet();
 			
