@@ -64,7 +64,7 @@ class EcommerceRole extends DataObjectDecorator {
 		$fields->push(new TextField('Address', 'Address'));
 		$fields->push(new TextField('AddressLine2', 'Address Line 2'));
 		$fields->push(new TextField('City', 'City'));
-		$fields->push(new DropdownField('Country', 'Country', Geoip::getCountryDropDown()));
+		if( ! $fields->fieldByName( 'Country' ) ) $fields->push(new DropdownField('Country', 'Country', Geoip::getCountryDropDown()));
 	}
 	
 	/**
