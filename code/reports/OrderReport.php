@@ -189,6 +189,7 @@ class OrderReport_Popup extends Controller {
 			'StatusTable',
 			'OrderStatusLog',
 			array(
+				"ID" => "ID",
 				"Created" => "Created",
 				"Status" => "Status",
 				'Note' => 'Note',
@@ -207,6 +208,7 @@ class OrderReport_Popup extends Controller {
 			'OrderStatusLogForm',
 			new FieldSet(
 				new HeaderField('Order Status History',3),
+				new HiddenField('ID'),
 				$table
 			),
 			new FieldSet()
