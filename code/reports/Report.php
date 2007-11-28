@@ -192,7 +192,7 @@ class Report_FindAnOrder extends Report{
 			)
 		);
 		$orderReport->setCustomSelect(array(
-			"Member.*",
+			"Member.Surname",
 			"OrderStatusLog.Created",
 //			"Payment.PaymentMethod",
 		));
