@@ -81,10 +81,15 @@ class DPSPayment extends Payment {
 	  	$result = DPS::pxpost($details, $credentials);
 	  	$this->Message = "<p>$result[ResponseText] <br /> $result[HelpText]</p>";
 
-	  	// get the DPS transaction reference and place it with the rest of the payment information
-		if($result[TxnRef]) {
-			$this->DpsTxnRef = $result[TxnRef];	  	
-		}
+	  	// Get the DPS transaction reference and place it with the rest of the payment information.
+		// Fall back to using TxnRef if DpsTxnRef not populated.
+		if($result['DpsTxnRef']) {
+			$this->TxnRef = $result['DpsTxnRef'];	  	
+		} else {
+			if($result['TxnRef']) {
+				$this->TxnRef = $result['TxnRef'];
+			}
+ 		}
 	  				  	
 	  	if($result['Fatal'] ){
 	  		 	global $project;
