@@ -187,7 +187,7 @@ class DPS {
 		$datesettlement = $msg->get_element_text("Transaction/DateSettlement");
 		if(ereg('([0-9]{4})([0-9]{2})([0-9]{2})',$datesettlement,$parts))
 			$datesettlement = "$parts[1]-$parts[2]-$parts[3]";
-		$txnref = $msg->get_element_text("TxnRef");
+		$txnref = $msg->get_element_text("DpsTxnRef");
 	
 		$returnVal = array(
 			"Success" => $success,

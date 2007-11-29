@@ -83,13 +83,9 @@ class DPSPayment extends Payment {
 
 	  	// Get the DPS transaction reference and place it with the rest of the payment information.
 		// Fall back to using TxnRef if DpsTxnRef not populated.
-		if($result['DpsTxnRef']) {
-			$this->TxnRef = $result['DpsTxnRef'];	  	
-		} else {
-			if($result['TxnRef']) {
-				$this->TxnRef = $result['TxnRef'];
-			}
- 		}
+		if($result['TxnRef']) {
+			$this->TxnRef = $result['TxnRef'];	  	
+		}
 	  				  	
 	  	if($result['Fatal'] ){
 	  		 	global $project;
