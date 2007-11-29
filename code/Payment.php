@@ -7,6 +7,7 @@
  */
 
 class Payment extends DataObject {
+
 	public static $testCredentials, $liveCredentials;
 
 	static $casting = array(
@@ -14,12 +15,14 @@ class Payment extends DataObject {
 		"LastEdited" => "Datetime"
 	);
 	 
-	static $db = array (
+	static $db = array(
 		"Message" => "Text",
 		"Status" =>"Enum(array('Success', 'Failure', 'Incomplete', 'Pending'), 'Incomplete')",
 		"Amount" => "Decimal",
 		"Currency" =>"Varchar(3)",
 		"TxnRef" => "Text",
+		"IP" => "Varchar",
+		"ProxyIP" => "Varchar"
 	);
 	
 	/**
@@ -33,8 +36,7 @@ class Payment extends DataObject {
 	/**
 	 * Process this payment, and set the status message in the session.
 	 * Returns true on a successful payment, false on an error (such as CC declined).
-	 */
-	 
+	 */	 
 	function __construct($data = null) {
 		parent::__construct($data);
 	 	
@@ -47,11 +49,38 @@ class Payment extends DataObject {
 	function populateDefaults() {
 		parent::populateDefaults();
 		$this->Currency = Order::site_currency();
+		$this->setClientIP();
 	}
 
 	function setAmount($val){
 		$this->setField('Amount', number_format(ereg_replace("[^0-9.]", "", $val), 2, ".", ""));
 	}
+
+	/**
+	 * Set the IP address and Proxy IP (if available) from the site visitor.
+	 * Does an ok job of proxy detection. Probably can't be too much better because anonymous proxies
+	 * will make themselves invisible.
+	 */	
+	function setClientIP() {
+		if($_SERVER['HTTP_X_FORWARDED_FOR']) {
+			if($_SERVER['HTTP_CLIENT_IP']) {
+				$proxy = $_SERVER['HTTP_CLIENT_IP'];
+			} else {
+				$proxy = $_SERVER['REMOTE_ADDR'];
+			}
+			$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+		} else {
+			if($_SERVER['HTTP_CLIENT_IP']) {
+				$ip = $_SERVER['HTTP_CLIENT_IP'];
+			} else {
+				$ip = $_SERVER['REMOTE_ADDR'];
+			}
+		}
+		
+		// If the IP and/or Proxy IP have already been set, we want to be sure we don't set it again.
+		if(!$this->IP) $this->IP = $ip;
+		if(!$this->ProxyIP) $this->ProxyIP = $proxy;
+	}	
 	
 	/**
 	 * Subclasses of Payment that are allowed to be used on this site.
@@ -144,11 +173,15 @@ class Payment extends DataObject {
 	function getPaymentFormFields() {
 		user_error("Please implement getPaymentFormFields() on $this->class", E_USER_ERROR);
 	}
+	
 	function processPayment($data, $form) {
 		user_error("Please implement processPayment() on $this->class", E_USER_ERROR);
 	}
+	
 	function getPaymentFormRequirements() {
 		user_error("Please implement getPaymentFormRequirements() on $this->class", E_USER_ERROR);
 	}
+	
 }
+
 ?>
