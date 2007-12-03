@@ -41,7 +41,7 @@ class Payment extends DataObject {
 		parent::__construct($data);
 	 	
 		// Check if we have a Member table, otherwise it breaks db/build
-	 	if(ClassInfo::hasTable('Member') && Member::currentUser()->ID) {
+	 	if(ClassInfo::hasTable('Member') && Member::currentUser()) {
 	 		$this->MemberID = Member::currentUser()->ID;
 	 	}
 	}
