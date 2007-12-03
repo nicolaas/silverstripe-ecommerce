@@ -61,7 +61,7 @@ class OrderForm extends Form{
 		
 		// if a terms page is in the system, create a field to confirm the user read it
 		if($tacPage = DataObject::get_one('EcommerceTermsPage')) {
-			$readConditionsField = new CheckboxField('ReadConditions', "I agree to the terms and conditions stated on <a href=\"$tacPage->URLSegment\" title=\"Read the shop terms and conditions for this site\">the terms and conditions</a> page");
+			$readConditionsField = new CheckboxField('ReadConditions', "I agree to the terms and conditions stated on the <a href=\"$tacPage->URLSegment\" title=\"Read the shop terms and conditions for this site\">terms and conditions</a> page");
 		} else {
 			$readConditionsField = new HiddenField('ReadConditions', '');
 		}
