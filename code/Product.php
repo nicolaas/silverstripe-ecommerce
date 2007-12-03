@@ -32,6 +32,10 @@ class Product extends Page {
 	static $has_one = array(
 		'Image' => 'Product_Image'
 	);
+	
+	static $defaults = array(
+		'AllowPurchase' => true
+	);
 
 	protected $cart;
 
