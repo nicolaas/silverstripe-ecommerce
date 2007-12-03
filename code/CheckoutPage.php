@@ -230,10 +230,10 @@ class CheckoutPage_Controller extends Page_Controller{
 		);		
 		
 		$actions = new FieldSet(
-			new FormAction("SaveCountry", "Save Country")
+			new FormAction("updateCountry", "Save Country")
 		);
 		
-		$form = new Form($this, "updateCountry", $fields, $actions);
+		$form = new Form($this, "ChangeCountryForm", $fields, $actions);
 		
 		if($member) {
 			$form->loadDataFrom($member);
@@ -245,9 +245,7 @@ class CheckoutPage_Controller extends Page_Controller{
 	/**
 	 * Updates the Country
 	 */
-	function updateCountry(){
-		$form = $this->ChangeCountryForm();
-		$form->loadDataFrom($_REQUEST);
+	function updateCountry($data, $form){
 		$member = Member::currentUser();	
 		$sc = Order::ShoppingCart();
 		
