@@ -71,76 +71,12 @@ class ProductGroup extends Page {
 			return $p->GroupsMenu();
 		}
 	}
-
-	/**
-	 * Return children from the stage site
-	 * @param showAll Inlcude all of the elements, even those not shown in the menus.
-	 */
-	public function stageChildren($showAll = false) {
-		if($showAll) {
-			$filter = " AND ShowInMenus = 1";
-		} else {
-			$filter = null;
-		}
-		
-		if(DataObject::get('ProductGroup', "ParentID = $this->ID" . $filter)) {
-			$productGroups = DataObject::get('ProductGroup', "ParentID = $this->ID" . $filter);
-		} else {
-			$productGroups = new DataObjectSet();
-		}
-
-		$childproducts = $this->childProducts();
-		if($childproducts){
-			if($childproducts->Count()){
-				foreach($childproducts as $product){
-					$productGroups->push($product);
-				}
-			}
-		}
-		return $productGroups;
-	}
-
-	/**
-	 * Return children from the live site, if it exists.
-	 * @param showAll Inlcude all of the elements, even those not shown in the menus.
-	 */
-	public function liveChildren($showAll = false) {
-		if($showAll) {
-			$filter = " AND ShowInMenus = 1";
-		} else {
-			$filter = null;
-		}
-		
-		$productGroups = Versioned::get_by_stage("ProductGroup","Live","ParentID = $this->ID" . $filter,"Sort");
-		if(!$productGroups) 
-			$productGroups = new DataObjectSet();
-			
-		$childproducts = $this->childProducts();
-		if($childproducts){
-			if($childproducts->Count()){
-				foreach($childproducts as $product){
-					$productGroups->push($product);
-				}
-			}
-		}
-		return $productGroups;
-	}
-
+	
 	/**
 	 * Returns the Products as children of the current page.
 	 */
 	public function childProducts() {
 		return DataObject::get("Product", "ShowInMenus = 1 AND ParentID = " . $this->ID);
-	}
-	
-	/**
-	 * This only accidentally works; it's all a bit dodgy.
-	 * @TODO - re-work this
-	 **/
-	public function numChildren() {
-		$stageChildren = $this->stageChildren();
-		$liveChildren = $this->liveChildren();
-		return $stageChildren ? $stageChildren->Count() : 0 + $liveChildren ?  $liveChildren->Count() : 0;
 	}
 	
 	/**
