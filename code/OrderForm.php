@@ -51,8 +51,7 @@ class OrderForm extends Form{
 			$membershipHeader = new HeaderField("Membership details", 3);
 			$accountField = new LiteralField("AccountInfo", "<p>Please choose a password, so you can login and check your order history in the future.</p><br />");
 			$passwordField = new FieldGroup(
-				new PasswordField('Password', 'Password'),
-				new PasswordField('ConfirmPassword', 'Confirm Password')
+				new ConfirmedPasswordField('Password', 'Password')
 			);
 		} else {
 			$membershipHeader = new HiddenField('MembershipHeaderHidden', '');
@@ -135,12 +134,6 @@ class OrderForm extends Form{
 			"Email",
 			"City"
 		);
-
-		// if not a member, add some password fields so a member can be setup
-		if(!$member) {
-			$requiredFieldsArr[] = "Password";
-			$requiredFieldsArr[] = "ConfirmPassword";
-		}
 
 		// if terms page exists, add validation for the field on the form
 		if($tacPage) {

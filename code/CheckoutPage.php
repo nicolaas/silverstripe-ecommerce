@@ -86,13 +86,6 @@ class CheckoutPage_Controller extends Page_Controller{
 	 * the member from the database, and then processes the payment.
 	 */
 	function processOrder($data, $form) {
-		// if the password and confirm password don't match, then return an error
-		if($data['Password'] != $data['ConfirmPassword']) {
-			$form->addErrorMessage('ConfirmPassword', 'The passwords do not match', 'bad');
-			Director::redirectBack();
-			exit;
-		}
-		
 		$sc = Order::ShoppingCart();
 		
 		// Check to see if there are still items in the shopping cart

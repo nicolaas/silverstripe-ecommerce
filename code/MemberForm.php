@@ -15,14 +15,17 @@ class MemberForm extends Form {
 		
 		$contactFields = EcommerceRole::getEcommerceFields();
 		$logoutField = new LiteralField('LogoutNote', "<p class=\"message good\">You are currently logged in. Click <a href=\"Security/logout\" title=\"Click here to log out\">here</a> to log out.</p>");
+		$passwordField = new ConfirmedPasswordField("Password", "Password");
+		if($member && $member->Password != '') {
+			$passwordField->setCanBeEmpty(true);
+		}
 		
 		$fields = new FieldSet(
 			$logoutField,
 			$contactFields,
 
 			new HeaderField("Login Details", 3),
-			new PasswordField("Password", "Password"),
-			new PasswordField("ConfirmPassword", "Confirm Password")
+			$passwordField
 		);
 		
 		$actions = new FieldSet(
@@ -35,8 +38,7 @@ class MemberForm extends Form {
 			"Surname",
 			"Address",
 			"Email",
-			"City",
-			"Password"
+			"City"
 		);
 		
 		$RequiredFields = new CustomRequiredFields($requiredFieldList);
@@ -54,17 +56,6 @@ class MemberForm extends Form {
 	 */
 	function submit($data, $form) {
 		$member = Member::currentUser();
-		
-		if(!empty($data['Password']) && !empty($data['ConfirmPassword'])) {
-			if($data['Password'] == $data['ConfirmPassword']) {
-				$member->Password = $data['Password'];
-			} else {
-				$form->sessionMessage('The passwords do not match', 'bad');
-				Director::redirectBack();
-			}
-		} else {
-			$form->dataFieldByName('Password')->setValue($member->Password);
-		}
 
 		$form->saveInto($member);
 		$member->write();
@@ -78,17 +69,6 @@ class MemberForm extends Form {
 	 */
 	function proceed($data, $form) {
 		$member = Member::currentUser();
-		
-		if(!empty($data['Password']) && !empty($data['ConfirmPassword'])) {
-			if($data['Password'] == $data['ConfirmPassword']) {
-				$member->Password = $data['Password'];
-			} else {
-				$form->sessionMessage('The passwords do not match', 'bad');
-				Director::redirectBack();
-			}
-		} else {
-			$form->dataFieldByName('Password')->setValue($member->Password);
-		}
 
 		$form->saveInto($member);
 		$member->write();
