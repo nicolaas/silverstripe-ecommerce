@@ -268,6 +268,25 @@ class CheckoutPage_Controller extends Page_Controller{
 		
 		Director::redirect($this->Link());
 	}
+	
+		
+	function useDifferentShippingAddress() {
+		$sc = Order::ShoppingCart();
+		
+		$sc->UseShippingAddress = true;
+		$sc->write();
+		
+		Director::redirectBack();
+	}
+	
+		function useBillingAddress() {
+		$sc = Order::ShoppingCart();
+		
+		$sc->UseShippingAddress = false;
+		$sc->write();
+		
+		Director::redirectBack();
+	}
 }
 
 

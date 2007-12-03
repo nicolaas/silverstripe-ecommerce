@@ -68,5 +68,19 @@ Behaviour.register({
 				return true;
 			}
 		}
+	},
+	'#OrderForm_OrderForm_action_useDifferentShippingAddress' : {
+		onclick: function() {
+			$('OrderForm_OrderForm').onsubmit = function() {
+				return true;
+			}
+		}
+	},
+	'#OrderForm_OrderForm_action_useBillingAddress' : {
+		onclick: function() {
+			$('OrderForm_OrderForm').onsubmit = function() {
+				return true;
+			}
+		}
 	}
 });

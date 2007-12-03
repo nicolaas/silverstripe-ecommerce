@@ -69,8 +69,12 @@ class OrderForm extends Form{
 		
 		// initialise variables with contact fields from member, remove country because orderform requires
 		// a custom country field setup
-		$contactFields = EcommerceRole::getEcommerceFields();
-		$contactFields->removeByName('Country');
+		if(!$member) {
+			$contactFields = EcommerceRole::getEcommerceFields();
+			$contactFields->removeByName('Country');
+		} else {
+			$contactFields = EcommerceRole::getAddressFields();
+		}
 		
 		// setup the shipping fields, if UseShippingAddress is true (can be set when changing country)
 		if($sc->UseShippingAddress) {
@@ -82,10 +86,12 @@ class OrderForm extends Form{
 				new TextField("ShippingAddress", "Address"),
 				new TextField("ShippingAddress2", ""),
 				new TextField("ShippingCity", "City"),
-				$shippingCountryFieldGroup
+				$shippingCountryFieldGroup,
+				new FormAction_WithoutLabel('useBillingAddress', 'Use Billing Address for Shipping')
 			);
 		} else {
-			$shippingFields = new HiddenField('ShippingDetailsHidden', '');
+			$shippingFields = new FormAction_WithoutLabel('useDifferentShippingAddress', 'Use Different Shipping Address');
+			// $shippingFields = new HiddenField('ShippingDetailsHidden', '');
 		}
 		
 		// setup the fields into a fieldset
@@ -260,13 +266,13 @@ class OrderForm extends Form{
 	 * Disable the validator when you're calling ChangeCountry
 	 */
 	function beforeProcessing() {
-		if($_REQUEST['action_ChangeCountry'] || $_REQUEST['action_ChangeCountry2']) {
+		if(isset($_REQUEST['action_ChangeCountry']) || isset($_REQUEST['action_ChangeCountry2']) || isset($_REQUEST['action_useDifferentShippingAddress']) ||  isset($_REQUEST['action_useBillingAddress'])) {
 			return true;
 		} else {
 			return parent::beforeProcessing();
 		}
 	}
-	
+
 }
 
 ?>

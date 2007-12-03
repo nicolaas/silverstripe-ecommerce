@@ -84,6 +84,17 @@ class EcommerceRole extends DataObjectDecorator {
 			new DropdownField('Country', 'Country', Geoip::getCountryDropDown(), self::findCountry())
 		);
 	}
+	
+	static function getAddressFields() {
+		return new CompositeField(
+			new HeaderField('Address', 3),
+			new TextField('FirstName', 'First Name'),
+			new TextField('Surname', 'Surname'),
+			new TextField('Address', 'Address'),
+			new TextField('AddressLine2', ''),
+			new TextField('City', 'City')
+		);
+	}
 
 	/**
 	 * Create a new member from the given data or merge with the built-in fields.
