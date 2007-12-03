@@ -101,6 +101,12 @@ class EcommerceRole extends DataObjectDecorator {
 	 * @param data the array data from a submitted form.
 	 */
 	public static function createOrMerge($data) {
+		// Because we are using a ConfirmedPasswordField, the password will
+		// be an array of two fields
+		if(is_array($data['Password'])) {
+			$data['Password'] = $data['Password']['_Password'];
+		}
+		
 		if($existingMember = Member::currentUser()) {
 			$existingMember->update($data);
 			return $existingMember;
