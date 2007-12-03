@@ -974,7 +974,7 @@ class Order_Item extends DataObject {
 	);
 	
 	
-	public function __construct($product, $quantity = 1) {
+	public function __construct($product = null, $quantity = 1) {
 		// Constructed by DataObject::get
 		if(is_array($product)) {
   			$this->quantity = $product[Quantity];
