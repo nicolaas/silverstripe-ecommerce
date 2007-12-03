@@ -994,7 +994,7 @@ class Order_Item extends DataObject {
  			$this->failover = $this->product;
   			parent::__construct($product);  			
 		// Constructed in memory
-		} else {
+		} else if(is_object($product)) {
 			parent::__construct();
  			$this->product = $product;
  			$this->failover = $product;
@@ -1002,8 +1002,9 @@ class Order_Item extends DataObject {
  			$this->UnitPrice = $product->Price;
  			$this->ProductVersion = $product->Version;
 			$this->quantity = $quantity;
+		} else {
+			parent::__construct();
 		}
-		
 	}
 	public function getQuantity() {
 		return $this->quantity;
