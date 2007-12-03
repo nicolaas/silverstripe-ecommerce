@@ -161,7 +161,7 @@ class OrderForm extends Form{
 		}
 		
 		// apply the required fields array we've accumulated into the object		
-		$RequiredFields = new EcommerceRequiredFields(
+		$RequiredFields = new CustomRequiredFields(
 			$requiredFieldsArr
 		);
 
@@ -179,88 +179,6 @@ class OrderForm extends Form{
 		}
 		
 	}
-	
-	
-	/** 
-	 * Processes the order information from the Shopping cart, creates or merges
-	 * the member from the database, and then processes the payment.
-	 */
-	function processOrder($data, $form) {
-		// if the password and confirm password don't match, then return an error
-		if($data['Password'] != $data['ConfirmPassword']) {
-			$form->addErrorMessage('ConfirmPassword', 'The passwords do not match', 'bad');
-			Director::redirectBack();
-			exit;
-		}
-		
-		$sc = Order::ShoppingCart();
-		
-		// Check to see if there are still items in the shopping cart
-		if($sc->Items()){
-			$cartContents = Session::get('cartContents');
-			$member = EcommerceRole::createOrMerge($data);
-			$member->write();
-			$member->logIn();
-			
-			// Get, and save the order from session.
-			$order = $sc->createOrderFromShoppingCart();
-			// Update order with shipping address
-			$form->saveInto($order);
-			
-			$order->write();
-			
-			$data['BillingId'] = $order->ID;
-			
-			// Save payment data from form and process payment
-			
-			
-			$payment = Object::create($data['PaymentMethod']);
-			if(!$payment instanceof Payment) user_error(get_class($payment) ." is not a Payment object!", E_USER_ERROR);
-			$form->saveInto($payment);
-			$payment->OrderID = $order->ID;
-			$payment->Amount = $order->Total();
-			
-			// Worldpay doesn't have a payment object so we write one here
-			if($data['PaymentMethod'] == 'WorldpayPayment') {
-				$payment->write();
-			}			
-			
-			$result = $payment->processPayment($data, $form);
-							
-			// Successful payment
-			if($result['Success']) {
-			  	Session::set('Order.OrderID',$order->ID);
-				Session::set('Order.PurchaseComplete', true);
-				
-				$order->sendReceipt();
-				$order->isComplete();
-				$order->write();
-				
-				Director::redirect(CheckoutPage::find_link() . "OrderSuccessful/$order->ID");
-				return;
-				
-			// Longer payment process, such as Worldpay
-			} else if($result['Processing']) {
-				return $result['ReturnValue'];
-	 		
-			// Failed payment
-			} else {
-				Session::set('cartContents',$cartContents);
-				Session::set('Order.OrderID', $order->ID);
-				Session::clear('Order.PurchaseComplete');
-				$form->sessionMessage("Sorry, your payment was not accepted, please try again<br/><strong>$result[HelpText]:</strong> $result[MerchantHelpText]","bad");
-	 			Director::redirect(CheckoutPage::find_link() . "$order->ID");
-	 			return;
-			}
-		
-		} else {
-			// no items, redirect back
-			$form->sessionMessage("Please add some items to your cart","warning");
-		   	Director::redirectBack();
-		   	return;
-		}
-		
-	}
 
 	/**
 	 * Disable the validator when you're calling ChangeCountry
@@ -272,7 +190,6 @@ class OrderForm extends Form{
 			return parent::beforeProcessing();
 		}
 	}
-
 }
 
 ?>

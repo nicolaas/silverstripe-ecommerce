@@ -977,10 +977,10 @@ class Order_Item extends DataObject {
 	public function __construct($product = null, $quantity = 1) {
 		// Constructed by DataObject::get
 		if(is_array($product)) {
-  			$this->quantity = $product[Quantity];
-  			$this->UnitPrice = $product[UnitPrice];
-  			$this->ProductVersion = $product[ProductVersion];
-  			$this->ProductID = $product[ProductID];
+  			$this->quantity = $product['Quantity'];
+  			$this->UnitPrice = $product['UnitPrice'];
+  			$this->ProductVersion = $product['ProductVersion'];
+  			$this->ProductID = $product['ProductID'];
   			if($this->ProductID && $this->ProductVersion){
   				$this->product = Versioned::get_version("Product",$this->ProductID,$this->ProductVersion);
   				
