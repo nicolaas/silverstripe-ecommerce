@@ -87,7 +87,7 @@ class EcommerceRole extends DataObjectDecorator {
 	
 	static function getAddressFields() {
 		return new CompositeField(
-			new HeaderField('Address', 3),
+			new HeaderField('Personal Information', 3),
 			new TextField('FirstName', 'First Name'),
 			new TextField('Surname', 'Surname'),
 			new TextField('Address', 'Address'),

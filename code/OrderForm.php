@@ -47,7 +47,7 @@ class OrderForm extends Form{
 		$shippingCountryFieldGroup->subfieldParam = 'Field';
 
 		// setup password fields
-		if(!$member) {
+		if(!$member || $member->Password == '') {
 			$membershipHeader = new HeaderField("Membership details", 3);
 			$accountField = new LiteralField("AccountInfo", "<p>Please choose a password, so you can login and check your order history in the future.</p><br />");
 			$passwordField = new FieldGroup(
