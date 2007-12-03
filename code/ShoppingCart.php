@@ -18,10 +18,10 @@ class ShoppingCart extends Object {
 	function setQuantity($order, $product, $quantity){
 		if($quantity) {
 			Session::set('cartContents.'.$product->ID, $quantity);
-			if(Session::get('cartContents.'.$product->ID) < 0) {
+			if(Session::get('cartContents.'.$product->ID) <= 0) {
 				Session::clear('cartContents.'.$product->ID);
 			} 
-		} else { 
+		} else { 			
 			Session::clear('cartContents.'.$product->ID);
 		}
 	}

@@ -164,16 +164,7 @@ class Product extends Page {
 	 * Checks if the product is in the cart or not
 	 */
 	function IsInCart() {
-		$order = Order::ShoppingCart();		
-		if($items = $order->Items()) {
-			foreach($items as $item) {
-				if($item->ProductID == $this->ID) {
-					return true;
-				}
-			}
-		} else {
-			return false;
-		}
+		return (bool) $this->Quantity();
 	}
 	
 	/**

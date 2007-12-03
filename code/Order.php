@@ -307,13 +307,18 @@
 	*/
 	function remove($product){
 		$id = $product->ID;
-   		$this->items[$id]--;
- 
+   	$this->items[$id]--;
+   	
 		if($this->dataHandler){
 			$this->dataHandler->setQuantity($this, $product, $this->items[$product->ID]);	
 		}else if($this->ID){
 			$this->removeFromDatabase($product);
 		}
+		
+		if($this->items[$id] <= 0) {
+   		unset($this->items[$id]);
+   	}
+		
 		$this->calcShipping();
 	}
 	
@@ -394,13 +399,22 @@
 	}
 	
 	function createOrderItems(array $sourceItems){
-	  	if($sourceItems) $ids = implode(',', array_keys($sourceItems));
+		// We don't want items with no quantity..
+		$sourceItemsFixed = array();
+		foreach($sourceItems as $key => $value) {
+			if($value > 0) {
+				$sourceItemsFixed[$key] = $value;
+			}
+		}
+		
+		$ids = '';
+	  	if($sourceItemsFixed) $ids = implode(',', array_keys($sourceItemsFixed));
 		if($ids) {
 			$products = DataObject::get("Product", "`SiteTree`.ID IN ($ids)", "Title");
 			if($products) {
 				$items = new DataObjectSet();
 				foreach($products as $product) {
-					$item = $this->createOrderItem($product, $sourceItems[$product->ID]);
+					$item = $this->createOrderItem($product, $sourceItemsFixed[$product->ID]);
 					$item->setCart($this);
 					$items->push($item);
 				}
