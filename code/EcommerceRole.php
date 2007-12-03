@@ -101,8 +101,7 @@ class EcommerceRole extends DataObjectDecorator {
 	 * @param data the array data from a submitted form.
 	 */
 	public static function createOrMerge($data) {
-		$email = is_array($data) ? $data['Email'] : $data->Email;
-		if($existingMember = DataObject::get_one('Member', "Email = '$email'")) {
+		if($existingMember = Member::currentUser()) {
 			$existingMember->update($data);
 			return $existingMember;
 		} else {

@@ -89,6 +89,15 @@
 	static function set_email($e) {
 		self::$receiptEmail = $e;
 	}
+	
+	/**
+	 * Set the subject of the order receipt email.
+	 */
+	protected static $receiptSubject;
+	
+	static function set_subject($subject) {
+		self::$receiptSubject = $subject;
+	}
 
 	/**
 	 * Currency used in orders
@@ -616,6 +625,10 @@
  		} else {
  			$adminEmail = Email::getAdminEmail();
  		}
+
+		if(self::$receiptSubject) {
+			$subject = self::$receiptSubject;
+		}
  		
  		// send an email to the customer
  		$e = new $emailClass($member->Email, $adminEmail);
@@ -626,6 +639,7 @@
 				"Member" => $member
 			)
 		);
+		if($subject) $e->setSubject($subject);
 		$e->send();
 		
 		// if copyToAdmin is true, send a copy to the admin AND if the admin email has been defined.
@@ -638,6 +652,7 @@
 					"Member" => $member
 				)
 			);
+			if($subject) $e2->setSubject($subject);
 			$e2->send();			
 		}
 	}
