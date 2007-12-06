@@ -62,15 +62,15 @@ class Payment extends DataObject {
 	 * will make themselves invisible.
 	 */	
 	function setClientIP() {
-		if($_SERVER['HTTP_X_FORWARDED_FOR']) {
-			if($_SERVER['HTTP_CLIENT_IP']) {
+		if(isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+			if(isset($_SERVER['HTTP_CLIENT_IP'])) {
 				$proxy = $_SERVER['HTTP_CLIENT_IP'];
 			} else {
 				$proxy = $_SERVER['REMOTE_ADDR'];
 			}
 			$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
 		} else {
-			if($_SERVER['HTTP_CLIENT_IP']) {
+			if(isset($_SERVER['HTTP_CLIENT_IP'])) {
 				$ip = $_SERVER['HTTP_CLIENT_IP'];
 			} else {
 				$ip = $_SERVER['REMOTE_ADDR'];
@@ -78,8 +78,8 @@ class Payment extends DataObject {
 		}
 		
 		// If the IP and/or Proxy IP have already been set, we want to be sure we don't set it again.
-		if(!$this->IP) $this->IP = $ip;
-		if(!$this->ProxyIP) $this->ProxyIP = $proxy;
+		if(!$this->IP && isset($ip)) $this->IP = $ip;
+		if(!$this->ProxyIP && isset($proxy)) $this->ProxyIP = $proxy;
 	}	
 	
 	/**
