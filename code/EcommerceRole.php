@@ -18,9 +18,9 @@ class EcommerceRole extends DataObjectDecorator {
 	function augmentSQL(SQLQuery &$query) {}
 
  	/**
-	 * Update the database schema as required by this extension.
+	 * Update the database data, migrating ShopMember into Member, if necessary
 	 */
-	function augmentDatabase() {
+	function augmentDefaultRecords() {
  		$exist = DB::query("SHOW TABLES LIKE 'ShopMember'")->numRecords();
  		if($exist > 0) {
  			DB::query("UPDATE `Member`, `ShopMember` " .

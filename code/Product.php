@@ -23,7 +23,8 @@ class Product extends Page {
 		'Weight' => 'Decimal(9,2)',
 		'Model' => 'Varchar',
 		'FeaturedProduct' => 'Boolean',
-		'AllowPurchase' => 'Boolean'
+		'AllowPurchase' => 'Boolean',
+		"InternalItemID" => "Varchar(30)",
 	);
 
 	/**
@@ -58,8 +59,12 @@ class Product extends Page {
 		$fields->addFieldToTab("Root.Content.Main", new TextField("Price", "Price", "", 12));
 		$fields->addFieldToTab("Root.Content.Main", new TextField("Model", "Author", "", 50));
 
+		$fields->addFieldToTab("Root.Content.Main", new TextField("InternalItemID","Product Code","",7));
+
 		// product image field
-		$fields->addFieldToTab("Root.Content.Images", new ImageField("Image", "Product Image"));
+		if(!$fields->dataFieldByName("Image")) {
+			$fields->addFieldToTab("Root.Content.Images", new ImageField("Image", "Product Image"));
+		}
 
 		// flags for this product which affect it's behaviour on the site
 		$fields->addFieldToTab("Root.Content.Main", new CheckboxField("FeaturedProduct", "Featured Product"));
@@ -256,7 +261,9 @@ class Product_Controller extends Page_Controller {
 			}
 			Director::redirectBack();
 		} else {
-			return false;
+			if(!$this->Price) echo "<li>This product doesn't have a price";
+			if(!$this->AllowPurchase) echo "<li>This product doesn't have purchasing enabled";
+			return;
 		}
 	}
 	

@@ -258,7 +258,7 @@ class Report_ProductPopularity extends Report {
 			null,
 			null,
 			array(
-				'Product ID' => 'ProductID', 
+				'Product Code' => 'InternalItemID', 
 				'Product name' => 'Name',
 				'Total orders' => 'NumberOfOrders',
 				'Current unit price' => 'CurrentUnitPrice',
@@ -267,17 +267,17 @@ class Report_ProductPopularity extends Report {
 			),
 			null,
 			"SELECT `SiteTree`.`Title` AS 'Name', " .
-			"	`Product`.`ID` AS 'ProductID', " .
+			"	`Product`.`InternalItemID` AS 'InternalItemID', " .
 			"	`Order_Item`.`Quantity` AS 'NumberOfOrders', " .
 			"	`Product`.`Price` AS 'CurrentUnitPrice', " .
 			"	( `Order_Item`.`Quantity` * `Order_Item`.`UnitPrice` ) AS 'TotalOrderValue', " .
 			"	MAX( `Order`.`Created` ) AS 'LastOrdered' " .
 			"FROM `Product` " .
 			"	LEFT JOIN `SiteTree` USING (`ID`) " .
-			"	LEFT JOIN `Order_Item` ON `ProductID`=`Product`.`ID`" .
+			"	LEFT JOIN `Order_Item` ON `Order_Item`.`ProductID` =`Product`.`ID`" .
 			"	LEFT JOIN `Order` ON `Order`.`ID`=`OrderID`" .
 			"WHERE `Order_Item`.`Quantity` > 0 " .
-			"GROUP BY `Product`.`ID`" .
+			"GROUP BY `Product`.`InternalItemID`" .
 			"ORDER BY TotalOrderValue DESC , `SiteTree`.`Title` ASC"
 		);
 		
@@ -296,6 +296,8 @@ class Report_ProductPopularity extends Report {
  * A controller class work for exporting reported table to CSV format.
  */
 class Report_ProductReport_Controller extends Controller{
+	static $title = "Product popularity"; 
+	static $description = "Breakdown of numbers of units of items sold";     
 
 	/**The function is an action for making $Controller/$action/$ID works when click on Exporting button.
 		*Todo: Declear a new OrderReport Object with null filter, then set its filter using $_GET global, then call its export function.
@@ -309,7 +311,7 @@ class Report_ProductReport_Controller extends Controller{
 			null,
 			null,
 			array(
-				'Product ID' => 'ProductID', 
+				'Product Code' => 'InternalItemID', 
 				'Product name' => 'Name',
 				'Total orders' => 'NumberOfOrders',
 				'Current unit price' => 'CurrentUnitPrice',
@@ -318,16 +320,16 @@ class Report_ProductReport_Controller extends Controller{
 			),
 			null,
 			"SELECT `SiteTree`.`Title` AS 'Name', " .
-			"	`Product`.`ID` AS 'ProductID', " .
+			"	`Product`.`InternalItemID` AS 'InternalItemID', " .
 			"	COUNT(`Order_Item`.`ID`) AS 'NumberOfOrders', " .
 			"	`Product`.`Price` AS 'CurrentUnitPrice', " .
 			"	SUM( `Order_Item`.`Quantity` * `Order_Item`.`UnitPrice` ) AS 'TotalOrderValue', " .
 			"	MAX( `Order`.`Created` ) AS 'LastOrdered' " .
 			"FROM `Product` " .
 			"	LEFT JOIN `SiteTree` USING (`ID`) " .
-			"	LEFT JOIN `Order_Item` ON `ProductID`=`Product`.`ID`" .
+			"	LEFT JOIN `Order_Item` ON `Order_Item`.`ProductID`=`Product`.`ID`" .
 			"	LEFT JOIN `Order` ON `Order`.`ID`=`OrderID`" .
-			"GROUP BY `Product`.`ID`" .
+			"GROUP BY `Product`.`InternalItemID`" .
 			"ORDER BY TotalOrderValue DESC , `SiteTree`.`Title` ASC"
 		);
 		// $orderReport->filter_onchange();

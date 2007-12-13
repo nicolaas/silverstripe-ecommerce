@@ -21,8 +21,8 @@ class CheckoutPage extends Page{
 		if($member = Member::currentUser()){
 		 return array();
 		}else{			
-		   Director::redirect('403/');	
-			die();
+		  	Director::redirect('403/');	
+			return;
 		}
 	}
 	
