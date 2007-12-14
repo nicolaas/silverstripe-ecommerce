@@ -68,12 +68,9 @@ class OrderForm extends Form{
 		
 		// initialise variables with contact fields from member, remove country because orderform requires
 		// a custom country field setup
-		if(!$member) {
-			$contactFields = EcommerceRole::getEcommerceFields();
-			$contactFields->removeByName('Country');
-		} else {
-			$contactFields = EcommerceRole::getAddressFields();
-		}
+
+		$contactFields = EcommerceRole::getEcommerceFields($member);
+		$contactFields->removeByName('Country');
 		
 		// setup the shipping fields, if UseShippingAddress is true (can be set when changing country)
 		if($sc->UseShippingAddress) {

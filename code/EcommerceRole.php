@@ -7,7 +7,7 @@
 /**
  * EcommerceRole is a DataObjectDecorator for the member class to allow additional
  * member fields for the module. It has a base set of contact fields that can be
- * statically called anywhere in the system using EcommerceRole::getEcommerceFields();
+ * statically called anywhere in the system using singleton('Member')->getEcommerceFields();
  * The OrderForm and MemberForm class uses this call.
  */
 class EcommerceRole extends DataObjectDecorator {
@@ -68,10 +68,12 @@ class EcommerceRole extends DataObjectDecorator {
 	}
 	
 	/**
-	 * Define the objects for these database fields used by other forms like MemberForm and OrderForm.
+	 * Return the member fields to be shown on order forms.
+	 * For orders made by existing members, this will be called on that memeber.
+	 * For new orders, this will be called on the singleton object.
 	 */
-	static function getEcommerceFields() {
-		return new CompositeField(
+	function getEcommerceFields() {
+		$fields = new FieldSet(
 			new HeaderField('Personal Information', 3),
 			new TextField('FirstName', 'First Name'),
 			new TextField('Surname', 'Surname'),
@@ -83,17 +85,11 @@ class EcommerceRole extends DataObjectDecorator {
 			new TextField('City', 'City'),
 			new DropdownField('Country', 'Country', Geoip::getCountryDropDown(), self::findCountry())
 		);
-	}
-	
-	static function getAddressFields() {
-		return new CompositeField(
-			new HeaderField('Personal Information', 3),
-			new TextField('FirstName', 'First Name'),
-			new TextField('Surname', 'Surname'),
-			new TextField('Address', 'Address'),
-			new TextField('AddressLine2', ''),
-			new TextField('City', 'City')
-		);
+		
+		$this->owner->extend('augmentEcommerceFields', $fields);
+		
+		return new CompositeField($fields);
+		
 	}
 
 	/**

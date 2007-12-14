@@ -13,7 +13,7 @@ class MemberForm extends Form {
 	function __construct($controller, $name) {
 		$member = Member::currentUser();
 		
-		$contactFields = EcommerceRole::getEcommerceFields();
+		$contactFields = $member->getEcommerceFields();
 		$logoutField = new LiteralField('LogoutNote', "<p class=\"message good\">You are currently logged in. Click <a href=\"Security/logout\" title=\"Click here to log out\">here</a> to log out.</p>");
 		$passwordField = new ConfirmedPasswordField("Password", "Password");
 		if($member && $member->Password != '') {
