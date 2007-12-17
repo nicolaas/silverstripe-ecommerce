@@ -14,7 +14,7 @@ class MemberForm extends Form {
 		$member = Member::currentUser();
 		
 		$contactFields = $member->getEcommerceFields();
-		$logoutField = new LiteralField('LogoutNote', "<p class=\"message good\">You are currently logged in. Click <a href=\"Security/logout\" title=\"Click here to log out\">here</a> to log out.</p>");
+		$logoutField = new LiteralField('LogoutNote', "<p class=\"message good\">" . _t("MemberForm.LOGGEDIN","You are currently logged in.") . "Click <a href=\"Security/logout\" title=\"Click here to log out\">here</a> to log out.</p>");
 		$passwordField = new ConfirmedPasswordField("Password", "Password");
 		if($member && $member->Password != '') {
 			$passwordField->setCanBeEmpty(true);
@@ -59,7 +59,7 @@ class MemberForm extends Form {
 
 		$form->saveInto($member);
 		$member->write();
-		$form->sessionMessage('Your details have been saved', 'bad');
+		$form->sessionMessage(_t("MemberForm.DETAILSSAVED",'Your details have been saved'), 'bad');
 		Director::redirectBack();
 		return;
 	}
@@ -72,7 +72,7 @@ class MemberForm extends Form {
 
 		$form->saveInto($member);
 		$member->write();
-		$form->sessionMessage('Your details have been saved', 'bad');
+		$form->sessionMessage(_t("MemberForm.DETAILSSAVED",'Your details have been saved'), 'bad');
 		Director::redirect(CheckoutPage::find_link());
 		return;
 	}

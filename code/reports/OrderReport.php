@@ -19,8 +19,9 @@ HTML
 	
 	function htmlPrintButton(){
 		$idprint = $this->ID."_printEachOrder";
+		$printeachorder = _t("OrderReport.PRINTEACHORDER","Print all orders shown");
 		return $printButton = <<<HTML
-<a href="OrderReport_Popup/index/All" class="popup">$record->ID<input name="$idprint" style="width: 12em" type="button" id="$idprint" class="DataReport_PrintEachOrderButton" value="Print all orders shown" /></a>
+<a href="OrderReport_Popup/index/All" class="popup">$record->ID<input name="$idprint" style="width: 12em" type="button" id="$idprint" class="DataReport_PrintEachOrderButton" value="$printeachorder" /></a>
 HTML
 ;
 	}
@@ -169,10 +170,10 @@ class OrderReport_Popup extends Controller {
 			$member = $order->Member();
 
 			$fields = new FieldSet(
-				new HeaderField('Change Order Status',3),
+				new HeaderField(_t("OrderReport.CHANGESTATUS","Change Order Status"),3),
 				$order->dbObject('Status')->formField("Status", null, null, $order->Status),
-				new TextareaField('Note', 'Note/Email'),
-				new CheckboxField('SentToCustomer', "Send this note to {$member->Title} ({$member->Email})", true),
+				new TextareaField('Note', _t("OrderReport.NOTEEMAIL","Note/Email")),
+				new CheckboxField('SentToCustomer', sprintf(_t("OrderReport.SENDNOTETO", "Send this note to %s (%s)"), $member->Title, $member->Email) , true),
 				new HiddenField('ID', 'ID', $order->ID)
 			);
 			$actions = new FieldSet(

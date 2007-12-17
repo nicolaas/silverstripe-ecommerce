@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" >
-		<title>Shop Receipt</title>
+		<title><% _t("TITLE","Shop Receipt") %></title>
 		<style>
 			<!--
 			/** Global resetting for Design **/
@@ -127,7 +127,7 @@
 			<thead>
 				<tr>
 					<th scope="col" colspan="2">
-						<h1 class="emailTitle">Shop Order Receipt</h1>
+						<h1 class="emailTitle"><% _t("HEADLINE","Shop Order Receipt") %></h1>
 					</th>
 				</tr>
 				<tr>

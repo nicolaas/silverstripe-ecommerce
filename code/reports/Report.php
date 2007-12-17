@@ -80,8 +80,8 @@ class Report_UnprintedOrder extends Report{
 			"Payment.ClassName",
 		));
 		$orderReport->setExtraFields(array(
-			"Print" => '<a href=\"OrderReport_Popup/index/$record->ID/?print=1\">print</a>',
-			"Packing Slip" => '<a href=\"OrderReport_Popup/packingSlip/$record->ID\">view</a>'
+			"Print" => '<a href=\"OrderReport_Popup/index/$record->ID/?print=1\">'._t("Report.PRINT","print").'</a>',
+			"Packing Slip" => '<a href=\"OrderReport_Popup/packingSlip/$record->ID\">'._t("Report.VIEW","view").'</a>'
 		));
 
 		return $orderReport;
@@ -132,7 +132,7 @@ class Report_CurrentOrders extends Report{
 			"OrderStatusLog.Created",
 		));
 		$orderReport->setExtraFields(array(
-			"Print" => '<a href=\"OrderReport_Popup/index/$record->ID/?print=1\">print</a>',
+			"Print" => '<a href=\"OrderReport_Popup/index/$record->ID/?print=1\">'._t("Report.PRINT").'</a>',
 		));
 
 		return $orderReport;
@@ -197,8 +197,8 @@ class Report_FindAnOrder extends Report{
 //			"Payment.PaymentMethod",
 		));
 		$orderReport->setExtraFields(array(
-			"Print" => '<a href=\"OrderReport_Popup/index/$record->ID/?print=1\">print</a>',
-			"Packing Slip" => '<a href=\"OrderReport_Popup/packingSlip/$record->ID\">view</a>'
+			"Print" => '<a href=\"OrderReport_Popup/index/$record->ID/?print=1\">'._t("Report.PRINT").'</a>',
+			"Packing Slip" => '<a href=\"OrderReport_Popup/packingSlip/$record->ID\">'._t("Report.VIEW").'</a>'
 		));
 		return $orderReport;
 	}
@@ -238,7 +238,7 @@ class Report_AllProducts extends Report {
 	
 	function getReportField() {
 		return new LiteralField('Info',
-				"<a href=\"ViewAllProducts/\" class=\"popup viewAll\" target=\"_blank\">Click here to view all products</a>");
+				"<a href=\"ViewAllProducts/\" class=\"popup viewAll\" target=\"_blank\">"._t("Report.ALLCLICKHERE","Click here to view all products")."</a>");
 	}
 	
 	function getOwnerID() {

@@ -105,7 +105,7 @@
 				window.print();
 			}
 		</script>
-		<title>Print Orders</title>
+		<title><% _t("PAGETITLE","Print Orders") %></title>
 		</head>
 		<body>
 				<div id="OrderInformation">

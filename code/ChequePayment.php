@@ -19,7 +19,7 @@ class ChequePayment extends Payment {
 			$this->Status = "Pending";
 			
 		if(!$this->Message)
-			$this->Message = "<p class=\"warningMessage\">Payment accepted via Cheque. Please note: products will not be shipped until payment has been received.</p>";
+			$this->Message = "<p class=\"warningMessage\">"._t("ChequePayment.MESSAGE","Payment accepted via Cheque. Please note: products will not be shipped until payment has been received.")."</p>";
 		
 		$result['Success'] = "Success";
 		$result['PaymentID'] = $this->write();

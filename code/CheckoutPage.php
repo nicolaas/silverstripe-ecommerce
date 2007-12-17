@@ -56,7 +56,7 @@ class CheckoutPage extends Page{
 	static function find_link($urlSegment = null) {
 		$page = DataObject::get_one("CheckoutPage", "");
 		if(!$page) {
-			user_error("No CheckoutPage on this site - please create one!", E_USER_ERROR);
+			user_error(_t("CheckoutPage.NOPAGE","No CheckoutPage on this site - please create one!"), E_USER_ERROR);
 		}		
 		if($urlSegment) {
 			return $page->URLSegment;

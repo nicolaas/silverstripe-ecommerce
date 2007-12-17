@@ -50,7 +50,7 @@ HTML
 		*/
 	protected function htmlDateRangeFilter(){
 
-		$dateFilter = new FieldGroup("Date Range",
+		$dateFilter = new FieldGroup(_t("FindOrderReport.DATERANGE","Date Range"),
 			new CalendarDateField("From", "From", $this->dateFilter['From'],null),
 			new CalendarDateField("To", "To", $this->dateFilter['To'],null)
 		);

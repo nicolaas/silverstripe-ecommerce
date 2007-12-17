@@ -9,9 +9,9 @@
   		<ul>
 		  	<% control GroupsMenu %>
   	    		<% if Children %>
-			  	    <li class="$LinkingMode"><a href="$Link" title="Go to the $Title.XML page" class="$LinkingMode Nobottom">$MenuTitle</a>
+			  	    <li class="$LinkingMode"><a href="$Link" title="<% sprintf(_t("GOTOPAGE","Go to the %s page"),$Title.XML) %>" class="$LinkingMode Nobottom">$MenuTitle</a>
 	  	    	<% else %>
-		  			<li><a href="$Link" title="Go to the $Title.XML page" class="$LinkingMode">$MenuTitle</a>
+		  			<li><a href="$Link" title="<% sprintf(_t("GOTOPAGE"),$Title.XML) %>" class="$LinkingMode">$MenuTitle</a>
 				<% end_if %>	  
 	  		
 	  			<% if LinkOrSection = section %>
@@ -21,7 +21,7 @@
 				 				<ul>
 								  	<% control ChildGroups %>
 						  	  			<li class="$LinkingMode">
-						  	  				<a href="$Link" title="Go to the $Title.XML page" class="$LinkingMode">$MenuTitle.LimitCharacters(22)</a>
+						  	  				<a href="$Link" title="<% sprintf(_t("GOTOPAGE"),$Title.XML) %>" class="$LinkingMode">$MenuTitle.LimitCharacters(22)</a>
 										</li>
  				 					<% end_control %>
 			 				 	</ul>

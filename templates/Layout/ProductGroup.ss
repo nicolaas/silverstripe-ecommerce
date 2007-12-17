@@ -28,7 +28,7 @@
 		<% end_if %>
 		<% if FeaturedProducts %>
 			<div class="product_summary">
-				<h3 class="productGroupTitle">Featured Products</h3>
+				<h3 class="productGroupTitle"><% _t("FEATURED","Featured Products") %></h3>
 				<ul id="ProductList">
 					<% control FeaturedProducts %>
 						<% include ProductGroupItem %>
@@ -48,7 +48,7 @@
 				<% end_if %>
 				<% control ChildGroups %>
 					<% if ChildGroups %>
-						<h3 class="productGroupTitle"><a href="$Link" title="View the product group &quot;{$Title}&quot;">$Title</a></h3>
+						<h3 class="productGroupTitle"><a href="$Link" title="<% sprintf(_t("VIEWGROUP","View the product group &quot;%s&quot;"),$Title) %>">$Title</a></h3>
 						<ul id="ProductList">
 							<% control ChildGroups %>
 								<% if ChildProducts %>

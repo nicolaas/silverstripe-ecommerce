@@ -46,13 +46,13 @@
 				}
 			)
 		</style>
-		<title>Shop Print Orders</title>
+		<title><% _t("PAGETITLE","Shop Print Orders") %></title>
 		</head>
 		<body>
 			<div id="OrderInformation">
 				<% control DisplayFinalisedOrder %>
 				<div>
-					<table class="packingSlip" cellspacing="0" cellpadding="0" summary="The contents of your cart are displayed in this form and summary of all fees associated with an order and a rundown of payments options.">
+					<table class="packingSlip" cellspacing="0" cellpadding="0" summary="<% _t("TABLESUMMARY","The contents of your cart are displayed in this form and summary of all fees associated with an order and a rundown of payments options.") %>">
 						
 						<thead>
 							<tr class="gap">
@@ -99,8 +99,8 @@
 					<table class="packingSlip orderDetails" cellspacing="0" cellpadding="0">
 						<tbody>
 							<tr class="orderDetails">
-								<td colspan="3">Order Date</td>
-								<td>Order Number</td>
+								<td colspan="3"><% _t("ORDERDATE","Order Date") %></td>
+								<td><% _t("ORDERNUMBER","Order Number") %></td>
 							</tr>
 							<tr>
 								<td colspan="3">$Created.Nice</td>
@@ -111,9 +111,9 @@
 					<table class="packingSlip orderDetails" cellspacing="0" cellpadding="0">
 						<tbody>
 							<tr class="orderDetails">
-								<td colspan="3">Item #</td>
-								<td>Description</td>
-								<td>Quantity</td>
+								<td colspan="3"><% _t("ITEM","Item") %> #</td>
+								<td><% _t("DESCRIPTION","Description") %></td>
+								<td><% _t("QUANTITY","Quantity") %></td>
 							</tr>
 							<% control Items %>
 								<tr>
