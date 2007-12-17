@@ -53,6 +53,7 @@ class OrderForm extends Form{
 			$passwordField = new FieldGroup(
 				new ConfirmedPasswordField('Password', 'Password')
 			);
+			$member = new Member();
 		} else {
 			$membershipHeader = new HiddenField('MembershipHeaderHidden', '');
 			$accountField = new HiddenField('AccountInfo', '');
@@ -69,7 +70,7 @@ class OrderForm extends Form{
 		// initialise variables with contact fields from member, remove country because orderform requires
 		// a custom country field setup
 
-		$contactFields = EcommerceRole::getEcommerceFields($member);
+		$contactFields = $member->getEcommerceFields();
 		$contactFields->removeByName('Country');
 		
 		// setup the shipping fields, if UseShippingAddress is true (can be set when changing country)
