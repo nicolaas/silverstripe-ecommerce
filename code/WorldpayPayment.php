@@ -55,7 +55,7 @@ class WorldpayPayment extends Payment {
 		$tmpPage->URLSegment = "payment";
 
 		$controller = new Page_Controller($tmpPage);
-		Controller::$currentController = $controller;
+		Controller::pushCurrent();
 		
 		$form = $controller->renderWith("Page");
 		
