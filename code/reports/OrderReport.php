@@ -121,6 +121,10 @@ class OrderReport_Popup extends Controller {
 		return $this->renderWith('OrderInformation_PackingSlip');
 	}
 	
+	function invoice(){
+		return $this->renderWith('OrderInformation_Invoice');
+	}
+	
 	function Link() {
 		return "OrderReport_Popup/index/";
 	}
