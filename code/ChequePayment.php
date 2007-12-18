@@ -44,6 +44,13 @@ class ChequePayment extends Payment {
 		return DataObject::get_one('CheckoutPage')->ChequeMessage;
 	}
 	
+	/**
+	 *  Function used for in template to check if payment is cheque.
+	 */
+	function IsCheque(){
+		return true;
+	}
+	
 }
 
 ?>
