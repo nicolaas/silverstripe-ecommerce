@@ -128,6 +128,34 @@ class OrderReport_Popup extends Controller {
 	function Link() {
 		return "OrderReport_Popup/index/";
 	}
+	
+	/**
+	 * Function created for the purpose of checking for Cheque payment 
+	 */
+	function SingleOrder(){
+		$id = $this->urlParams[ID];
+
+		if(is_numeric($id)){
+			$order = DataObject::get_by_id("Order", $id);
+			$payment = $order->OrderPayment();
+			$cheque = false;
+			if($payment->First()){
+				$record = $payment->First();
+			//	Debug::Show($record);
+				if($record->ClassName == "ChequePayment"){
+					$cheque = true;
+				}
+			}
+			
+			return new ArrayData(array(
+					'DisplayFinalisedOrder' => $order,
+					'IsCheque' => $cheque
+				)
+			);
+		}
+		
+		return false;
+	}
  	
 	/**
 		*Todo: get orders by ID or using the current filter if ID is not numeric such as 'all'.
@@ -140,6 +168,7 @@ class OrderReport_Popup extends Controller {
 			if(isset($_REQUEST['print'])) {
 				$order->updatePrinted(true);
 			}
+
 			return $order;
 		}else{
 			
