@@ -1011,7 +1011,7 @@ class Order_Item extends DataObject {
   			$this->ProductVersion = $product['ProductVersion'];
   			$this->ProductID = $product['ProductID'];
 			if($this->ProductID){
-				$this->product = DataObject::get_one("Product",$this->ProductID);
+				$this->product = DataObject::get_by_id("Product",$this->ProductID);
 			} else {
   				user_error("Product #$product[ProductID] not found", E_USER_ERROR);
 			}
