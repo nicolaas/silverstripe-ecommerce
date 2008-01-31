@@ -12,7 +12,7 @@
  * class Order ( our main order class ) 
  * class Order_item ( our subclass which handles multiple products in an order
  * class Order_item_attribute ( which handles any attributes of the product such as colour,
- *															size, or type )
+ * size, or type )
  * class Order_receiptEmail (which handles all emails generated from an order) * typically overloaded.
  */
  
@@ -639,7 +639,7 @@
 				"Member" => $member
 			)
 		);
-		if($subject) $e->setSubject($subject);
+		if(isset($subject)) $e->setSubject($subject);
 		$e->send();
 		
 		// if copyToAdmin is true, send a copy to the admin AND if the admin email has been defined.
