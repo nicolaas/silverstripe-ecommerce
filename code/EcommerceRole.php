@@ -99,7 +99,7 @@ class EcommerceRole extends DataObjectDecorator {
 	public static function createOrMerge($data) {
 		// Because we are using a ConfirmedPasswordField, the password will
 		// be an array of two fields
-		if(is_array($data['Password'])) {
+		if(isset($data['Password']) && is_array($data['Password'])) {
 			$data['Password'] = $data['Password']['_Password'];
 		}
 		
