@@ -276,18 +276,19 @@
 	}
 	
 	/**
-	* Adds a product to this instance of the order if there is an ID, it updates the DB
-	* @param $product the product you wish to add.
+	* Adds a product to this order. If there is an ID, it updates the DB.
+	* @param DataObject $product An instance of product you wish to add.
+	* @param int $quantity The quantity you wish to add, default is 1.
 	*/
-	function add($product, $quantity = 1){
+	function add($product, $quantity = 1) {
+		if(!isset($this->items[$product->ID])) $this->items[$product->ID] = 0;
 		$this->items[$product->ID] += $quantity;
-		if($this->dataHandler){
+		if($this->dataHandler) {
 			$this->dataHandler->setQuantity($this, $product, $this->items[$product->ID]);	
-		}else if($this->ID){
+		} elseif($this->ID) {
 			$this->addToDatabase($product);
 		}
 		$this->calcShipping();
-		
   	}
   	
   	function removeByQuantity($product, $quantity = 1) {
