@@ -29,7 +29,8 @@ class ProductGroup extends Page {
 	/**
 	 * Returns the shopping cart
 	 */
-	function Cart(){
+	function Cart() {
+		HTTP::set_cache_age(0);
 		return Order::ShoppingCart();
 	}
 

@@ -77,6 +77,7 @@ class Product extends Page {
 	 * Returns the shopping cart
 	 */
 	function Cart() {
+		HTTP::set_cache_age(0);
 		return Order::ShoppingCart();
 	}
 
@@ -106,12 +107,6 @@ class Product extends Page {
 		} else {
 			return $p->GroupsMenu();
 		}
-	}
-
-	function ShoppingCart(){
-		$order = Order::create();
-		$order->changeToShoppingCart();
-		return $order;
 	}
 
 	/**
