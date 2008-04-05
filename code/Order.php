@@ -529,8 +529,8 @@
 	function calcShipping() {
 		$shipping = 0;
 
-		if($this->hasShippingCost){
-			$sc = ShippingCalculator::create();
+		if($this->hasShippingCost) {
+			$sc = Object::create('ShippingCalculator');
 	 		$shipping = $sc->getCharge($this);
 	 		$this->Shipping = $shipping;
 	 		if($this->ID && is_numeric($this->ID)) {
