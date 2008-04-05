@@ -107,7 +107,9 @@ class EcommerceRole extends DataObjectDecorator {
 			$existingMember->update($data);
 			return $existingMember;
 		} else {
-			return new Member($data);
+			$member = new Member();
+			$member->update($data);
+			return $member;
 		}
 	}
 	
