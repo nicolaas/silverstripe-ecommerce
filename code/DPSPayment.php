@@ -118,19 +118,6 @@ class DPSPayment extends Payment {
 	  		Session::set('Message', $result['HelpText']);
 	  	}
 
-		if($result['Success']) {
-			// update order
-	  		$order = $this->Order();
-	  		$order->Status = 'Paid';
-			$order->write();
-
-			// create a log-entry for it
-			$logEntry = new OrderStatusLog();
-			$logEntry->OrderID = $order->ID;
-			$logEntry->Status = 'Paid';
-			$logEntry->write();
-		}
-
 		$this->write();
 		return $result;
 	}
