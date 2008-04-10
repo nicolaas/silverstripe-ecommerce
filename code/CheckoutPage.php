@@ -11,8 +11,8 @@
 class CheckoutPage extends Page{
 		
 	static $db = array(
-		"PurchaseComplete" => "Text",
-		"ChequeMessage" => "Text"
+		"PurchaseComplete" => "HTMLText",
+		"ChequeMessage" => "HTMLText"
 	);
 	
 	static $add_action = 'a Checkout Page';
