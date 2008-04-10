@@ -132,7 +132,7 @@
 
 	<% if UseShippingAddress %>
 		<tr class="gap shippingDetails">
-			<th colspan="4" scope="row" class="left"><% _t("SHIPPINGDETAILS","Shipping Details" %></th>
+			<th colspan="4" scope="row" class="left"><% _t("SHIPPINGDETAILS","Shipping Details") %></th>
 		</tr>
 		<tr class="summary shippingDetails">
 			<td colspan="3" scope="row" class="left"><% _t("NAME") %></td>
