@@ -211,29 +211,6 @@ class Report_FindAnOrder extends Report{
 		return $this->class;
 	}
 }
-
-/*class Report_StatsReport extends Report {
-	
-	static $title = "Website statistics";
-	static $description = "View statistics of this website";
-	
-	static $awstatsURL;
-		static function set_awstatsURL($pass) {
-		self::$awstatsURL = $pass;
-	}
-	
-	function getReportField() {
-		
-		$awstatsURL = self::$awstatsURL;
-		
-		return new LiteralField( 'AWStats', "<iframe name=\"reportframe\" class=\"AWStatsReport\" src=\"$awstatsURL\"></iframe>" );
-	}
-	
-	function getOwnerID() {
-		return $this->class;
-	}	
-}
-*/
 class Report_AllProducts extends Report {
 	
 	static $title = "View all Products";
