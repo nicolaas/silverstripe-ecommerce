@@ -11,7 +11,7 @@ DataObject::add_extension('Member', 'EcommerceRole');
 // To use your own one, copy this line, with the second argument as your
 // custom shipping class into mysite/_config.php - this will override
 // SimpleShippingCalculator
-Object::useCustomClass('ShippingCalculator', 'SimpleShippingCalculator');
+Order::set_modifiers(array('SimpleShippingModifier'));
 
 // Add additional fields to the MemberTableField in the CMS for e-commerce.
 MemberTableField::addPermissions(array('show', 'export'));

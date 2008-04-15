@@ -9,7 +9,7 @@
  * It lets you set a fixed shipping costs, or a fixed cost for each country you're delivering to.
  * If you require more advanced shipping control, we suggest that you create your own subclass of {@link ShippingCalculator}
  */
-class SimpleShippingCalculator extends ShippingCalculator {
+class SimpleShippingModifier extends OrderModifier {
 	static $default_charge = 0;
 	static $charges_by_country = array();
 
@@ -29,12 +29,25 @@ class SimpleShippingCalculator extends ShippingCalculator {
 		self::$charges_by_country = array_merge(self::$charges_by_country, $countryMap);
 	}
 	
+	function TitleForTable() {
+		if($this->ID) $order = DataObject::get_by_id('Order', $this->OrderID);
+		else $order = $this->order;
+		if($shippingCountry = $order->findShippingCountry()) return "Shipping to $shippingCountry";
+		else return 'Shipping';
+	}
+	function ValueIdForTable() { return 'ShippingCost'; }
+	function ValueForTable() {
+		$val = new Currency('currency');
+		$val->setValue($this->getValue());
+		return $val->Nice();
+	}
+	
 	/**
-	 * Find the charge for the shipping on the shipping country for the order.
+	 * Find the amount for the shipping on the shipping country for the order.
 	 */
-	function getCharge(Order $o) {
-		if($o->findShippingCountry(true) && array_key_exists($o->findShippingCountry(true), self::$charges_by_country)) {
-			return self::$charges_by_country[$o->findShippingCountry(true)];
+	function getAmount(Order $order) {
+		if($order->findShippingCountry(true) && array_key_exists($order->findShippingCountry(true), self::$charges_by_country)) {
+			return self::$charges_by_country[$order->findShippingCountry(true)];
 		} else {
 			return self::$default_charge;
 		}
