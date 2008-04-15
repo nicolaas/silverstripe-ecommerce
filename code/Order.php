@@ -44,7 +44,8 @@
 	
 	static $has_many = array(
 		"Items" => "Order_Item",
-		"OrderStatusLogs" => "OrderStatusLog"
+		"OrderStatusLogs" => "OrderStatusLog",
+		'OrderModifier' => 'OrderModifier'
 	);
 	
 	static $casting = array(
@@ -110,6 +111,16 @@
 	static function site_currency() {
 		return self::$site_currency;
 	}
+
+	// Romain's Work
+	protected $modifiers;
+	
+	protected static $modifiersName = array();
+	
+	static function set_modifiers($modifiers) {
+		self::$modifiersName = $modifiers;
+	}
+	// End Romain's Work
 
 	/**
 	 * Returns the correct shipping address. If there is an alternate
@@ -433,7 +444,36 @@
 		}
 	}
 	
+	/**
+	 * Get the items for this order from the database, and returns them
+	 */
+	function modifiersFromDatabase(){
+		return DataObject::get('OrderModifier',"OrderID = $this->ID");
+	}
 	
+	/**
+	 * Returns the items of the order, if it hasn't been saved yet
+	 * it returns the items from session, if it has, it returns them 
+	 * from the DB entry.
+	 */ 
+ 	function Modifiers(){
+ 		// If we have an ID, assume that this is a database order
+ 		if($this->ID) return $this->modifiersFromDatabase();
+ 		else if($this->modifiers) return $this->modifiers;
+ 		else return $this->createOrderModifiers();
+	}
+		
+	function createOrderModifiers() {
+		$this->modifiers = new DataObjectSet();
+		if(self::$modifiersName && is_array(self::$modifiersName) && count(self::$modifiersName) > 0) {
+			foreach(self::$modifiersName as $className) {
+				if(class_exists($className)) $this->modifiers->push(new $className($this));
+			}
+			return $this->modifiers;
+		}
+		return null;
+	}
+		
 	/**
 	 * Attempts to process this orders payment.
 	 * Assummes the correct payment data, for each payement type is 
@@ -516,6 +556,13 @@
 		}
 		return $goodsCost;
 	}
+	
+	function ModifiersSubTotal() {
+		$total = 0;
+		foreach($this->modifiers as $modifier)
+			$total += $modifier->getValue();
+		return $total;
+	}
   
 	/**
 	* Returns the shipping cost for this order.
@@ -577,6 +624,7 @@
   	 */
 	function _Total(){
 		return $this->_Subtotal() + $this->Shipping() + $this->calcAddedTax();
+		//return $this->_Subtotal() + $this->ModifiersSubTotal();
 	}
 		
 	/**
