@@ -38,13 +38,13 @@
 			<td class="right" id="Subtotal">$Subtotal.Nice</td>
 		</tr>
 
-		<% if Shipping %>
-			<tr class="summary">
-				<td colspan="2" scope="row"><% _t("SHIPPING","Shipping") %><% if findShippingCountry %> <% _t("SHIPPINGTO","to") %> $findShippingCountry<% end_if %></td>
+		<% control Modifiers %>
+			<tr id="$ClassNameForTable" class="modifier">
+				<td colspan="2" scope="row">$TitleForTable</td>
 				<td>&nbsp;</td>
-				<td class="right" id="ShippingCost">$Shipping.Nice</td>
+				<td class="right" id="$ValueIdForTable">$ValueForTable</td>
 			</tr>
-		<% end_if %>
+		<% end_control %>
 
 		<% if TaxInfo.LineItemTitle %>
 		<tr id="GST" class="summary">
