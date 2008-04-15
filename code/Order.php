@@ -112,7 +112,9 @@
 		return self::$site_currency;
 	}
 
-	// Romain's Work
+	/*
+	 * The modifiers represent the additional charges or deductions associated to an order like shipping, tax but also vounchers, etc...
+	 */
 	protected $modifiers;
 	
 	protected static $modifiersName = array();
@@ -120,7 +122,6 @@
 	static function set_modifiers($modifiers) {
 		self::$modifiersName = $modifiers;
 	}
-	// End Romain's Work
 
 	/**
 	 * Returns the correct shipping address. If there is an alternate
@@ -445,15 +446,15 @@
 	}
 	
 	/**
-	 * Get the items for this order from the database, and returns them
+	 * Get the modifiers for this order from the database, and returns them
 	 */
 	function modifiersFromDatabase(){
 		return DataObject::get('OrderModifier',"OrderID = $this->ID");
 	}
 	
 	/**
-	 * Returns the items of the order, if it hasn't been saved yet
-	 * it returns the items from session, if it has, it returns them 
+	 * Returns the modifiers of the order, if it hasn't been saved yet
+	 * it returns the modifiers from session, if it has, it returns them 
 	 * from the DB entry.
 	 */ 
  	function Modifiers(){
@@ -557,13 +558,17 @@
 		return $goodsCost;
 	}
 	
-	function ModifiersSubTotal() {
+	/**
+	* Returns the modifiers subtotal without those in the optional array parameter (usefull for the tax calculation).
+	*/
+	function ModifiersSubTotal($modifiersNameExcluded = null) {
 		$total = 0;
-		foreach($this->Modifiers() as $modifier)
-			$total += $modifier->getValue();
+		foreach($this->Modifiers() as $modifier) {
+			if(! $modifiersNameExcluded || ! is_array($modifiersNameExcluded) || ! in_array(self::$modifiersName, get_class($modifier))) $total += $modifier->getValue();
+		}
 		return $total;
 	}
-  
+	  
 	/**
 	* Returns the shipping cost for this order.
 	* Shipping functions must extend the "ShippingCalculator"
@@ -620,10 +625,9 @@
 	}
   	
   	/**
-  	 * Returns the total cost of an order including any other costs associated with it.
+  	 * Returns the total cost of an order including the additional charges or deductions of its modifiers.
   	 */
 	function _Total(){
-		//return $this->_Subtotal() + $this->Shipping() + $this->calcAddedTax();
 		return $this->_Subtotal() + $this->ModifiersSubTotal();
 	}
 		
