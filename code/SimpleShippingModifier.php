@@ -10,6 +10,7 @@
  * If you require more advanced shipping control, we suggest that you create your own subclass of {@link OrderModifier}
  */
 class SimpleShippingModifier extends OrderModifier {
+	
 	static $default_charge = 0;
 	static $charges_by_country = array();
 
@@ -19,7 +20,7 @@ class SimpleShippingModifier extends OrderModifier {
 	
 	/**
 	 * Set shipping charges on a country by country basis. 
-	 * For example, SimpleShippingCalculator::set_charges_for_countries(array(
+	 * For example, SimpleShippingModifier::set_charges_for_countries(array(
 	 *   'US' => 10,
 	 *   'NZ' => 5,
 	 * ));
