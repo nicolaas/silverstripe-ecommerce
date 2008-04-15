@@ -1,9 +1,11 @@
 <?php
-/*
- * Created on Apr 11, 2008
- *
- * To change the template for this generated file go to
- * Window - Preferences - PHPeclipse - PHP - Code Templates
+
+/**
+ * @package ecommerce
+ */
+ 
+/** 
+ * The OrderModifier class is a databound object for handling the additionale charges or deductions of an order.
  */
  
 class OrderModifier extends DataObject {
@@ -25,26 +27,33 @@ class OrderModifier extends DataObject {
 		parent::__construct();
 		$this->order = $order;
 	}
+	
+	/*
+	 * This function must be called all the time we want to access the order because it checks if the order already exists in the DB or not
+	 */
+	function getOrder() {
+		if($this->ID) return DataObject::get_by_id('Order', $this->OrderID);
+		else return $this->order;
+	}
 		
 	function updateOrderInformationEditableFields(FieldSet &$fields) {
 	}
 	
+	function ShowInOrderTable() {return true;}
 	function ClassNameForTable() {
 		if($this->ID) return $this->ClassName;
 		else return get_class($this);
 	}
-	function TitleForTable() { return 'Modifier'; }
-	function ValueIdForTable() { return 'Cost'; }
-	function ValueForTable() { return $this->getValue(); }
+	function TitleForTable() {return 'Modifier';}
+	function ValueIdForTable() {return 'Cost';}
+	function ValueForTable() {return $this->getValue();}
 	
-	function getAmount(Order $order) {
+	function getAmount() {
 		return 0;
 	}
 	
 	final function getValue() {
-		if($this->ID) $order = DataObject::get_by_id('Order', $this->OrderID);
-		else $order = $this->order;
-		$amount = $this->getAmount($order);
+		$amount = $this->getAmount();
 		return (self::$isChargable ? 1 : -1) * $amount;
 	}
 }
