@@ -21,19 +21,15 @@
 			<td class="right">$Subtotal.Nice</td>
 		</tr>
 
-		<% if Shipping %>
-			<tr class="summary">
-				<td colspan="3" scope="row"><% _t("SHIPPING","Shipping") %><% if findShippingCountry %> <% _t("SHIPPINGTO","to") %> $findShippingCountry<% end_if %></td>
-				<td class="right">$Shipping.Nice</td>
-			</tr>
-		<% end_if %>
-
-		<% if TaxInfo.LineItemTitle %>
-		<tr id="GST" class="summary">
-			<td colspan="3" scope="row">$TaxInfo.LineItemTitle</td>
-			<td class="right">$TaxInfo.Charge.Nice</td>
-		</tr>
-		<% end_if %>
+		<% control Modifiers %>
+			<% if ShowInOrderTable %>
+				<tr id="$ClassNameForTable" class="modifier">
+					<td colspan="2" scope="row">$TitleForTable</td>
+					<td>&nbsp;</td>
+					<td class="right" id="$ValueIdForTable">$ValueForTable</td>
+				</tr>
+			<% end_if %>
+		<% end_control %>
 
 		<tr class="gap Total">
 			<td colspan="3" scope="row"><% _t("TOTALl","Total") %></td>

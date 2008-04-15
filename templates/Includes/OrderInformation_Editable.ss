@@ -39,20 +39,15 @@
 		</tr>
 
 		<% control Modifiers %>
-			<tr id="$ClassNameForTable" class="modifier">
-				<td colspan="2" scope="row">$TitleForTable</td>
-				<td>&nbsp;</td>
-				<td class="right" id="$ValueIdForTable">$ValueForTable</td>
-			</tr>
+			<% if ShowInOrderTable %>
+				<tr id="$ClassNameForTable" class="modifier">
+					<td colspan="2" scope="row">$TitleForTable</td>
+					<td>&nbsp;</td>
+					<td class="right" id="$ValueIdForTable">$ValueForTable</td>
+				</tr>
+			<% end_if %>
 		<% end_control %>
-
-		<% if TaxInfo.LineItemTitle %>
-		<tr id="GST" class="summary">
-			<td colspan="3" scope="row">$TaxInfo.LineItemTitle</td>
-			<td class="right" id="TaxCost">$TaxInfo.Charge.Nice</td>
-		</tr>
-		<% end_if %>
-		
+				
 		<tr class="gap Total">
 			<td colspan="2" scope="row"><% _t("TOTAL","Total") %></td>
 			<td>&nbsp;</td>
