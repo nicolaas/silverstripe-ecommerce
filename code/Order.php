@@ -559,7 +559,7 @@
 	
 	function ModifiersSubTotal() {
 		$total = 0;
-		foreach($this->modifiers as $modifier)
+		foreach($this->Modifiers() as $modifier)
 			$total += $modifier->getValue();
 		return $total;
 	}
@@ -623,8 +623,8 @@
   	 * Returns the total cost of an order including any other costs associated with it.
   	 */
 	function _Total(){
-		return $this->_Subtotal() + $this->Shipping() + $this->calcAddedTax();
-		//return $this->_Subtotal() + $this->ModifiersSubTotal();
+		//return $this->_Subtotal() + $this->Shipping() + $this->calcAddedTax();
+		return $this->_Subtotal() + $this->ModifiersSubTotal();
 	}
 		
 	/**
