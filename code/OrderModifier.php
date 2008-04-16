@@ -49,7 +49,7 @@ class OrderModifier extends DataObject {
 	
 	// Functions called from the Cart
 	function ShowInCart() {return true;}
-	function TitleForCart() {return 'Modifier';}
+	function TitleForCart() {return $this->TitleForTable();}
 	function ValueIdForCart() {return 'Cart_' . $this->ValueIdForTable();}
 	function ValueForCart() {return $this->ValueForTable();}
 	
