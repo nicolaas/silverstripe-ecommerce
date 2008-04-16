@@ -7,10 +7,10 @@
 // Extend the Member with e-commerce related fields.
 DataObject::add_extension('Member', 'EcommerceRole');
 
-// This is the default shipping method class - SimpleShippingCalculator.
+// This is the default shipping method class - SimpleShippingModifier.
 // To use your own one, copy this line, with the second argument as your
 // custom shipping class into mysite/_config.php - this will override
-// SimpleShippingCalculator
+// SimpleShippingModifier
 Order::set_modifiers(array('SimpleShippingModifier'));
 
 // Add additional fields to the MemberTableField in the CMS for e-commerce.
