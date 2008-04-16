@@ -182,7 +182,8 @@ class Product extends Page {
 	 * Return the gloal tax information of the site.
 	 */
 	function TaxInfo() {
-		return singleton('Order')->TaxInfo();
+		$order = Order::ShoppingCart();
+		return $order->TaxInfo();
 	}
 	
 }
