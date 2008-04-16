@@ -97,6 +97,11 @@ class TaxModifier extends OrderModifier {
 		return $this->Rate() ? number_format($this->Rate() * 100, 1) . '%' : null;
 	}
 	
+	// Functions called from the Cart
+	function ShowInCart() {return $this->ShowInOrderTable();}
+	function TitleForCart() {return $this->TitleForTable();}
+	
+	// Functions called from the Order table
 	function ShowInOrderTable() {return $this->LineItemTitle();}
 	function ClassNameForTable() {return 'GST';}
 	function TitleForTable() {return $this->LineItemTitle();}

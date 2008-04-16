@@ -31,6 +31,7 @@ class SimpleShippingModifier extends OrderModifier {
 	}
 	
 	// Functions called from the Cart
+	function ShowInCart() {return $this->getValue() > 0;}
 	function TitleForCart() {return 'Shipping';}
 	
 	// Functions called from the Order table
