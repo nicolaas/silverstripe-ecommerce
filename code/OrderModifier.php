@@ -21,7 +21,7 @@ class OrderModifier extends DataObject {
 	
 	protected $order;
 	
-	private static $isChargable = true;
+	protected static $is_chargable = true;
 	
 	public function __construct(Order $order = null) {
 		parent::__construct();
@@ -43,7 +43,9 @@ class OrderModifier extends DataObject {
 		if($this->ID) return DataObject::get_by_id('Order', $this->OrderID);
 		else return $this->order;
 	}
-		
+	
+	function isChargable() {return $this->ID ? $this->Type == 'Chargable' : $this->stat('is_chargable');}
+	
 	function updateOrderInformationEditableFields(FieldSet &$fields) {
 	}
 	
@@ -55,10 +57,7 @@ class OrderModifier extends DataObject {
 	
 	// Functions called from the Order table
 	function ShowInOrderTable() {return true;}
-	function ClassNameForTable() {
-		if($this->ID) return $this->ClassName;
-		else return get_class($this);
-	}
+	function ClassNameForTable() {return $this->ID ? $this->ClassName : get_class($this);}
 	function TitleForTable() {return 'Modifier';}
 	function ValueIdForTable() {return 'Cost';}
 	function ValueForTable() {return $this->getValue();}
@@ -69,7 +68,14 @@ class OrderModifier extends DataObject {
 	
 	final function getValue() {
 		$amount = $this->getAmount();
-		return (self::$isChargable ? 1 : -1) * $amount;
+		return ($this->isChargable() ? 1 : -1) * $amount;
+	}
+	
+	public function write() {
+		$this->Amount = $this->getAmount();
+		$this->Type = $this->isChargable() ? 'Chargable' : 'Deductable';
+		$this->OrderID = $this->getOrder()->ID;
+		parent::write();
 	}
 }
 
