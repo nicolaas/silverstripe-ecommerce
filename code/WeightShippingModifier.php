@@ -16,7 +16,7 @@ class WeightShippingModifier extends OrderModifier {
 	 * Calculates the extra charges from the order based on the weight attribute of a product
  	 * ASSUMPTION -> weight in grams
 	 */
-	function getAmount() {
+	function getLiveAmount() {
 		$order = $this->getOrder();
 			
 		$orderItems = $order->Items();
