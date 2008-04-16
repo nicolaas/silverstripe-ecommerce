@@ -10,12 +10,13 @@
 						</li>
 					<% end_control %>
 					<li class="subtotal"><% _t("SUBTOTAL","Subtotal") %>: <strong id="Cart_Subtotal">$Subtotal.Nice</strong></li>
-					<% if Shipping %>
-						<li><% _t("SHIPPING","Shipping") %>: <strong id="Cart_ShippingCost">$Shipping.Nice</strong></li>
-					<% end_if %>
-					<% if TaxInfo.LineItemTitle %>
-						<li>$TaxInfo.LineItemTitle: <strong id="Cart_TaxCost">$TaxInfo.Charge.Nice</strong></li>
-					<% end_if %>
+					
+					<% control Modifiers %>
+						<% if ShowInCart %>
+							<li>$TitleForCart: <strong id="$ValueIdForCart">$ValueForCart</strong></li>
+						<% end_if %>
+					<% end_control %>
+					
 					<li class="total"><% _t("TOTAL","Total") %>: <strong id="Cart_GrandTotal">$Total.Nice $Currency</strong></li>
 					<li class="buyProducts"><p><a class="checkoutButton" href="checkout" title="<% _t("CheckoutClick","Click here to go to the checkout") %>"><% _t("CheckoutGoTo","Go to checkout") %> &gt;&gt;</a></p></li>
 				</ul>
