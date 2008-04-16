@@ -50,7 +50,7 @@ class SimpleShippingModifier extends OrderModifier {
 	/**
 	 * Find the amount for the shipping on the shipping country for the order.
 	 */
-	function getAmount() {
+	function getLiveAmount() {
 		$order = $this->getOrder();
 		if($order->findShippingCountry(true) && array_key_exists($order->findShippingCountry(true), self::$charges_by_country)) return self::$charges_by_country[$order->findShippingCountry(true)];
 		else return self::$default_charge;
