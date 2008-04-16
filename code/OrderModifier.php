@@ -62,9 +62,16 @@ class OrderModifier extends DataObject {
 	function ValueIdForTable() {return 'Cost';}
 	function ValueForTable() {return $this->getValue();}
 	
-	function getAmount() {
-		return 0;
-	}
+	/*
+	 * This function must be called all the time we want the amount value because it checks if the order modifier already exists in the DB. In That case, it returns the Amount value.
+	 * Otherwise, it returns the calculation based on the live order and its items.
+	 */
+	function getAmount() {return $this->ID ? $this->Amount : $this->getLiveAmount();}
+	
+	/*
+	 * This function returns the amount of the modifier based on the live order and its items.
+	 */
+	function getLiveAmount() {return 0;}
 	
 	final function getValue() {
 		$amount = $this->getAmount();
@@ -75,6 +82,10 @@ class OrderModifier extends DataObject {
 		$this->Amount = $this->getAmount();
 		$this->Type = $this->isChargable() ? 'Chargable' : 'Deductable';
 		$this->OrderID = $this->getOrder()->ID;
+		parent::write();
+	}
+	
+	public function writeForStructureChanges() {
 		parent::write();
 	}
 }
