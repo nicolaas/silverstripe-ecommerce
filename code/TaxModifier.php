@@ -5,7 +5,9 @@
  */
 
 /**
- * Handles calculation of sales tax on Orders
+ * Handles calculation of sales tax on Orders.
+ * If you would like to make your own tax calculator, create a subclass of
+ * this and link it in using Order::set_modifiers()
  * 
  * Configuration:
  * TaxModifier::set_for_country("NZ", 0.125, "GST", "inclusive")
