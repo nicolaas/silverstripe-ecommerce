@@ -215,7 +215,7 @@
 		$this->MemberID = $member->ID;
 		$this->TotalOrderValue = $this->Total();
 		
-		// items can't be added to the order or saved till the 
+		// items and modifiers can't be added to the order or saved till the 
 		// order has an id
 		$items = $this->Items();
 		$this->write();
@@ -227,6 +227,12 @@
 				$item->OrderID = $this->ID;
 				$item->write();
 			}
+		}
+		
+		$modifiers = $this->Modifiers();
+		// if there are any items, iterate through them
+		if($modifiers) {
+			foreach($modifiers as $modifier) $modifier->write();
 		}
 		
 		return $this;
@@ -300,7 +306,6 @@
 		} elseif($this->ID) {
 			$this->addToDatabase($product);
 		}
-		//$this->calcShipping();
   	}
   	
   	function removeByQuantity($product, $quantity = 1) {
@@ -310,7 +315,6 @@
   		} else if($this->ID) {
   			$this->addToDatabase($product);
   		}
-  		//$this->calcShipping();
   	}
   
 	/**
@@ -329,7 +333,7 @@
 	*/
 	function remove($product){
 		$id = $product->ID;
-   	$this->items[$id]--;
+   		$this->items[$id]--;
    	
 		if($this->dataHandler){
 			$this->dataHandler->setQuantity($this, $product, $this->items[$product->ID]);	
@@ -338,10 +342,8 @@
 		}
 		
 		if($this->items[$id] <= 0) {
-   		unset($this->items[$id]);
-   	}
-		
-		//$this->calcShipping();
+   			unset($this->items[$id]);
+   		}
 	}
 	
 	/**
@@ -463,7 +465,7 @@
  		else if($this->modifiers) return $this->modifiers;
  		else return $this->createOrderModifiers();
 	}
-		
+			
 	function createOrderModifiers() {
 		$this->modifiers = new DataObjectSet();
 		if(self::$modifiersName && is_array(self::$modifiersName) && count(self::$modifiersName) > 0) {
@@ -576,61 +578,15 @@
 		}
 		return $total;
 	}
-	  
-	/**
-	* Returns the shipping cost for this order.
-	* Shipping functions must extend the "ShippingCalculator"
-	* class, and configured in "_order"
-	*/
-	/*function Shipping(){
-		return $this->calcShipping();
-	}
-
-	function calcShipping() {
-		$shipping = 0;
-
-		if($this->hasShippingCost) {
-			$sc = Object::create('ShippingCalculator');
-	 		$shipping = $sc->getCharge($this);
-	 		$this->Shipping = $shipping;
-	 		if($this->ID && is_numeric($this->ID)) {
-	 		    $SQL_shipping = Convert::raw2sql($shipping);
-	 		    DB::query("UPDATE `Order` SET Shipping = '$SQL_shipping' WHERE ID = $this->ID");
-	 		}
-		}
-		return $shipping;
-	}*/
-
 	
-	/**
-	 * Calculate the amount of tax that should be added to the order total.
-	 * For tax-inclusive prices, this will be zero.
-	 * For tax-exlcusive, this will be the tax amount
-	 * Updates $this->AddedTax
+	/*
+	 * Returns a TaxModifier object that provides information about tax on this order.
 	 */
-	/*function calcAddedTax() {
-		$addedTax = $this->TaxInfo()->AddedCharge();
-		
-		// Save to the data object
-		$this->AddedTax = $addedTax;
-		if($this->ID && is_numeric($this->ID)) {
- 		    $SQL_addedTax = Convert::raw2sql($addedTax);
- 		    DB::query("UPDATE `Order` SET AddedTax = '$SQL_addedTax' WHERE ID = $this->ID");
+	function TaxInfo() {
+		foreach($this->Modifiers() as $modifier) {
+			if($modifier instanceof TaxModifier) return $modifier;
 		}
-			
-		return $addedTax;
-	}*/
-
-	/**
-	 * Return a TaxCalculator object that provides information about tax on this order.
-	 */
-	/*function TaxInfo() {
-		// Find the country from the member - falls back to GeoIP if it can't find anything
-		$country = EcommerceRole::findCountry();
-
-		// return the tax calculator based on country
- 		return Object::create('TaxCalculator', $this->_Subtotal() + $this->Shipping(), $country);
-	}*/
+	}
   	
   	/**
   	 * Returns the total cost of an order including the additional charges or deductions of its modifiers.
@@ -788,8 +744,8 @@
 			// TODO Use glyphs instead of hard-coding to be the '$' glyph
 			$item_subtotal = '$' . number_format($item_subtotal, 2);
 			$subtotal = '$' . number_format($sc->_Subtotal(), 2);
-			$shipping = '$' . number_format($sc->Shipping(), 2);
-			$tax = '$' . number_format($sc->calcAddedTax(), 2);		
+			//$shipping = '$' . number_format($sc->Shipping(), 2);
+			//$tax = '$' . number_format($sc->calcAddedTax(), 2);		
 			$grand_total = '$' . number_format($sc->_Total(), 2) . " " . $sc->Currency();
 			
 			$js = array();
@@ -797,15 +753,15 @@
 			if($_REQUEST['isCheckout']) {
 				$js[] = '$(\'Item' . $prod->ID . '_Subtotal\').innerHTML = "' . $item_subtotal . '"; ';
 				$js[] = '$(\'Subtotal\').innerHTML = "' . $subtotal . '"; ';
-				$js[] = 'if($(\'ShippingCost\')) $(\'ShippingCost\').innerHTML = "' . $shipping . '"; ';
-				$js[] = 'if($(\'TaxCost\')) $(\'TaxCost\').innerHTML = "' . $tax . '"; ';	
+				//$js[] = 'if($(\'ShippingCost\')) $(\'ShippingCost\').innerHTML = "' . $shipping . '"; ';
+				//$js[] = 'if($(\'TaxCost\')) $(\'TaxCost\').innerHTML = "' . $tax . '"; ';	
 				$js[] = '$(\'GrandTotal\').innerHTML = "' . $grand_total . '"; ';
 				$js[] = '$(\'OrderForm_OrderForm_Amount\').innerHTML = "' . $grand_total . '"; ';
 			} elseif($_REQUEST['isProduct'] || $_REQUEST['isProductGroup']) {
 				$js[] = '$(\'Cart_Item' . $prod->ID . '_Quantity\').innerHTML = "' . $item_quantity . '"; ';
 				$js[] = '$(\'Cart_Subtotal\').innerHTML = "' . $subtotal . '"; ';
-				$js[] = 'if($(\'Cart_ShippingCost\')) $(\'Cart_ShippingCost\').innerHTML = "' . $shipping . '"; ';
-				$js[] = 'if($(\'Cart_TaxCost\')) $(\'Cart_TaxCost\').innerHTML = "' . $tax . '"; ';
+				//$js[] = 'if($(\'Cart_ShippingCost\')) $(\'Cart_ShippingCost\').innerHTML = "' . $shipping . '"; ';
+				//$js[] = 'if($(\'Cart_TaxCost\')) $(\'Cart_TaxCost\').innerHTML = "' . $tax . '"; ';
 				$js[] = '$(\'Cart_GrandTotal\').innerHTML = "' . $grand_total . '"; ';
 			}
 			return implode("\n", $js);
@@ -995,6 +951,14 @@
 			$termsPage->publish('Stage', 'Live');
 			Database::alteration_message("Terms and conditions page created.","created");
 		}
+		
+		// If some orders with the old structure exist (hasShippingCost, Shipping and AddedTax columns presents in Order table), create the Order Modifiers SimpleShippingModifier and TaxModifier and associate them to the order
+		$columnsEndFilter = "column_name LIKE 'hasShippingCost' OR column_name LIKE 'Shipping' OR column_name LIKE 'AddedTax'";
+		$exist = DB::query( "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name = 'Order' AND ($columnsEndFilter)" )->numRecords();
+ 		echo( "<div style=\"padding:5px; color:white; background-color:blue;\">$exist</div>" );
+ 		if( $exist == 3 ) {
+ 			echo( "<div style=\"padding:5px; color:white; background-color:blue;\">The 'Order' table has been changed successfully.</div>" );
+  		}
 	}
 
 	/**
