@@ -300,7 +300,7 @@
 		} elseif($this->ID) {
 			$this->addToDatabase($product);
 		}
-		$this->calcShipping();
+		//$this->calcShipping();
   	}
   	
   	function removeByQuantity($product, $quantity = 1) {
@@ -310,7 +310,7 @@
   		} else if($this->ID) {
   			$this->addToDatabase($product);
   		}
-  		$this->calcShipping();
+  		//$this->calcShipping();
   	}
   
 	/**
@@ -341,7 +341,7 @@
    		unset($this->items[$id]);
    	}
 		
-		$this->calcShipping();
+		//$this->calcShipping();
 	}
 	
 	/**
@@ -468,11 +468,19 @@
 		$this->modifiers = new DataObjectSet();
 		if(self::$modifiersName && is_array(self::$modifiersName) && count(self::$modifiersName) > 0) {
 			foreach(self::$modifiersName as $className) {
-				if(class_exists($className)) $this->modifiers->push(new $className($this));
+				if(class_exists($className)) {
+					//$this->modifiers->push(new $className($this));
+					eval("$className::init_for_order(\$className, \$this);");
+				}
 			}
 			return $this->modifiers;
 		}
 		return null;
+	}
+	
+	function addModifier(OrderModifier $modifier) {
+		if(! $this->modifiers) $this->modifiers = new DataObjectSet();
+		$this->modifiers->push($modifier);
 	}
 		
 	/**
@@ -574,7 +582,7 @@
 	* Shipping functions must extend the "ShippingCalculator"
 	* class, and configured in "_order"
 	*/
-	function Shipping(){
+	/*function Shipping(){
 		return $this->calcShipping();
 	}
 
@@ -591,7 +599,7 @@
 	 		}
 		}
 		return $shipping;
-	}
+	}*/
 
 	
 	/**
@@ -600,7 +608,7 @@
 	 * For tax-exlcusive, this will be the tax amount
 	 * Updates $this->AddedTax
 	 */
-	function calcAddedTax() {
+	/*function calcAddedTax() {
 		$addedTax = $this->TaxInfo()->AddedCharge();
 		
 		// Save to the data object
@@ -611,18 +619,18 @@
 		}
 			
 		return $addedTax;
-	}
+	}*/
 
 	/**
 	 * Return a TaxCalculator object that provides information about tax on this order.
 	 */
-	function TaxInfo() {
+	/*function TaxInfo() {
 		// Find the country from the member - falls back to GeoIP if it can't find anything
 		$country = EcommerceRole::findCountry();
 
 		// return the tax calculator based on country
  		return Object::create('TaxCalculator', $this->_Subtotal() + $this->Shipping(), $country);
-	}
+	}*/
   	
   	/**
   	 * Returns the total cost of an order including the additional charges or deductions of its modifiers.
