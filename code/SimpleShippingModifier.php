@@ -30,6 +30,10 @@ class SimpleShippingModifier extends OrderModifier {
 		self::$charges_by_country = array_merge(self::$charges_by_country, $countryMap);
 	}
 	
+	// Functions called from the Cart
+	function TitleForCart() {return 'Shipping';}
+	
+	// Functions called from the Order table
 	function TitleForTable() {
 		$order = $this->getOrder();
 		if($shippingCountry = $order->findShippingCountry()) return "Shipping to $shippingCountry";
