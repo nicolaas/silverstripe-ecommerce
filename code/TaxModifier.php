@@ -99,7 +99,6 @@ class TaxModifier extends OrderModifier {
 	
 	// Functions called from the Cart
 	function ShowInCart() {return $this->ShowInOrderTable();}
-	function TitleForCart() {return $this->TitleForTable();}
 	
 	// Functions called from the Order table
 	function ShowInOrderTable() {return $this->LineItemTitle();}
