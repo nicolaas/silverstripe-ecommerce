@@ -953,11 +953,35 @@
 		}
 		
 		// If some orders with the old structure exist (hasShippingCost, Shipping and AddedTax columns presents in Order table), create the Order Modifiers SimpleShippingModifier and TaxModifier and associate them to the order
-		$columnsEndFilter = "column_name LIKE 'hasShippingCost' OR column_name LIKE 'Shipping' OR column_name LIKE 'AddedTax'";
-		$exist = DB::query( "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name = 'Order' AND ($columnsEndFilter)" )->numRecords();
- 		echo( "<div style=\"padding:5px; color:white; background-color:blue;\">$exist</div>" );
- 		if( $exist == 3 ) {
- 			echo( "<div style=\"padding:5px; color:white; background-color:blue;\">The 'Order' table has been changed successfully.</div>" );
+		$exist = DB::query("SHOW COLUMNS FROM `Order` LIKE 'Shipping'")->numRecords();
+ 		if($exist > 0) {
+ 			if($orders = DataObject::get('Order')) {
+ 				foreach($orders as $order) {
+ 					$id = $order->ID;
+ 					$hasShippingCost = DB::query("SELECT `hasShippingCost` FROM `Order` WHERE `ID` = '$id'")->value();
+ 					$shipping = DB::query("SELECT `Shipping` FROM `Order` WHERE `ID` = '$id'")->value();
+ 					$addedTax = DB::query("SELECT `AddedTax` FROM `Order` WHERE `ID` = '$id'")->value();
+ 					if($hasShippingCost == '1' && $shipping != null) {
+ 						$simpleShippingModifier = new SimpleShippingModifier();
+ 						$simpleShippingModifier->Amount = abs($shipping);
+ 						$simpleShippingModifier->Type = 'Chargable';
+ 						$simpleShippingModifier->OrderID = $id;
+ 						$simpleShippingModifier->writeForStructureChanges();
+ 					}
+ 					if($addedTax != null) {
+ 						$taxModifier = new TaxModifier();
+ 						$taxModifier->Amount = abs($addedTax);
+ 						$taxModifier->Type = 'Chargable';
+ 						$taxModifier->OrderID = $id;
+ 						$taxModifier->writeForStructureChanges();
+ 					}
+ 				}
+ 				echo( "<div style=\"padding:5px; color:white; background-color:blue;\">The 'SimpleShippingModifier' and 'TaxModifier' objects have been successfully created and linked to the appropriate orders present in the 'Order' table.</div>" );	
+ 			}
+ 			DB::query("ALTER TABLE `Order` CHANGE COLUMN `hasShippingCost` `_obsolete_hasShippingCost`");
+ 			DB::query("ALTER TABLE `Order` CHANGE COLUMN `Shipping` `_obsolete_Shipping`");
+ 			DB::query("ALTER TABLE `Order` CHANGE COLUMN `AddedTax` `_obsolete_AddedTax`");
+ 			echo( "<div style=\"padding:5px; color:white; background-color:blue;\">The columns 'hasShippingCost', 'Shipping' and 'AddedTax' of the table 'Order' have been renamed successfully. Also, the columns have been renamed respectly to '_obsolete_hasShippingCost', '_obsolete_Shipping' and '_obsolete_AddedTax'.</div>" );
   		}
 	}
 
