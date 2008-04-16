@@ -325,11 +325,6 @@ class CheckoutPage_Controller extends Page_Controller{
 		
 		$form->saveInto($sc);
 		
-		// if Order exists, recalculate shipping because country changed
-		if($sc) {
-			$sc->calcShipping();
-		}
-
 		if($member) {
 			$form->saveInto($member);
 			$member->write();
