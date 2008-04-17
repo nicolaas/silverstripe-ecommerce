@@ -221,9 +221,8 @@
 			}
 		}
 		
-		$modifiers = $this->Modifiers();
 		// if there are any items, iterate through them
-		if($modifiers) {
+		if($modifiers = $this->Modifiers()) {
 			foreach($modifiers as $modifier) $modifier->write();
 		}
 		
