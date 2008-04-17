@@ -19,9 +19,6 @@
  class Order extends DataObject {
  	
 	static $db = array(
-		"hasShippingCost" => "Boolean",
-		"Shipping" => "Currency",
-		"AddedTax" => "Currency",
 		"Status" => "Enum('Unpaid,Paid,Query,Processing,Sent,Complete,Cancelled','Unpaid')",
 		"Country" => "Text",
 		"UseShippingAddress" => "Boolean",
@@ -31,11 +28,6 @@
 		"ShippingCity" => "Text",
 		"ShippingCountry" => "Text",
 		"Printed" => "Boolean"
-	);
-	
-	static $defaults = array(
-		"hasShippingCost" => "1",
-		"Type" => "",
 	);
 	
 	static $has_one = array (
@@ -53,8 +45,6 @@
 		"Total" => "Currency",
 		"Shipping" => "Currency",
 		"TotalOutstanding" => "Currency",
-		"Tax" => "Currency",
-		"AddedTax" => "Currency",
 	);
 
 	/**
@@ -966,6 +956,9 @@
  						$simpleShippingModifier->Amount = abs($shipping);
  						$simpleShippingModifier->Type = 'Chargable';
  						$simpleShippingModifier->OrderID = $id;
+ 						$simpleShippingModifier->Country = Geoip::countryCode2name($order->Country);
+ 						$simpleShippingModifier->CountryCode = $order->Country;
+ 						$simpleShippingModifier->ShippingChargeType = 'Default';
  						$simpleShippingModifier->writeForStructureChanges();
  					}
  					if($addedTax != null) {
@@ -973,6 +966,9 @@
  						$taxModifier->Amount = abs($addedTax);
  						$taxModifier->Type = 'Chargable';
  						$taxModifier->OrderID = $id;
+ 						$taxModifier->Country = Geoip::countryCode2name($order->Country);
+ 						$taxModifier->Name = 'Undefined After Ecommerce Upgrade';
+ 						$taxModifier->TaxType = 'Exclusive';
  						$taxModifier->writeForStructureChanges();
  					}
  				}
