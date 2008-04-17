@@ -951,22 +951,24 @@
  					$hasShippingCost = DB::query("SELECT `hasShippingCost` FROM `Order` WHERE `ID` = '$id'")->value();
  					$shipping = DB::query("SELECT `Shipping` FROM `Order` WHERE `ID` = '$id'")->value();
  					$addedTax = DB::query("SELECT `AddedTax` FROM `Order` WHERE `ID` = '$id'")->value();
+					$countryCode = $order->findShippingCountry(true);
+					$country = Geoip::countryCode2name($countryCode);
  					if($hasShippingCost == '1' && $shipping != null) {
  						$simpleShippingModifier = new SimpleShippingModifier();
- 						$simpleShippingModifier->Amount = abs($shipping);
+ 						$simpleShippingModifier->Amount = $shipping < 0 ? abs($shipping) : $shipping;
  						$simpleShippingModifier->Type = 'Chargable';
  						$simpleShippingModifier->OrderID = $id;
- 						$simpleShippingModifier->Country = Geoip::countryCode2name($order->Country);
- 						$simpleShippingModifier->CountryCode = $order->Country;
+ 						$simpleShippingModifier->Country = $country;
+ 						$simpleShippingModifier->CountryCode = $countryCode;
  						$simpleShippingModifier->ShippingChargeType = 'Default';
  						$simpleShippingModifier->writeForStructureChanges();
  					}
  					if($addedTax != null) {
  						$taxModifier = new TaxModifier();
- 						$taxModifier->Amount = abs($addedTax);
+ 						$taxModifier->Amount = $addedTax < 0 ? abs($addedTax) : $addedTax;
  						$taxModifier->Type = 'Chargable';
  						$taxModifier->OrderID = $id;
- 						$taxModifier->Country = Geoip::countryCode2name($order->Country);
+ 						$taxModifier->Country = $country;
  						$taxModifier->Name = 'Undefined After Ecommerce Upgrade';
  						$taxModifier->TaxType = 'Exclusive';
  						$taxModifier->writeForStructureChanges();
@@ -974,9 +976,9 @@
  				}
  				echo( "<div style=\"padding:5px; color:white; background-color:blue;\">The 'SimpleShippingModifier' and 'TaxModifier' objects have been successfully created and linked to the appropriate orders present in the 'Order' table.</div>" );	
  			}
- 			DB::query("ALTER TABLE `Order` CHANGE COLUMN `hasShippingCost` `_obsolete_hasShippingCost`");
- 			DB::query("ALTER TABLE `Order` CHANGE COLUMN `Shipping` `_obsolete_Shipping`");
- 			DB::query("ALTER TABLE `Order` CHANGE COLUMN `AddedTax` `_obsolete_AddedTax`");
+ 			DB::query("ALTER TABLE `Order` CHANGE COLUMN `hasShippingCost` `_obsolete_hasShippingCost` tinyint(1)");
+ 			DB::query("ALTER TABLE `Order` CHANGE COLUMN `Shipping` `_obsolete_Shipping` decimal(9,2)");
+ 			DB::query("ALTER TABLE `Order` CHANGE COLUMN `AddedTax` `_obsolete_AddedTax` decimal(9,2)");
  			echo( "<div style=\"padding:5px; color:white; background-color:blue;\">The columns 'hasShippingCost', 'Shipping' and 'AddedTax' of the table 'Order' have been renamed successfully. Also, the columns have been renamed respectly to '_obsolete_hasShippingCost', '_obsolete_Shipping' and '_obsolete_AddedTax'.</div>" );
   		}
 	}
