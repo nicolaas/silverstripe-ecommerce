@@ -15,6 +15,13 @@
  */
 class TaxModifier extends OrderModifier {
 	
+	static $db = array(
+		'Country' => 'Text',
+		'Rate' => 'Currency',
+		'Name' => 'Text',
+		'TaxType' => "Enum(array('Exclusive','Inclusive'))"
+	);
+	
 	static $names_by_country;
 	static $rates_by_country;
 	static $excl_by_country;
@@ -35,26 +42,24 @@ class TaxModifier extends OrderModifier {
 			default: user_error("TaxModifier::set_for_country - bad argument '$inclexcl' for \$inclexl.  Must be 'inclusive' or 'exclusive'.", E_USER_ERROR);
 		} 
 	}
-		
+	
+	//1) Attributes Functions Access
+	
+	function Country() {return $this->ID ? $this->Country : $this->LiveCountry();}
+	function Rate() {return $this->ID ? $this->Rate : $this->LiveRate();}
+	function Name() {return $this->ID ? $this->Name : $this->LiveName();}
+	function IsExclusive() {return $this->ID ? $this->TaxType == 'Exclusive' : $this->LiveIsExclusive();}
+	
+	function LiveCountry() {return EcommerceRole::findCountry();}
+	function LiveRate() {return self::$rates_by_country[$this->LiveCountry()];}
+	function LiveName() {return self::$names_by_country[$this->LiveCountry()];}
+	function LiveIsExclusive() {return self::$excl_by_country[$this->LiveCountry()];}
+	
+	function LiveAmount() {return $this->AddedCharge();}
+	
 	function TaxableAmount() {
-		$order = $this->getOrder();
+		$order = $this->Order();
 		return $order->SubTotal() + $order->ModifiersSubTotal(array($this));
-	}
-	
-	function Country() {
-		return EcommerceRole::findCountry();
-	}
-	
-	function Name() {
-		return self::$names_by_country[$this->Country()];
-	}
-	
-	function Rate() {
-		return self::$rates_by_country[$this->Country()];
-	}
-	
-	function IsExclusive() {
-		return self::$excl_by_country[$this->Country()];
 	}
 	
 	/**
@@ -99,6 +104,8 @@ class TaxModifier extends OrderModifier {
 		return $this->Rate() ? number_format($this->Rate() * 100, 1) . '%' : null;
 	}
 	
+	//2) Display Functions
+	
 	// Functions called from the Cart
 	function ShowInCart() {return $this->ShowInOrderTable();}
 	
@@ -113,8 +120,14 @@ class TaxModifier extends OrderModifier {
 		return $val->Nice();
 	}
 	
-	function getAmount() {
-		return $this->AddedCharge();
+	//3) Database Writing Function
+	
+	public function write() {
+		$this->Country = $this->Country();
+		$this->Rate = $this->Rate();
+		$this->Name = $this->Name();
+		$this->TaxType = $this->IsExclusive() ? 'Exclusive' : 'Inclusive';
+		parent::write();
 	}
 }
 
