@@ -168,9 +168,9 @@
 		
 		// We load the order object's default 'DataObject stuff' with the cart contents.
 		// That way, if we ever need to save or access these values internally, the data is there.
-		$this->items = $this->dataHandler->items($this);		
+		$this->items = $this->dataHandler->items($this);
 		$this->record = $this->dataHandler->getRecord($this);
-	
+
 	}
 	
 	/**
@@ -220,6 +220,8 @@
 				$item->write();
 			}
 		}
+		
+		// Problem : There is no any modifiers here, so there are not saved
 		
 		// if there are any items, iterate through them
 		if($modifiers = $this->Modifiers()) {
