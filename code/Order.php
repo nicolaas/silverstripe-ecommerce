@@ -107,6 +107,8 @@
 	 */
 	protected $modifiers;
 	
+	protected $modifiersInitDone = false;
+	
 	protected static $modifiersName = array();
 	
 	static function set_modifiers($modifiers) {
@@ -453,11 +455,10 @@
  		// If we have an ID, assume that this is a database order
  		if($this->ID) return $this->modifiersFromDatabase();
  		else if($this->modifiers) return $this->modifiers;
- 		else return $this->createOrderModifiers();
+ 		else if(! $this->modifiersInitDone) return $this->createOrderModifiers();
 	}
 			
 	function createOrderModifiers() {
-		$this->modifiers = new DataObjectSet();
 		if(self::$modifiersName && is_array(self::$modifiersName) && count(self::$modifiersName) > 0) {
 			foreach(self::$modifiersName as $className) {
 				if(class_exists($className)) {
@@ -465,9 +466,9 @@
 					eval("$className::init_for_order(\$className, \$this);");
 				}
 			}
-			return $this->modifiers;
 		}
-		return null;
+		$this->modifiersInitDone = true;
+		return $this->modifiers;
 	}
 	
 	function addModifier(OrderModifier $modifier) {
@@ -563,8 +564,10 @@
 	*/
 	function ModifiersSubTotal($modifiersNameExcluded = null) {
 		$total = 0;
-		foreach($this->Modifiers() as $modifier) {
-			if(! $modifiersNameExcluded || ! is_array($modifiersNameExcluded) || ! in_array(self::$modifiersName, get_class($modifier))) $total += $modifier->getValue();
+		if($modifiers = $this->Modifiers()) {
+			foreach($modifiers as $modifier) {
+				if(! $modifiersNameExcluded || ! is_array($modifiersNameExcluded) || ! in_array(self::$modifiersName, get_class($modifier))) $total += $modifier->getValue();
+			}
 		}
 		return $total;
 	}
@@ -573,8 +576,10 @@
 	 * Returns a TaxModifier object that provides information about tax on this order.
 	 */
 	function TaxInfo() {
-		foreach($this->Modifiers() as $modifier) {
-			if($modifier instanceof TaxModifier) return $modifier;
+		if($modifiers = $this->Modifiers()) {
+			foreach($modifiers as $modifier) {
+				if($modifier instanceof TaxModifier) return $modifier;
+			}
 		}
 	}
   	
