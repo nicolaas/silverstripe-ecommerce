@@ -72,7 +72,7 @@ class SimpleShippingModifier extends OrderModifier {
 		return $val->Nice();
 	}
 	
-	//3) Database Writing Functions
+	//3) Database Writing Function
 	
 	public function write() {
 		$this->Country = $this->Country();
