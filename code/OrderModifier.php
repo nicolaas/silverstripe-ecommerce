@@ -36,19 +36,31 @@ class OrderModifier extends DataObject {
 		$order->addModifier(new $className($order));
 	}
 	
+	//1) Attributes Functions Access
+	
+	/*
+	 * This function must be called all the time we want the amount value because it checks if the order modifier already exists in the DB. In That case, it returns the Amount value.
+	 * Otherwise, it returns the calculation based on the live order and its items.
+	 */
+	function Amount() {return $this->ID ? $this->Amount : $this->LiveAmount();}
+	
+	/*
+	 * This function returns the amount of the modifier based on the live order and its items.
+	 */
+	function LiveAmount() {return 0;}
+	
+	function IsChargable() {return $this->ID ? $this->Type == 'Chargable' : $this->stat('is_chargable');}
+	
 	/*
 	 * This function must be called all the time we want to access the order because it checks if the order already exists in the DB or not
 	 */
-	function getOrder() {
+	function Order() {
 		if($this->ID) return DataObject::get_by_id('Order', $this->OrderID);
 		else return $this->order;
 	}
-	
-	function isChargable() {return $this->ID ? $this->Type == 'Chargable' : $this->stat('is_chargable');}
-	
-	function updateOrderInformationEditableFields(FieldSet &$fields) {
-	}
-	
+		
+	//2) Display Functions
+		
 	// Functions called from the Cart
 	function ShowInCart() {return true;}
 	function TitleForCart() {return $this->TitleForTable();}
@@ -62,26 +74,17 @@ class OrderModifier extends DataObject {
 	function ValueIdForTable() {return 'Cost';}
 	function ValueForTable() {return $this->getValue();}
 	
-	/*
-	 * This function must be called all the time we want the amount value because it checks if the order modifier already exists in the DB. In That case, it returns the Amount value.
-	 * Otherwise, it returns the calculation based on the live order and its items.
-	 */
-	function getAmount() {return $this->ID ? $this->Amount : $this->getLiveAmount();}
-	
-	/*
-	 * This function returns the amount of the modifier based on the live order and its items.
-	 */
-	function getLiveAmount() {return 0;}
-	
 	final function getValue() {
-		$amount = $this->getAmount();
-		return ($this->isChargable() ? 1 : -1) * $amount;
+		$amount = $this->Amount();
+		return ($this->IsChargable() ? 1 : -1) * $amount;
 	}
 	
+	//3) Database Writing Functions
+	
 	public function write() {
-		$this->Amount = $this->getAmount();
-		$this->Type = $this->isChargable() ? 'Chargable' : 'Deductable';
-		$this->OrderID = $this->getOrder()->ID;
+		$this->Amount = $this->Amount();
+		$this->Type = $this->IsChargable() ? 'Chargable' : 'Deductable';
+		$this->OrderID = $this->Order()->ID;
 		parent::write();
 	}
 	
