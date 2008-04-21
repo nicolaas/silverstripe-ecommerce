@@ -480,6 +480,9 @@
 		$this->modifiers->push($modifier);
 	}
 	
+	/*
+	 * Return a DataObjectSet which contains the forms to add some modifiers to update the OrderInformation table
+	 */
 	function ModifierForms() {
 		$forms = array();
 		if(self::$modifiersName && is_array(self::$modifiersName) && count(self::$modifiersName) > 0) {
