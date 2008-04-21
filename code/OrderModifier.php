@@ -23,17 +23,16 @@ class OrderModifier extends DataObject {
 	
 	protected static $is_chargable = true;
 	
-	public function __construct(Order $order = null) {
-		parent::__construct();
-		$this->order = $order;
-	}
+	function setOrder(Order $order) {$this->order = $order;}
 	
 	/*
 	 * This function is called when the order inits its modifiers.
 	 * It is better than directly construct the modifier in the Order class because, the user may need to create several modifiers or customize it.
 	 */
 	public static function init_for_order($className, Order $order) {
-		$order->addModifier(new $className($order));
+		$modifier = new $className();
+		$modifier->setOrder($order);
+		$order->addModifier($modifier);
 	}
 	
 	//1) Attributes Functions Access
@@ -81,16 +80,17 @@ class OrderModifier extends DataObject {
 	
 	//3) Database Writing Functions
 	
-	public function write() {
+	public function onBeforeWrite() {
 		$this->Amount = $this->Amount();
 		$this->Type = $this->IsChargable() ? 'Chargable' : 'Deductable';
 		$this->OrderID = $this->Order()->ID;
-		parent::write();
+		parent::onBeforeWrite();
 	}
 	
 	public function writeForStructureChanges() {
 		parent::write();
 	}
+	
 }
 
 ?>
