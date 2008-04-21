@@ -57,7 +57,7 @@ class OrderModifier extends DataObject {
 		if($this->ID) return DataObject::get_by_id('Order', $this->OrderID);
 		else return $this->order;
 	}
-		
+	
 	//2) Display Functions
 		
 	// Functions called from the Cart
@@ -91,6 +91,11 @@ class OrderModifier extends DataObject {
 		parent::write();
 	}
 	
+	//4) Form Functions
+	
+	function showFormForAdding($order) {return false;}
+	
+	function getFormForAdding($order) {return null;}
 }
 
 ?>
