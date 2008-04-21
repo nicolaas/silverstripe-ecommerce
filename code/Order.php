@@ -492,7 +492,7 @@
 				}
 			}
 		}
-		return count($forms) > 0 ? $forms : null;
+		return count($forms) > 0 ? new DataObjectSet($forms) : null;
 	}
 		
 	/**
