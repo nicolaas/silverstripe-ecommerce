@@ -245,6 +245,13 @@ class CheckoutPage_Controller extends Page_Controller{
 		}
 	}
 	
+	/*
+	 * Return a DataObjectSet which contains the forms to add some modifiers to update the OrderInformation table
+	 */
+	function ModifierForms() {
+		$order = $this->DisplayOrder();
+		return $order->ModifierForms();
+	}
 
 	/**
 	 * Return the OrderForm object
