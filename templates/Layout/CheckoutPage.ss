@@ -12,5 +12,8 @@
 		<% include OrderInformation_Editable %>
 	<% end_control %>
 	
+	<% control ModifierForms %>
+		$Me
+	<% end_control %>
 	$OrderForm	
 </div>
