@@ -463,8 +463,11 @@
 		if(self::$modifiersName && is_array(self::$modifiersName) && count(self::$modifiersName) > 0) {
 			foreach(self::$modifiersName as $className) {
 				if(class_exists($className)) {
-					//$this->modifiers->push(new $className($this));
-					eval("$className::init_for_order(\$className, \$this);");
+					$modifier = new $className();
+					if($modifier instanceof OrderModifier) {
+						//$this->modifiers->push(new $className($this));
+						eval("$className::init_for_order(\$className, \$this);");
+					}
 				}
 			}
 		}
@@ -475,6 +478,21 @@
 	function addModifier(OrderModifier $modifier) {
 		if(! $this->modifiers) $this->modifiers = new DataObjectSet();
 		$this->modifiers->push($modifier);
+	}
+	
+	function ModifierForms() {
+		$forms = array();
+		if(self::$modifiersName && is_array(self::$modifiersName) && count(self::$modifiersName) > 0) {
+			foreach(self::$modifiersName as $className) {
+				if(class_exists($className)) {
+					$modifier = new $className();
+					if($modifier instanceof OrderModifier && $modifier->showFormForAdding($this) && $form = $modifier->getFormForAdding($this)) {
+						array_push($form);
+					}
+				}
+			}
+		}
+		return count($forms) > 0 ? $forms : null;
 	}
 		
 	/**
