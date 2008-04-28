@@ -19,20 +19,22 @@ class OrderModifier extends DataObject {
 		'Order' => 'Order'
 	);
 	
-	protected $order;
+	//protected $order;
 	
 	protected static $is_chargable = true;
 	
-	function setOrder(Order $order) {$this->order = $order;}
+	//function setOrder(Order $order) {$this->order = $order;}
 	
 	/*
 	 * This function is called when the order inits its modifiers.
 	 * It is better than directly construct the modifier in the Order class because, the user may need to create several modifiers or customize it.
 	 */
-	public static function init_for_order($className, Order $order) {
+	public static function init_for_order($className/*, Order $order*/) {
 		$modifier = new $className();
-		$modifier->setOrder($order);
-		$order->addModifier($modifier);
+		$order = Order::ShoppingCart();
+			//$order->add($this->data());
+		//$modifier->setOrder($order);
+		$order->addModifier($modifier->data());
 	}
 	
 	//1) Attributes Functions Access
@@ -55,7 +57,8 @@ class OrderModifier extends DataObject {
 	 */
 	function Order() {
 		if($this->ID) return DataObject::get_by_id('Order', $this->OrderID);
-		else return $this->order;
+		else return Order::ShoppingCart();
+		//else return $this->order;
 	}
 	
 	//2) Display Functions
@@ -93,9 +96,11 @@ class OrderModifier extends DataObject {
 	
 	//4) Form Functions
 	
-	function showFormForAdding($order) {return false;}
+	static function show_form(/*Order $order*/) {return false;}
 	
-	function getFormForAdding($order) {return null;}
+	static function get_form(/*Order $order, */CheckoutPage $checkoutPage) {
+		return new OrderModifierForm(/*$order, */$checkoutPage, 'ModifierForm', new FieldSet(), new FieldSet());
+	}
 }
 
 ?>
