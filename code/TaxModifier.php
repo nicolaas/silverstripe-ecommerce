@@ -122,12 +122,12 @@ class TaxModifier extends OrderModifier {
 	
 	//3) Database Writing Function
 	
-	public function write() {
+	public function onBeforeWrite() {
 		$this->Country = $this->Country();
 		$this->Rate = $this->Rate();
 		$this->Name = $this->Name();
 		$this->TaxType = $this->IsExclusive() ? 'Exclusive' : 'Inclusive';
-		parent::write();
+		parent::onBeforeWrite();
 	}
 }
 

@@ -74,11 +74,10 @@ class SimpleShippingModifier extends OrderModifier {
 	
 	//3) Database Writing Function
 	
-	public function write() {
+	public function onBeforeWrite() {
 		$this->Country = $this->Country();
 		$this->CountryCode = $this->CountryCode();
 		$this->ShippingChargeType = $this->IsDefaultCharge() ? 'Default' : 'ForCountry';
-		parent::write();
+		parent::onBeforeWrite();
 	}
-	
 }
