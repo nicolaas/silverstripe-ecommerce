@@ -75,10 +75,34 @@ class CheckoutPage_Controller extends Page_Controller{
 		// include stylesheet for the checkout page
 		Requirements::themedCSS('CheckoutPage');
 
+		$this->initVirtualMethods();
+
 		$sc = Order::Shoppingcart();
 		$country = Geoip::visitor_country();
 
 		parent::init();
+	}
+	
+	/*
+	 * Inits the virtual methods from the name of the modifier forms to redirect the action method to the form class
+	 */
+	protected function initVirtualMethods() {
+		if($forms = $this->ModifierForms()) {
+			foreach($forms as $form) $this->addWrapperMethod($form->Name(), 'getOrderModifierForm');
+		}
+	}
+	
+	/*
+	 * Returns the form which name is 'methodname'
+	 * @param methodname : name of the virtual method called
+	 */
+	protected function getOrderModifierForm($methodName) {
+		// loops for all modifier forms, finds form named $methodName and returns it
+		if($forms = $this->ModifierForms()) {
+			foreach($forms as $form) {
+				if($form->Name() == $methodName) return $form;
+			}
+		}
 	}
 	
 	/** 
@@ -250,9 +274,9 @@ class CheckoutPage_Controller extends Page_Controller{
 	 */
 	function ModifierForms() {
 		$order = $this->DisplayOrder();
-		return $order->ModifierForms();
+		return $order->ModifierForms($this);
 	}
-
+	
 	/**
 	 * Return the OrderForm object
 	 */
