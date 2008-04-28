@@ -170,6 +170,7 @@
 		// That way, if we ever need to save or access these values internally, the data is there.
 		$this->items = $this->dataHandler->items($this);
 		$this->record = $this->dataHandler->getRecord($this);
+		$this->modifiers = $this->dataHandler->modifiers($this);
 
 	}
 	
@@ -466,7 +467,8 @@
 					$modifier = new $className();
 					if($modifier instanceof OrderModifier) {
 						//$this->modifiers->push(new $className($this));
-						eval("$className::init_for_order(\$className, \$this);");
+						//eval("$className::init_for_order(\$className, \$this);");
+						eval("$className::init_for_order(\$className);");
 					}
 				}
 			}
@@ -475,29 +477,37 @@
 		return $this->modifiers;
 	}
 	
+	
 	function addModifier(OrderModifier $modifier) {
 		if(! $this->modifiers) $this->modifiers = new DataObjectSet();
 		$this->modifiers->push($modifier);
+		if($this->dataHandler) $this->dataHandler->addModifier($this, $modifier);	
+		/*elseif($this->ID) {
+			$this->addToDatabase($product);
+		}*/
 	}
 	
 	/*
 	 * Return a DataObjectSet which contains the forms to add some modifiers to update the OrderInformation table
 	 */
-	function ModifierForms() {
+	function ModifierForms(CheckoutPage $checkoutPage) {
 		$forms = array();
 		if(self::$modifiersName && is_array(self::$modifiersName) && count(self::$modifiersName) > 0) {
 			foreach(self::$modifiersName as $className) {
 				if(class_exists($className)) {
 					$modifier = new $className();
-					if($modifier instanceof OrderModifier && $modifier->showFormForAdding($this) && $form = $modifier->getFormForAdding($this)) {
-						array_push($form);
+					/*if($modifier instanceof OrderModifier && eval("return $className::show_form(\$this);") && $form = eval("return $className::get_form(\$this, \$checkoutPage);")) {
+						array_push($forms, $form);
+					}*/
+					if($modifier instanceof OrderModifier && eval("return $className::show_form();") && $form = eval("return $className::get_form(\$checkoutPage);")) {
+						array_push($forms, $form);
 					}
 				}
 			}
 		}
-		return count($forms) > 0 ? new DataObjectSet($forms) : null;
-	}
 		
+		return count($forms) > 0 ? new DataObjectSet($forms) : null;
+	}		
 	/**
 	 * Attempts to process this orders payment.
 	 * Assummes the correct payment data, for each payement type is 
