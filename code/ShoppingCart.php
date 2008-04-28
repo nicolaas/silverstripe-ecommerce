@@ -27,6 +27,13 @@ class ShoppingCart extends Object {
 	}
 	
 	/**
+	 * Add the given modifier in the shopping cart
+	 */
+	function addModifier($order, $modifier) {
+		Session::addToArray('cartModifiers', serialize($modifier));
+	}
+	
+	/**
 	 * Allows any extra fields stored to be returned from session
 	 */
 	function getField($order, $fieldName){
@@ -54,6 +61,27 @@ class ShoppingCart extends Object {
 			Session::set('cartContents',$order->items());
 		}
 		return Session::get('cartContents');
+	}
+	
+	/**
+	 * Stores order modifiers information in session and returns them
+	 * 
+	 * @param Order $order : the order containing the modifiers
+	 * @return the modifiers in a DataObjectSet
+	 */
+	function modifiers($order) {
+		$tmp = Session::get('cartDetails');
+		if(! isset($tmp) || ! is_array($tmp)) {
+			if($modifiers = $order->modifiers()) {
+				foreach($modifiers as $modifier) $this->addModifier($order, $modifier);
+			}
+		}
+		if($cartModifiers = Session::get('cartModifiers')) {
+			$modifiers = new DataObjectSet();
+			foreach($cartModifiers as $cartModifier) $modifiers->push(unserialize($cartModifier));
+			return $modifiers;
+		}
+		return null;
 	}
 	
 	/**
