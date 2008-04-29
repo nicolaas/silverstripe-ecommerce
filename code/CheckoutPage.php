@@ -219,6 +219,7 @@ class CheckoutPage_Controller extends Page_Controller{
 				// @todo - is there a better way to do this?
 				if($action == "OrderSuccessful") {
 					singleton('ShoppingCart')->removeAllProducts();
+					singleton('ShoppingCart')->removeAllModifiers();
 				}
 				$orderID = $this->orderID();
 
