@@ -189,14 +189,15 @@
 	 * Turn a 'data handled' order (such as a shopping cart) into a regular order
 	 */
 	function saveToDatabase(){
-		if(!$this->dataHandler) {
-			user_error("saveToDatabase called on a non-data-handled object, turning it into a ShoppingCart", E_USER_WARNING);
+		if(! $this->dataHandler) {
+			user_error('saveToDatabase called on a non-data-handled object, turning it into a ShoppingCart', E_USER_WARNING);
 			$this->changeToShoppingCart();
 		}
 				
 		// Store the items to this object for later saving. 
 		// Remove the datahandler
-		$this->items = $this->dataHandler->Items($this);
+		$this->items = $this->dataHandler->items($this);
+		$this->modifiers = $this->dataHandler->modifiers($this);
 		$this->dataHandler = null;
 		
 		// 23/7/2007 Sean says: This creates blank members? This is not working.
@@ -211,6 +212,7 @@
 		// items and modifiers can't be added to the order or saved till the 
 		// order has an id
 		$items = $this->Items();
+		$modifiers = $this->Modifiers();
 		$this->write();
 			
 		// if there are any items, iterate through them, and write
@@ -224,9 +226,12 @@
 		
 		// Problem : There is no any modifiers here, so there are not saved
 		
-		// if there are any items, iterate through them
-		if($modifiers = $this->Modifiers()) {
-			foreach($modifiers as $modifier) $modifier->write();
+		// if there are any modifiers, iterate through them
+		if($modifiers) {
+			foreach($modifiers as $modifier) {
+				$modifier->OrderID = $this->ID;
+				$modifier->write();
+			}
 		}
 		
 		return $this;
@@ -338,6 +343,8 @@
 		if($this->items[$id] <= 0) {
    			unset($this->items[$id]);
    		}
+   		
+   		$this->updateModifiers();
 	}
 	
 	/**
@@ -354,6 +361,8 @@
 		}else{
 			$this->removeFromDatabase($product);	
 		}
+		
+		$this->updateModifiers();
 	}
 	
 	/**
@@ -485,6 +494,31 @@
 		/*elseif($this->ID) {
 			$this->addToDatabase($product);
 		}*/
+	}
+	
+	function updateModifiers() {
+		/*if($modifiers = $this->Modifiers()) {
+			foreach($modifiers as $modifier) $modifier->update();
+		}*/
+	}
+	
+   /** 
+	* Removes a modifier
+	* @param modifier : Modifier to remove
+	*/
+	function removeModifier($modifier){
+		if($modifiers = $this->modifiers) {
+   			$newModifiers = new DataObjectSet();
+   			foreach($modifiers as $oneModifier) {
+   				if($oneModifier !== $modifier) $newModifiers->push($oneModifier);
+   			}
+   			$this->modifiers = $newModifiers;
+   		}
+   		
+		if($this->dataHandler) $this->dataHandler->removeModifier($this, $modifier);	
+		else if($this->ID) $modifier->delete();
+				
+		if($this->modifiers->Count() == 0) $this->modifiers = null;
 	}
 	
 	/*
