@@ -83,10 +83,12 @@ class OrderModifier extends DataObject {
 	
 	//3) Database Writing Functions
 	
+	function update() {}
+	
 	public function onBeforeWrite() {
 		$this->Amount = $this->Amount();
 		$this->Type = $this->IsChargable() ? 'Chargable' : 'Deductable';
-		$this->OrderID = $this->Order()->ID;
+		/*$this->OrderID = $this->Order()->ID;*/
 		parent::onBeforeWrite();
 	}
 	
