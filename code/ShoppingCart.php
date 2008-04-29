@@ -34,6 +34,18 @@ class ShoppingCart extends Object {
 	}
 	
 	/**
+	 * Removes the modifier from session
+	 */
+	function removeModifier($modifier){
+		if($cartModifiers = Session::get('cartModifiers')) {
+			$this->removeAllModifiers();
+			foreach($cartModifiers as $cartModifier) {
+				if($cartModifier !== $modifier) $this->addModifier($cartModifier);
+			}
+		}
+	}
+	
+	/**
 	 * Allows any extra fields stored to be returned from session
 	 */
 	function getField($order, $fieldName){
@@ -58,7 +70,7 @@ class ShoppingCart extends Object {
 	function items($order) {
 		$tmp = Session::get('cartDetails');
 		if(!isset($tmp) || !is_array($tmp)) {
-			Session::set('cartContents',$order->items());
+			Session::set('cartContents',$order->Items());
 		}
 		return Session::get('cartContents');
 	}
@@ -72,7 +84,7 @@ class ShoppingCart extends Object {
 	function modifiers($order) {
 		$tmp = Session::get('cartDetails');
 		if(! isset($tmp) || ! is_array($tmp)) {
-			if($modifiers = $order->modifiers()) {
+			if($modifiers = $order->Modifiers()) {
 				foreach($modifiers as $modifier) $this->addModifier($order, $modifier);
 			}
 		}
@@ -129,6 +141,10 @@ class ShoppingCart extends Object {
 		Session::clear('cartContents');
 	}
 	
+	function removeAllModifiers(){
+		Session::clear('cartModifiers');
+	}
+	
 	/**
 	 * Sets the order ID (for when you have saved a order)
 	 */ 
@@ -181,7 +197,7 @@ class ShoppingCart extends Object {
 		foreach($sc->Items() as $item){
 			$item->OrderID = $order->ID;
 			$item->write();
-		}		
+		}
 		return $order;
   } 
 	
