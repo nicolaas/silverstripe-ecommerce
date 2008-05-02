@@ -11,20 +11,20 @@
 class CheckoutPage extends Page{
 		
 	static $db = array(
-		"PurchaseComplete" => "HTMLText",
-		"ChequeMessage" => "HTMLText"
+		'PurchaseComplete' => 'HTMLText',
+		'ChequeMessage' => 'HTMLText'
 	);
 	
 	static $add_action = 'a Checkout Page';
 
-	public function Order(){
+	/*public function Order(){
 		if($member = Member::currentUser()){
 		 return array();
 		}else{			
 		  	Director::redirect('403/');	
 			return;
 		}
-	}
+	}*/
 	
 	/**
 	 * Create the fields for the checkout page within the CMS
@@ -54,15 +54,9 @@ class CheckoutPage extends Page{
 	 * @param - $urlSegment - returns a URLSegment only if set
 	 */ 
 	static function find_link($urlSegment = null) {
-		$page = DataObject::get_one("CheckoutPage", "");
-		if(!$page) {
-			user_error(_t("CheckoutPage.NOPAGE","No CheckoutPage on this site - please create one!"), E_USER_ERROR);
-		}		
-		if($urlSegment) {
-			return $page->URLSegment;
-		} else {
-			return $page->Link();
-		}
+		if(! $page = DataObject::get_one('CheckoutPage')) user_error(_t("CheckoutPage.NOPAGE","No CheckoutPage on this site - please create one!"), E_USER_ERROR);
+		if($urlSegment) return $page->URLSegment;
+		else return $page->Link();
 	}
 }
 
@@ -77,8 +71,8 @@ class CheckoutPage_Controller extends Page_Controller{
 
 		$this->initVirtualMethods();
 
-		$sc = Order::Shoppingcart();
-		$country = Geoip::visitor_country();
+		//$sc = Order::Shoppingcart();
+		//$country = Geoip::visitor_country();
 
 		parent::init();
 	}
@@ -109,7 +103,7 @@ class CheckoutPage_Controller extends Page_Controller{
 	 * Processes the order information from the Shopping cart, creates or merges
 	 * the member from the database, and then processes the payment.
 	 */
-	function processOrder($data, $form) {
+	/*function processOrder($data, $form) {
 		$sc = Order::ShoppingCart();
 		
 		// Check to see if there are still items in the shopping cart
@@ -177,26 +171,101 @@ class CheckoutPage_Controller extends Page_Controller{
 		   	return;
 		}
 		
+	}*/
+	
+	/** 
+	 * Processes the order information from the Shopping cart, creates or merges
+	 * the member from the database, and then processes the payment.
+	 * This function concerns only the current order
+	 */
+	function processOrder($data, $form) {
+		//Check to see if there are still items in the current order
+		if(CurrentOrder::has_products()) {
+			//$cartContents = Session::get('cartContents');
+			$member = EcommerceRole::createOrMerge($data);
+			$member->write();
+			$member->logIn();
+			
+			// Save the current order from session as an Order object and return it
+			$order = CurrentOrder::save_to_database();
+			// Update order with shipping address
+			$form->saveInto($order);
+			
+			$order->write();
+			
+			$data['BillingId'] = $order->ID;
+			
+			// Save payment data from form and process payment
+						
+			$payment = Object::create($data['PaymentMethod']);
+			if(!$payment instanceof Payment) user_error(get_class($payment) ." is not a Payment object!", E_USER_ERROR);
+			$form->saveInto($payment);
+			$payment->OrderID = $order->ID;
+			$payment->Amount = $order->Total();
+			
+			// Worldpay doesn't have a payment object so we write one here
+			if($data['PaymentMethod'] == 'WorldpayPayment') {
+				$payment->write();
+			}			
+			
+			$result = $payment->processPayment($data, $form);
+			
+			// Successful payment
+			if($result['Success']) {
+			  	//Session::set('Order.OrderID',$order->ID);
+				//Session::set('Order.PurchaseComplete', true);
+				
+				$order->sendReceipt();
+				//$order->isComplete();
+				$order->write();
+				
+				CurrentOrder::clear();
+				
+				Director::redirect(CheckoutPage::find_link() . "OrderSuccessful/$order->ID");
+				return;
+				
+			// Longer payment process, such as Worldpay
+			} else if($result['Processing']) {
+				return $result['ReturnValue'];
+	 		
+			// Failed payment
+			} else {
+				//Session::set('cartContents',$cartContents);
+				//Session::set('Order.OrderID', $order->ID);
+				//Session::clear('Order.PurchaseComplete');
+				$form->sessionMessage("Sorry, your payment was not accepted, please try again<br/><strong>$result[HelpText]:</strong> $result[MerchantHelpText]","bad");
+	 			Director::redirect(CheckoutPage::find_link() . "$order->ID");
+	 			return;
+			}
+		
+		} else {
+			// no items, redirect back
+			$form->sessionMessage("Please add some items to your cart","warning");
+		   	Director::redirectBack();
+		   	return;
+		}
+		
 	}
 	
 	/**
 	 * Complete orders content
 	 */
-	function OrderContentSuccessful() {
+	/*function OrderContentSuccessful() {
 		return $this->PurchaseComplete;
-	}
+	}*/
 	
 	/**
 	 * Incomplete orders content
 	 */	
-	function OrderContentIncomplete() {
+	/*function OrderContentIncomplete() {
 		return $this->PurchaseIncomplete;
-	}
+	}*/
 	
 	/**
 	 * Return the order payment information
+	 * This function is not used
 	 */
-	function OrderPaymentInfo(){
+	/*function OrderPaymentInfo(){
 		$orderID = $this->orderID();
 		
 		$member = Member::currentUser();
@@ -206,66 +275,49 @@ class CheckoutPage_Controller extends Page_Controller{
 			}
 			return $payment;
 		}
-	}
-
-	/**
-	 * Return the order information 
-	 */
-	function DisplayOrder(){
-		if($action = Director::urlParam("Action")){
-			if($action == "OrderSuccessful" || $action = "OrderIncomplete"){
-				
-				// only remove all products if OrderSuccessful
-				// @todo - is there a better way to do this?
-				if($action == "OrderSuccessful") {
-					singleton('ShoppingCart')->removeAllProducts();
-					singleton('ShoppingCart')->removeAllModifiers();
-				}
-				$orderID = $this->orderID();
-
-				$member = Member::currentMember();
-				if($orderID && $member){
-					$order = DataObject::get_one("Order", "`Order`.ID = $orderID AND MemberID = $member->ID");
-				}
-			}
-		}else if($sc = Order::ShoppingCart()){
-			$order = $sc;
+	}*/
+		
+	function DisplayOrder() {
+		if($orderID = Director::urlParam('ID')) {
+			if($memberID = Member::currentMemberID()) return DataObject::get_one('Order', "`Order`.`ID` = '$orderID' AND `MemberID` = '$memberID'");
+			else return null;
 		}
-		return $order;
+		else return CurrentOrder::display_order();
 	}	
 	
 	/**
 	 * Return the order ID
 	 */
-	function orderID() {
+	/*function orderID() {
 		$orderID = $this->urlParams["ID"];
 		if(!$orderID) $orderID = Session::get('Order.OrderID');
 		return $orderID;
-	}
+	}*/
 	
 	/**
 	 * Displays the order information  @where is this used ?
 	 */
 	function DisplayFinalisedOrder(){
-		if($orderID = $this->orderID()){
+		/*if($orderID = $this->orderID()){
 			$member = Member();
 			if($orderID && $member){
 				$order = DataObject::get_one("Order", "`Order`.ID = $orderID && MemberID = $member->ID");
 				return $order;
 			}
-		}		
+		}*/
+		if($orderID = Director::urlParam('ID') && $memberID = Member::currentMemberID()) return DataObject::get_one('Order', "`Order`.`ID` = '$orderID' AND `MemberID` = '$memberID'");
+		else return null;
 	}
 	
 	/**
 	 * Check if the Member exists before displaying the order content,
 	 * redirect them back to the Security section if not
 	 */
-	function OrderSuccessful(){
-		if($member = Member::currentMember()){
-			return array();
-		}else{
-			Session::setFormMessage("Login","You need to be logged in to view that page","warning");
-			Director::redirect("Security/Login/");
+	function OrderSuccessful() {
+		if($member = Member::currentMember()) return array();
+		else {
+			Session::setFormMessage('Login', 'You need to be logged in to view that page', 'warning');
+			Director::redirect('Security/login/');
 			return;
 		}
 	}
@@ -273,21 +325,17 @@ class CheckoutPage_Controller extends Page_Controller{
 	/*
 	 * Return a DataObjectSet which contains the forms to add some modifiers to update the OrderInformation table
 	 */
-	function ModifierForms() {
-		$order = $this->DisplayOrder();
-		return $order->ModifierForms($this);
-	}
+	function ModifierForms() {return Order::ModifierForms($this);}
 	
 	/**
 	 * Return the OrderForm object
 	 */
-	function OrderForm() {
-		return new OrderForm($this, "OrderForm");
-	}
+	function OrderForm() {return new OrderForm($this, 'OrderForm');}
 
 	function ChangeCountry($data, $form) {
 		$member = EcommerceRole::createOrMerge($data);
-		$sc = Order::ShoppingCart();
+		//$sc = Order::ShoppingCart();
+		$sc = CurrentOrder::display_order();
 		
 		if($member) {
 			$form->saveInto($member);
@@ -321,7 +369,8 @@ class CheckoutPage_Controller extends Page_Controller{
 	
 	function ChangeCountryForm(){
 		$member = Member::currentUser();
-		$sc = Order::ShoppingCart();
+		//$sc = Order::ShoppingCart();
+		$sc = CurrentOrder::display_order();
 		
 		if($sc->ShippingCountry) {
 			$shipCountry = $sc->ShippingCountry;
