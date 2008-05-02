@@ -17,7 +17,7 @@ class AccountPage extends Page {
 class AccountPage_Controller extends Page_Controller {
 
 	/**
-	 * Include account page requirements - the stylesheet for one
+	 * Include account page requirements - the stylesheet for one and
 	 * Redirect to the login page if nobody is logged
 	 */
 	function init() {
