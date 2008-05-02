@@ -10,7 +10,8 @@ Behaviour.register({
 				this.value = this.value.replace(/[^0-9]+/g,'');
 				if(!this.value) this.value = 0;
 				var productID = matches[1];
-				var url = document.getElementsByTagName('base')[0].href + 'Order/setCartQuantity/?ProductID=' + productID + '&Quantity=' + this.value + "&isProductGroup=1";
+				var URLSegment = $('Product-' + productID + '-URLSegment').value;
+				var url = document.getElementsByTagName('base')[0].href + URLSegment + '/setQuantity?quantity=' + this.value;
 				
 				new Ajax.Request(
 					url,
