@@ -67,9 +67,9 @@
 	//protected $dataHandler = null;
 	
 	/**
-	 * All these stati count as a "completed order"
+	 * All these status count as a "completed order"
 	 */
-	public $completeStati = array('Paid','Sent','Complete');
+	static $complete_status = array('Paid', 'Sent', 'Complete');
 
 
 	/**
