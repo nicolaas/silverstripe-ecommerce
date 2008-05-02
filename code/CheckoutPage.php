@@ -407,7 +407,8 @@ class CheckoutPage_Controller extends Page_Controller{
 	 */
 	function updateCountry($data, $form){
 		$member = Member::currentUser();	
-		$sc = Order::ShoppingCart();
+		//$sc = Order::ShoppingCart();
+		$sc = CurrentOrder::display_order();
 		
 		$form->saveInto($sc);
 		
