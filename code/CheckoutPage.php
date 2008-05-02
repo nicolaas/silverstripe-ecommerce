@@ -422,8 +422,8 @@ class CheckoutPage_Controller extends Page_Controller{
 		
 	function useDifferentShippingAddress($data, $form) {
 		$member = EcommerceRole::createOrMerge($data);
-		$sc = Order::ShoppingCart();
-		
+		//$sc = Order::ShoppingCart();
+		$sc = CurrentOrder::display_order();
 		if($member) {
 			$form->saveInto($member);
 			$member->write();
@@ -438,7 +438,8 @@ class CheckoutPage_Controller extends Page_Controller{
 	
 	function useBillingAddress($data, $form) {
 		$member = EcommerceRole::createOrMerge($data);
-		$sc = Order::ShoppingCart();
+		//$sc = Order::ShoppingCart();
+		$sc = CurrentOrder::display_order();
 		
 		$sc->UseShippingAddress = false;
 		$sc->write();
