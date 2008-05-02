@@ -284,7 +284,7 @@ class CheckoutPage_Controller extends Page_Controller{
 		
 	function DisplayOrder() {
 		if($orderID = Director::urlParam('ID')) {
-			if($memberID = Member::currentMemberID()) return DataObject::get_one('Order', "`Order`.`ID` = '$orderID' AND `MemberID` = '$memberID'");
+			if($memberID = Member::currentUserID()) return DataObject::get_one('Order', "`Order`.`ID` = '$orderID' AND `MemberID` = '$memberID'");
 			else return null;
 		}
 		else return CurrentOrder::display_order();
@@ -310,7 +310,7 @@ class CheckoutPage_Controller extends Page_Controller{
 				return $order;
 			}
 		}*/
-		if($orderID = Director::urlParam('ID') && $memberID = Member::currentMemberID()) return DataObject::get_one('Order', "`Order`.`ID` = '$orderID' AND `MemberID` = '$memberID'");
+		if($orderID = Director::urlParam('ID') && $memberID = Member::currentUserID()) return DataObject::get_one('Order', "`Order`.`ID` = '$orderID' AND `MemberID` = '$memberID'");
 		else return null;
 	}
 	
