@@ -58,13 +58,13 @@
 	/**
 	 * Items are added to this array when loaded in memory
 	 */
-	protected $items = array();
+	//protected $items = array();
 	
 	/**
 	 * This can be set to an object that handles data operations.
 	 * ShoppingCart is one such handler. 
 	 */
-	protected $dataHandler = null;
+	//protected $dataHandler = null;
 	
 	/**
 	 * All these stati count as a "completed order"
@@ -105,9 +105,9 @@
 	/*
 	 * The modifiers represent the additional charges or deductions associated to an order like shipping, tax but also vounchers, etc...
 	 */
-	protected $modifiers;
+	//protected $modifiers;
 	
-	protected $modifiersInitDone = false;
+	//protected $modifiersInitDone = false;
 	
 	protected static $modifiersName = array();
 	
@@ -162,7 +162,7 @@
 	/**
 	 * Turn this order object into a shopping cart
 	 */
-	function changeToShoppingCart() {	
+	/*function changeToShoppingCart() {	
 
 		$this->dataHandler = new ShoppingCart();
 		
@@ -172,23 +172,23 @@
 		$this->record = $this->dataHandler->getRecord($this);
 		$this->modifiers = $this->dataHandler->modifiers($this);
 
-	}
+	}*/
 	
 	/**
 	 * Creates an order from the shopping cart
 	 * Saves the order to the database
 	 */
-	static function createOrderFromShoppingCart() {
+	/*static function createOrderFromShoppingCart() {
 		$order = Order::create();
 		$order->changeToShoppingCart();
 		$order = $order->saveToDatabase();
 		return $order;
-	}
+	}*/
 
 	/**
 	 * Turn a 'data handled' order (such as a shopping cart) into a regular order
 	 */
-	function saveToDatabase(){
+	/*function saveToDatabase(){
 		if(! $this->dataHandler) {
 			user_error('saveToDatabase called on a non-data-handled object, turning it into a ShoppingCart', E_USER_WARNING);
 			$this->changeToShoppingCart();
@@ -235,6 +235,32 @@
 		}
 		
 		return $this;
+	} */
+	
+	static function display_order() {return new Order();} 
+	
+	static function save_to_database() {
+		
+		//1) Order creation
+		
+		$order = new Order();
+		$order->write();
+				
+		//2) Products saving
+		
+		if($products = CurrentOrder::get_products()) $order->createOrderItems($products, true);
+		
+		//3) Modifiers saving
+		
+		if($modifiers = CurrentOrder::get_modifiers()) $order->createOrderModifiers($modifiers, true);
+		
+		//4) Member saving
+		
+		$order->MemberID = Member::currentUserID();
+		
+		$order->write();
+		
+		return $order;
 	} 
 
 	/**
@@ -270,7 +296,7 @@
 	/**
 	 * Creates the shopping cart object
 	 */
-	static function ShoppingCart() {
+	/*static function ShoppingCart() {
 		$order = Order::create();
 		if($order){
 			$order->changeToShoppingCart();
@@ -278,7 +304,7 @@
 			USER_ERROR("ORDER::ShoppingCart() - Could not create order from base class", E_USER_ERROR);
 		}
 		return $order;
-	}
+	}*/
 	
 	static function makeFrom($className){
 		self::$factory_class = $className;
@@ -287,17 +313,17 @@
 	/**
 	 * Factory method for new order items.
 	 */ 
-	function createOrderItem($product, $quantity) {
+	/*function createOrderItem($product, $quantity) {
 		$orderClassName = $this->stat('item_class');
 		return new $orderClassName($product, $quantity);
-	}
+	}*/
 	
 	/**
 	* Adds a product to this order. If there is an ID, it updates the DB.
 	* @param DataObject $product An instance of product you wish to add.
 	* @param int $quantity The quantity you wish to add, default is 1.
 	*/
-	function add($product, $quantity = 1) {
+	/*function add($product, $quantity = 1) {
 		if(!isset($this->items[$product->ID])) $this->items[$product->ID] = 0;
 		$this->items[$product->ID] += $quantity;
 		if($this->dataHandler) {
@@ -305,32 +331,32 @@
 		} elseif($this->ID) {
 			$this->addToDatabase($product);
 		}
-  	}
+  	}*/
   	
-  	function removeByQuantity($product, $quantity = 1) {
+  	/*function removeByQuantity($product, $quantity = 1) {
   		$this->items[$product->ID] -= $quantity;
   		if($this->dataHandler) {
   			$this->dataHandler->setQuantity($this, $product, $this->items[$product->ID]);
   		} else if($this->ID) {
   			$this->addToDatabase($product);
   		}
-  	}
+  	}*/
   
 	/**
 	 * Saves the given product to the database as an orderItem
 	 */
-	function addToDatabase($product) {
+	/*function addToDatabase($product) {
 		$orderItem = $this->createOrderItem($product, $this->items[$product->ID]); 	
 		$orderItem->setCart($this);
 		$orderItem->OrderID = $this->ID;
 		$orderItem->write();
-	}
+	}*/
 	
 	/** 
 	* Reduces the quanity of a product in the order by one, 
 	* or if it is one, it removes it all together.
 	*/
-	function remove($product){
+	/*function remove($product){
 		$id = $product->ID;
    		$this->items[$id]--;
    	
@@ -345,16 +371,16 @@
    		}
    		
    		$this->updateModifiers();
-	}
+	}*/
 	
 	/**
 	 * Return the quantity of items of that ID in the cart
 	 */
-	function getQuantity($productID){
+	/*function getQuantity($productID){
 		return $this->items[$productID];
-	}
+	}*/
 	
-	function removeall($product){
+	/*function removeall($product){
 		unset($this->items[$product->ID]);
 		if($this->dataHandler){
 			$this->dataHandler->setQuantity($this, $product, 0);
@@ -363,12 +389,12 @@
 		}
 		
 		$this->updateModifiers();
-	}
+	}*/
 	
 	/**
 	* Removes an item from the database (you need an ID to be stored on the order)
 	*/
-	function removeFromDatabase($product){
+	/*function removeFromDatabase($product){
 		// We need to have an order ID to get the saved order items.
 		
 		// TODO: Should we have some data integrity here to say you can't remove 
@@ -377,18 +403,18 @@
 			$orderItem = DataObject::get_one("Order_item", "Product.ID = $product->ID AND Order.ID = $this->ID");
 			$orderItem->delete();
 		}		
-	}
+	}*/
 
 	/**
 	 * Get the items for this order from the database, and returns them
 	 */
 	function itemsFromDatabase(){
 		$orderItems = DataObject::get($this->stat('item_class'),"OrderID = $this->ID");
-		if($orderItems)
+		/*if($orderItems)
 			foreach($orderItems as $item) $item->setCart($this);
 		else{
 			// user_error("Order: No Order_Items saved to Order: $this->ID", E_USER_WARNING);
-		}
+		}*/
 		return $orderItems;
 	}
 
@@ -397,7 +423,7 @@
 	 * it returns the items from session, if it has, it returns them 
 	 * from the DB entry.
 	 */ 
- 	function Items(){
+ 	/*function Items() {
  		// If we have an ID, assume that this is a database order
  		if($this->ID) {
 			return $this->itemsFromDatabase();
@@ -410,22 +436,23 @@
  			// No items in order 
  			return null;
  		}
+	}*/
+	function Items() {
+ 		// If we have an ID, assume that this is a database order
+ 		if($this->ID) return $this->itemsFromDatabase();
+ 		else if($products = CurrentOrder::get_products()) return $this->createOrderItems($products);
+ 		else return null;
 	}
 
-	function ContinueCountItems(){
-		$items = $this->Items();
-		if($items) {
+	function ContinueCountItems() {
+		if($items = $this->Items()) {
 			$i = 1;
-			foreach($items as $item){
-				$item->setCountID($i);
-				$i ++;
-			}
+			foreach($items as $item) $item->setCountID($i++);
 		}
-
 		return $items;
 	}
 	
-	function createOrderItems(array $sourceItems){
+	/*function createOrderItems(array $sourceItems){
 		// We don't want items with no quantity..
 		$sourceItemsFixed = array();
 		foreach($sourceItems as $key => $value) {
@@ -448,8 +475,36 @@
 				return $items;
 			}
 		}
+	}*/
+	
+	protected function createOrderItems(array $products, $write = false) {
+		$orderItems = array();
+		$orderItemClass = $this->stat('item_class');
+		foreach($products as $productID => $quantity) {
+			if($quantity > 0) {
+				$product = DataObject::get_by_id('Product', $productID);
+				$orderItem = new $orderItemClass($product, $quantity);
+				if($write) {
+					$orderItem->OrderID = $this->ID;
+					$orderItem->write();
+				}
+				else array_push($orderItems, $orderItem);
+			}
+		}
+		return $write ? $this->itemsFromDatabase() : new DataObjectSet($orderItems);
 	}
 	
+	protected function createOrderModifiers(array $modifiers, $write = false) {
+		if($write) {
+			foreach($modifiers as $modifier) {
+				$modifier->OrderID = $this->ID;
+				$modifier->write();
+			}
+			return $this->modifiersFromDatabase();
+		}
+		else return new DataObjectSet($modifiers);
+	}
+		
 	/**
 	 * Get the modifiers for this order from the database, and returns them
 	 */
@@ -465,11 +520,11 @@
  	function Modifiers(){
  		// If we have an ID, assume that this is a database order
  		if($this->ID) return $this->modifiersFromDatabase();
- 		else if($this->modifiers) return $this->modifiers;
- 		else if(! $this->modifiersInitDone) return $this->createOrderModifiers();
+ 		else if($modifiers = CurrentOrder::get_modifiers()) return $this->createOrderModifiers($modifiers);
+ 		else return null;
 	}
 			
-	function createOrderModifiers() {
+	static function init_all_modifiers() {
 		if(self::$modifiersName && is_array(self::$modifiersName) && count(self::$modifiersName) > 0) {
 			foreach(self::$modifiersName as $className) {
 				if(class_exists($className)) {
@@ -482,19 +537,19 @@
 				}
 			}
 		}
-		$this->modifiersInitDone = true;
-		return $this->modifiers;
+		//$this->modifiersInitDone = true;
+		//return $this->modifiers;
 	}
 	
 	
-	function addModifier(OrderModifier $modifier) {
+	/*function addModifier(OrderModifier $modifier) {
 		if(! $this->modifiers) $this->modifiers = new DataObjectSet();
 		$this->modifiers->push($modifier);
-		if($this->dataHandler) $this->dataHandler->addModifier($this, $modifier);	
+		if($this->dataHandler) $this->dataHandler->addModifier($this, $modifier);*/	
 		/*elseif($this->ID) {
 			$this->addToDatabase($product);
 		}*/
-	}
+	//}
 	
 	function updateModifiers() {
 		/*if($modifiers = $this->Modifiers()) {
@@ -506,7 +561,7 @@
 	* Removes a modifier
 	* @param modifier : Modifier to remove
 	*/
-	function removeModifier($modifier){
+	/*function removeModifier($modifier){
 		if($modifiers = $this->modifiers) {
    			$newModifiers = new DataObjectSet();
    			foreach($modifiers as $oneModifier) {
@@ -519,12 +574,12 @@
 		else if($this->ID) $modifier->delete();
 				
 		if($this->modifiers->Count() == 0) $this->modifiers = null;
-	}
+	}*/
 	
 	/*
 	 * Return a DataObjectSet which contains the forms to add some modifiers to update the OrderInformation table
 	 */
-	function ModifierForms(CheckoutPage $checkoutPage) {
+	static function ModifierForms(CheckoutPage $checkoutPage) {
 		$forms = array();
 		if(self::$modifiersName && is_array(self::$modifiersName) && count(self::$modifiersName) > 0) {
 			foreach(self::$modifiersName as $className) {
@@ -1057,26 +1112,18 @@
 	/**
 	 * Complete orders content from checkout object
 	 */
-	function OrderContentSuccessful() {
-		$Checkout = DataObject::get_one("CheckoutPage");
-		return $Checkout->PurchaseComplete;
-	}
+	function OrderContentSuccessful() {return DataObject::get_one('CheckoutPage')->PurchaseComplete;}
 	
 	/**
 	 * Incomplete orders content from checkout object
 	 */
-	function OrderContentIncomplete() {
-		$Checkout = DataObject::get_one("CheckoutPage");
-		return $Checkout->PurchaseIncomplete;
-	}
+	function OrderContentIncomplete() {return DataObject::get_one('CheckoutPage')->PurchaseIncomplete;}
 	
 	/**
 	 * Return the currency of this order.
 	 * Note: this is a fixed value across the entire site. 
 	 */
-	function Currency() {
-		return self::site_currency();
-	}
+	function Currency() {return self::site_currency();}
 }
 
 /**
