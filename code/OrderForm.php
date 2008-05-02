@@ -9,11 +9,7 @@
   */
 class OrderForm extends Form{
 	function __construct($controller, $name) {
-		
-		// include extra requirements for this form
-		Requirements::javascript("jsparty/behaviour.js");
-		Requirements::javascript("ecommerce/javascript/CheckoutPage.js");
-		
+				
 		// get the orders and member info (if available) and define the total number format
 		//$sc = Order::ShoppingCart();
 		$sc = CurrentOrder::display_order();

@@ -33,15 +33,15 @@ class CheckoutPage extends Page{
 		$fields = parent::getCMSFields();
 
 		// information about these images		
-		$shopmessagecomplete = '<p>This message is shown, along with order information after they submit the checkout:<p>';
-		$shopchequemessage = '<p>This message is shown when a user selects cheque as a payment option on the checkout:</p>';
+		$shopMessageComplete = '<p>This message is shown, along with order information after they submit the checkout :<p>';
+		$shopChequeMessage = '<p>This message is shown when a user selects cheque as a payment option on the checkout :</p>';
 
 		// add the editable message fields
-		$fields->addFieldToTab("Root.Content.Messages", new HeaderField("Checkout Messages",2));
-		$fields->addFieldToTab("Root.Content.Messages", new LiteralField("shop", $shopmessagecomplete));
-		$fields->addFieldToTab("Root.Content.Messages", new HtmlEditorField("PurchaseComplete", ""));
-		$fields->addFieldToTab("Root.Content.Messages", new LiteralField("shop", $shopchequemessage));
-		$fields->addFieldToTab("Root.Content.Messages", new HtmlEditorField("ChequeMessage", "", 5));
+		$fields->addFieldToTab('Root.Content.Messages', new HeaderField('Checkout Messages', 2));
+		$fields->addFieldToTab('Root.Content.Messages', new LiteralField('ShopMessageComplete', $shopMessageComplete));
+		$fields->addFieldToTab('Root.Content.Messages', new HtmlEditorField('PurchaseComplete', ''));
+		$fields->addFieldToTab('Root.Content.Messages', new LiteralField('ShopChequeMessage', $shopChequeMessage));
+		$fields->addFieldToTab('Root.Content.Messages', new HtmlEditorField('ChequeMessage', '', 5));
 
 		return $fields;
 	}
@@ -54,7 +54,7 @@ class CheckoutPage extends Page{
 	 * @param - $urlSegment - returns a URLSegment only if set
 	 */ 
 	static function find_link($urlSegment = null) {
-		if(! $page = DataObject::get_one('CheckoutPage')) user_error(_t("CheckoutPage.NOPAGE","No CheckoutPage on this site - please create one!"), E_USER_ERROR);
+		if(! $page = DataObject::get_one('CheckoutPage')) user_error(_t('CheckoutPage.NOPAGE', 'No CheckoutPage on this site - please create one !'), E_USER_ERROR);
 		if($urlSegment) return $page->URLSegment;
 		else return $page->Link();
 	}
@@ -66,6 +66,11 @@ class CheckoutPage_Controller extends Page_Controller{
 	 * otherwise use the module one instead
 	 */
 	public function init() {
+		// include extra requirements for this form
+		Requirements::javascript('jsparty/behaviour.js');
+		Requirements::javascript('ecommerce/javascript/CheckoutPage.js');
+		Requirements::javascript('ecommerce/javascript/AjaxQuantity.js');
+		
 		// include stylesheet for the checkout page
 		Requirements::themedCSS('CheckoutPage');
 

@@ -113,13 +113,10 @@ class Product extends Page {
 		if($items = $sc->Items()) {
 			foreach($items as $productID => $Quantity) {
 				if(is_object($Quantity)) {
-					if($Quantity->ProductID == $this->ID) {
-						$setQuantity = $Quantity->Quantity;
-					}
-				} else {
-					if($productID == $this->ID) {
-						$setQuantity = $Quantity;
-					}
+					if($Quantity->ProductID == $this->ID) $setQuantity = $Quantity->Quantity;
+				}
+				else {
+					if($productID == $this->ID) $setQuantity = $Quantity;
 				}
 			}
 		}
@@ -128,6 +125,16 @@ class Product extends Page {
 	<input class="ajaxQuantityField product-$this->ID" type="text" value="$setQuantity" size="3" maxlength="3" disabled="disabled"/>
 	<input type="hidden" id="Product-$this->ID-URLSegment" name="product-$this->ID-URLSegment" value="$this->URLSegment"/>
 HTML;
+	}
+	
+	static function javascript_for_new_values(array $values) {
+		$result = array();
+		foreach($values as $id => $value) {
+			$result[] = <<<JS
+				if(\$("$id")) \$("$id").innerHTML = "$value";
+JS;
+		}
+		return implode('', $result);
 	}
 	
 	/**
@@ -204,7 +211,7 @@ class Product_Controller extends Page_Controller {
 		Requirements::javascript('jsparty/prototype.js');
 		Requirements::javascript('jsparty/prototype_improvements.js');
 		Requirements::javascript('jsparty/behaviour.js');
-		Requirements::javascript('ecommerce/javascript/Product.js');
+		Requirements::javascript('ecommerce/javascript/AjaxQuantity.js');
 		
 		Requirements::themedCSS('Product');
 		Requirements::themedCSS('Cart');
@@ -237,60 +244,53 @@ class Product_Controller extends Page_Controller {
 	 * Ajax method to set the cart quantity
 	 */
 	function setQuantity() {
-		if(is_int($_REQUEST['quantity'] + 0)) {
-			if($_REQUEST['quantity'] > 0 && $quantity = $_REQUEST['quantity']) {
+		$quantity = $_REQUEST['quantity'];
+		if(is_numeric($quantity) && is_int($quantity + 0)) {
+			if($quantity > 0) {
 				CurrentOrder::set_product_quantity($this, $quantity);
 				//$sc = Order::ShoppingCart();
 				$sc = CurrentOrder::display_order();
 				
-				/*$prod = DataObject::get_by_id('Product', $_REQUEST['ProductID']);
-				
-				$sc->removeall($prod);
-				$sc->add($prod, $_REQUEST['Quantity']);*/
-				
 				$item_subtotal = 0;
 				$item_quantity = 0;
 				$subtotal = 0;
-				//$shipping = 0;
 				$grand_total = 0;
 				
-				if($sc->Items()) {
-					foreach($sc->Items() as $item) {
+				if($items = $sc->Items()) {
+					foreach($items as $item) {
 						if($item->ProductID == $this->ID) {
 							$item_subtotal = $item->SubTotal;
 							$item_quantity = $item->Quantity;
 						}
 					}
 				}
+				if($modifiers = $sc->Modifiers()) {
+					foreach($modifiers as $modifier) {
+						
+					}
+				}
 				
 				// TODO Use glyphs instead of hard-coding to be the '$' glyph
 				$item_subtotal = '$' . number_format($item_subtotal, 2);
 				$subtotal = '$' . number_format($sc->_Subtotal(), 2);
-				//$shipping = '$' . number_format($sc->Shipping(), 2);
-				//$tax = '$' . number_format($sc->calcAddedTax(), 2);		
 				$grand_total = '$' . number_format($sc->_Total(), 2) . " " . $sc->Currency();
 				
 				$js = array();
 				
-				if($_REQUEST['isCheckout']) {
-					$js[] = '$(\'Item' . $this->ID . '_Subtotal\').innerHTML = "' . $item_subtotal . '"; ';
-					$js[] = '$(\'Subtotal\').innerHTML = "' . $subtotal . '"; ';
-					//$js[] = 'if($(\'ShippingCost\')) $(\'ShippingCost\').innerHTML = "' . $shipping . '"; ';
-					//$js[] = 'if($(\'TaxCost\')) $(\'TaxCost\').innerHTML = "' . $tax . '"; ';	
-					$js[] = '$(\'GrandTotal\').innerHTML = "' . $grand_total . '"; ';
-					$js[] = '$(\'OrderForm_OrderForm_Amount\').innerHTML = "' . $grand_total . '"; ';
-				} elseif($_REQUEST['isProduct'] || $_REQUEST['isProductGroup']) {
-					$js[] = '$(\'Cart_Item' . $prod->ID . '_Quantity\').innerHTML = "' . $item_quantity . '"; ';
-					$js[] = '$(\'Cart_Subtotal\').innerHTML = "' . $subtotal . '"; ';
-					//$js[] = 'if($(\'Cart_ShippingCost\')) $(\'Cart_ShippingCost\').innerHTML = "' . $shipping . '"; ';
-					//$js[] = 'if($(\'Cart_TaxCost\')) $(\'Cart_TaxCost\').innerHTML = "' . $tax . '"; ';
-					$js[] = '$(\'Cart_GrandTotal\').innerHTML = "' . $grand_total . '"; ';
-				}
-				return implode('\n', $js);
+				$js['Item' . $this->ID . '_Subtotal'] = $item_subtotal;
+				$js['Subtotal'] = $subtotal;
+				$js['GrandTotal'] = $grand_total;
+				$js['OrderForm_OrderForm_Amount'] = $grand_total;
+				
+				$js['Cart_Item' . $this->ID . '_Quantity'] = $item_quantity;
+				$js['Cart_Subtotal'] = $subtotal;
+				$js['Cart_GrandTotal'] = $grand_total;
+				
+				return Product::javascript_for_new_values($js);
 			}
-			else user_error("Bad data to Product->setQuantity: quantity=$_REQUEST[quantity]", E_USER_WARNING);
+			else user_error("Bad data to Product->setQuantity: quantity=$quantity", E_USER_WARNING);
 		}
-		else user_error("Bad data to Product->setQuantity: quantity=$_REQUEST[quantity]", E_USER_WARNING);
+		else user_error("Bad data to Product->setQuantity: quantity=$quantity", E_USER_WARNING);
 	}
 	
 	
