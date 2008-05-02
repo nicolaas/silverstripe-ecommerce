@@ -31,10 +31,11 @@ class OrderModifier extends DataObject {
 	 */
 	public static function init_for_order($className/*, Order $order*/) {
 		$modifier = new $className();
-		$order = Order::ShoppingCart();
+		//$order = Order::ShoppingCart();
 			//$order->add($this->data());
 		//$modifier->setOrder($order);
-		$order->addModifier($modifier->data());
+		CurrentOrder::add_modifier($modifier);
+		//$order->addModifier($modifier->data());
 	}
 	
 	//1) Attributes Functions Access
@@ -57,7 +58,8 @@ class OrderModifier extends DataObject {
 	 */
 	function Order() {
 		if($this->ID) return DataObject::get_by_id('Order', $this->OrderID);
-		else return Order::ShoppingCart();
+		else return CurrentOrder::display_order();
+		//else return Order::ShoppingCart();
 		//else return $this->order;
 	}
 	
