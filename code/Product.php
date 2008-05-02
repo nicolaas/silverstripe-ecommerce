@@ -86,12 +86,7 @@ class Product extends Page {
 	 * If it has the checkbox for 'Allow this product to be purchased',
 	 * as well as having a price. Otherwise a user can't buy it.
 	 */
-	function AllowPurchase() {
-		if($this->AllowPurchase && $this->Price) {
-			return true;
-		}
-	}
-	
+	function AllowPurchase() {return $this->AllowPurchase && $this->Price;}
 
 	/** 
 	 * Return nested/child ProductGroups underneath this one
@@ -113,7 +108,8 @@ class Product extends Page {
 	 * Return a field that will update the shopping cart using ajax when updated
 	 */
 	public function AjaxQuantityField() {
-		$sc = Order::ShoppingCart();
+		//$sc = Order::ShoppingCart();
+		$sc = CurrentOrder::display_order();
 		if($items = $sc->Items()) {
 			foreach($items as $productID => $Quantity) {
 				if(is_object($Quantity)) {
@@ -127,14 +123,19 @@ class Product extends Page {
 				}
 			}
 		}
-		return "<input class=\"ajaxQuantityField product-$this->ID\" type=\"text\" value=\"$setQuantity\" size=\"3\" maxlength=\"3\" disabled=\"disabled\" />";
+		//return "<input class=\"ajaxQuantityField product-$this->ID\" type=\"text\" value=\"$setQuantity\" size=\"3\" maxlength=\"3\" disabled=\"disabled\" />";
+		return <<<HTML
+	<input class="ajaxQuantityField product-$this->ID" type="text" value="$setQuantity" size="3" maxlength="3" disabled="disabled"/>
+	<input type="hidden" id="Product-$this->ID-URLSegment" name="product-$this->ID-URLSegment" value="$this->URLSegment"/>
+HTML;
 	}
 	
 	/**
 	 * Returns the quantity of the current product in your cart
 	 */
 	function Quantity() {
-		$order = Order::ShoppingCart();
+		//$order = Order::ShoppingCart();
+		$order = CurrentOrder::display_order();
 		if($items = $order->Items()) {
 			foreach($items as $item) {
 				if($item->ProductID == $this->ID) {
@@ -182,7 +183,8 @@ class Product extends Page {
 	 * Return the gloal tax information of the site.
 	 */
 	function TaxInfo() {
-		$order = Order::ShoppingCart();
+		//$order = Order::ShoppingCart();
+		$order = CurrentOrder::display_order();
 		return $order->TaxInfo();
 	}
 	
@@ -213,7 +215,7 @@ class Product_Controller extends Page_Controller {
 	/**
 	 * This is used by the OrderForm to add more of this product to the current cart.
 	 */
-	function add() {
+	/*function add() {
 		if($this->AllowPurchase && $this->Price) {
 			$order = Order::ShoppingCart();
 			$order->add($this->data());
@@ -221,13 +223,81 @@ class Product_Controller extends Page_Controller {
 		} else {
 			return false;
 		}
+	}*/
+	
+	function add() {
+		if($this->AllowPurchase()) {
+			CurrentOrder::add_product($this);
+			Director::redirectBack();
+		}
+		else return false;
+	}
+	
+	/**
+	 * Ajax method to set the cart quantity
+	 */
+	function setQuantity() {
+		if(is_int($_REQUEST['quantity'] + 0)) {
+			if($_REQUEST['quantity'] > 0 && $quantity = $_REQUEST['quantity']) {
+				CurrentOrder::set_product_quantity($this, $quantity);
+				//$sc = Order::ShoppingCart();
+				$sc = CurrentOrder::display_order();
+				
+				/*$prod = DataObject::get_by_id('Product', $_REQUEST['ProductID']);
+				
+				$sc->removeall($prod);
+				$sc->add($prod, $_REQUEST['Quantity']);*/
+				
+				$item_subtotal = 0;
+				$item_quantity = 0;
+				$subtotal = 0;
+				//$shipping = 0;
+				$grand_total = 0;
+				
+				if($sc->Items()) {
+					foreach($sc->Items() as $item) {
+						if($item->ProductID == $this->ID) {
+							$item_subtotal = $item->SubTotal;
+							$item_quantity = $item->Quantity;
+						}
+					}
+				}
+				
+				// TODO Use glyphs instead of hard-coding to be the '$' glyph
+				$item_subtotal = '$' . number_format($item_subtotal, 2);
+				$subtotal = '$' . number_format($sc->_Subtotal(), 2);
+				//$shipping = '$' . number_format($sc->Shipping(), 2);
+				//$tax = '$' . number_format($sc->calcAddedTax(), 2);		
+				$grand_total = '$' . number_format($sc->_Total(), 2) . " " . $sc->Currency();
+				
+				$js = array();
+				
+				if($_REQUEST['isCheckout']) {
+					$js[] = '$(\'Item' . $this->ID . '_Subtotal\').innerHTML = "' . $item_subtotal . '"; ';
+					$js[] = '$(\'Subtotal\').innerHTML = "' . $subtotal . '"; ';
+					//$js[] = 'if($(\'ShippingCost\')) $(\'ShippingCost\').innerHTML = "' . $shipping . '"; ';
+					//$js[] = 'if($(\'TaxCost\')) $(\'TaxCost\').innerHTML = "' . $tax . '"; ';	
+					$js[] = '$(\'GrandTotal\').innerHTML = "' . $grand_total . '"; ';
+					$js[] = '$(\'OrderForm_OrderForm_Amount\').innerHTML = "' . $grand_total . '"; ';
+				} elseif($_REQUEST['isProduct'] || $_REQUEST['isProductGroup']) {
+					$js[] = '$(\'Cart_Item' . $prod->ID . '_Quantity\').innerHTML = "' . $item_quantity . '"; ';
+					$js[] = '$(\'Cart_Subtotal\').innerHTML = "' . $subtotal . '"; ';
+					//$js[] = 'if($(\'Cart_ShippingCost\')) $(\'Cart_ShippingCost\').innerHTML = "' . $shipping . '"; ';
+					//$js[] = 'if($(\'Cart_TaxCost\')) $(\'Cart_TaxCost\').innerHTML = "' . $tax . '"; ';
+					$js[] = '$(\'Cart_GrandTotal\').innerHTML = "' . $grand_total . '"; ';
+				}
+				return implode('\n', $js);
+			}
+			else user_error("Bad data to Product->setQuantity: quantity=$_REQUEST[quantity]", E_USER_WARNING);
+		}
+		else user_error("Bad data to Product->setQuantity: quantity=$_REQUEST[quantity]", E_USER_WARNING);
 	}
 	
 	
 	/**
 	 * Adds a product to your cart then redirects you to the checkout
 	 */
-	function buyNow($data) {
+	/*function buyNow($data) {
 		if($this->AllowPurchase && $this->Price) {
 			$order = Order::ShoppingCart();
 			$checkout = DataObject::get_one("CheckoutPage");
@@ -241,12 +311,12 @@ class Product_Controller extends Page_Controller {
 		} else {
 			return false;
 		}
-	}
+	}*/
 
 	/**
 	 * Adds a product to the current shopping cart
 	 */
-	function addToCart() {
+	/*function addToCart() {
 		if($this->AllowPurchase && $this->Price) {
 			$order = Order::ShoppingCart();
 			$quantity = (int) $_REQUEST['Quantity'];
@@ -261,12 +331,12 @@ class Product_Controller extends Page_Controller {
 			if(!$this->AllowPurchase) echo "<li>This product doesn't have purchasing enabled";
 			return;
 		}
-	}
+	}*/
 	
 	/**
 	 * Remove product by ID
 	 */
-	function removeFromCart() {
+	/*function removeFromCart() {
 		//unset($_SESSION['cartContents'][$this->ID]);
 		
 		$order = Order::ShoppingCart();
@@ -276,23 +346,33 @@ class Product_Controller extends Page_Controller {
 		}
 	
 		Director::redirectBack();
-	}
+	}*/
 	
 	/**
 	 * This is used by the OrderForm to remove the item(s) from your cart.
 	 */
-	function remove(){
+	/*function remove(){
 		$order = Order::ShoppingCart();
 		$order->remove($this->data());
+		Director::redirectBack();
+	}*/
+	
+	function remove(){
+		CurrentOrder::remove_product($this);
 		Director::redirectBack();
 	}
 	
 	/**
 	 * Remove all of the current product from the cart.
 	 */
-	function removeall() {
+	/*function removeall() {
 		$order = Order::ShoppingCart();
 		$order->removeall($this);
+		Director::redirectBack();
+	}*/
+	
+	function removeall() {
+		CurrentOrder::remove_all_product($this);
 		Director::redirectBack();
 	}
 	
