@@ -15,7 +15,8 @@ class OrderForm extends Form{
 		Requirements::javascript("ecommerce/javascript/CheckoutPage.js");
 		
 		// get the orders and member info (if available) and define the total number format
-		$sc = Order::ShoppingCart();
+		//$sc = Order::ShoppingCart();
+		$sc = CurrentOrder::display_order();
 		$total = '$' . number_format($sc->Total(), 2);
 		$member = Member::currentUser();
 		
