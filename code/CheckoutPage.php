@@ -8,7 +8,7 @@
  * Checkout has been changed to a databound controller, to use
  * seperate tabs and fields for messages.
  */
-class CheckoutPage extends Page{
+class CheckoutPage extends Page {
 		
 	static $db = array(
 		'PurchaseComplete' => 'HTMLText',
@@ -60,24 +60,23 @@ class CheckoutPage extends Page{
 	}
 }
 
-class CheckoutPage_Controller extends Page_Controller{
+class CheckoutPage_Controller extends Page_Controller {
+	
 	/**
 	 * Include the checkout requirements, override if the project has the file,
 	 * otherwise use the module one instead
 	 */
 	public function init() {
-		// include extra requirements for this form
+		// include extra js requirements for this page
 		Requirements::javascript('jsparty/behaviour.js');
 		Requirements::javascript('ecommerce/javascript/CheckoutPage.js');
 		Requirements::javascript('ecommerce/javascript/AjaxQuantity.js');
 		
 		// include stylesheet for the checkout page
 		Requirements::themedCSS('CheckoutPage');
-
+		
+		// init the virtual methods for the order modifiers
 		$this->initVirtualMethods();
-
-		//$sc = Order::Shoppingcart();
-		//$country = Geoip::visitor_country();
 
 		parent::init();
 	}
@@ -211,7 +210,7 @@ class CheckoutPage_Controller extends Page_Controller{
 			// Worldpay doesn't have a payment object so we write one here
 			if($data['PaymentMethod'] == 'WorldpayPayment') {
 				$payment->write();
-			}			
+			}
 			
 			$result = $payment->processPayment($data, $form);
 			
@@ -366,6 +365,26 @@ class CheckoutPage_Controller extends Page_Controller{
 		return array(
 			'OrderForm' => $this->ChangeCountryForm()
 		);
+	}
+	
+	function setCountry() {
+		if(isset($_REQUEST['country']) && $country = $_REQUEST['country']) {
+			CurrentOrder::set_country($country);
+			$sc = CurrentOrder::display_order();
+			
+			$js = array();
+			if($modifiers = $sc->Modifiers()) {
+				foreach($modifiers as $modifier) $modifier->updateJavascript($js);
+			}
+			
+			$grand_total = '$' . number_format($sc->_Total(), 2) . " " . $sc->Currency();
+			$js['GrandTotal'] = $grand_total;
+			$js['OrderForm_OrderForm_Amount'] = $grand_total;
+			$js['Cart_GrandTotal'] = $grand_total;
+			
+			return Product::javascript_for_new_values($js);
+		}
+		else user_error("Bad data to CheckoutPage->setCountry: country=" . $_REQUEST['country'], E_USER_WARNING);
 	}
 	
 	function ChangeCountry2($data, $form) {
