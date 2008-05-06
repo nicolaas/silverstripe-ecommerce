@@ -265,12 +265,7 @@ class Product_Controller extends Page_Controller {
 						}
 					}
 				}
-				if($modifiers = $sc->Modifiers()) {
-					foreach($modifiers as $modifier) {
-						
-					}
-				}
-				
+								
 				// TODO Use glyphs instead of hard-coding to be the '$' glyph
 				$item_subtotal = '$' . number_format($item_subtotal, 2);
 				$subtotal = '$' . number_format($sc->_Subtotal(), 2);
@@ -286,6 +281,10 @@ class Product_Controller extends Page_Controller {
 				$js['Cart_Item' . $this->ID . '_Quantity'] = $item_quantity;
 				$js['Cart_Subtotal'] = $subtotal;
 				$js['Cart_GrandTotal'] = $grand_total;
+				
+				if($modifiers = $sc->Modifiers()) {
+					foreach($modifiers as $modifier) $modifier->updateJavascript($js);
+				}
 				
 				return Product::javascript_for_new_values($js);
 			}
