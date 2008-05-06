@@ -41,7 +41,7 @@
 		<% control Modifiers %>
 			<% if ShowInOrderTable %>
 				<tr id="$ClassNameForTable" class="modifier">
-					<td colspan="2" scope="row">$TitleForTable</td>
+					<td colspan="2" scope="row" id="$TitleIdForTable">$TitleForTable</td>
 					<td>&nbsp;</td>
 					<td class="right" id="$ValueIdForTable">$ValueForTable</td>
 				</tr>
