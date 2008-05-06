@@ -15,6 +15,7 @@ class CurrentOrder extends Object {
 	static $current_order = 'current_order';
 	static $setting = 'setting';
 	static $initialized = 'initialized';
+	static $country = 'country';
 	static $product = 'product';
 	static $modifier = 'modifier';
 	
@@ -24,6 +25,7 @@ class CurrentOrder extends Object {
 	private static function setting_index($setting) {return self::setting_table_name() . '.' . $setting;}
 	
 	private static function initialized_setting_index() {return self::setting_index(self::$initialized);}
+	private static function country_setting_index() {return self::setting_index(self::$country);}
 		
 	private static function product_table_name() {return self::$current_order . '.' . self::$product;}
 	private static function product_index(Product $product) {return self::product_table_name() . '.' . $product->ID;}
@@ -47,7 +49,29 @@ class CurrentOrder extends Object {
 		Session::clear($settingTableIndex);
 	}
 	
-	//3) Product management
+	//3) Shipping management
+	
+	static function has_country() {
+		$countrySettingIndex = self::country_setting_index();
+		return Session::get($countrySettingIndex) != null;
+	}
+	
+	static function set_country($country) {
+		$countrySettingIndex = self::country_setting_index();
+		Session::set($countrySettingIndex, $country);
+	}
+	
+	static function get_country() {
+		$countrySettingIndex = self::country_setting_index();
+		return Session::get($countrySettingIndex);
+	}
+	
+	static function remove_country() {
+		$countrySettingIndex = self::country_setting_index();
+		Session::clear($countrySettingIndex);
+	}
+	
+	//4) Product management
 	
 	static function add_product(Product $product) {
 		$productIndex = self::product_index($product);
@@ -89,7 +113,7 @@ class CurrentOrder extends Object {
 		return Session::get($productTableIndex);
 	}
 	
-	//4) Modifier management
+	//5) Modifier management
 	
 	static function add_modifier(OrderModifier $modifier) {
 		$modifierTableIndex = self::modifier_table_name();
@@ -137,7 +161,7 @@ class CurrentOrder extends Object {
 		return null;
 	}
 	
-	//5) Init function
+	//6) Init function
 	
 	static function clear() {
 		self::remove_all_settings();
@@ -145,15 +169,16 @@ class CurrentOrder extends Object {
 		self::remove_all_modifiers();
 	}
 	
-	//6) Display Function
+	//7) Display Function
 	
 	static function display_order() {
 		 return Order::display_order();
 	}
 	
-	//7) Database saving function
+	//8) Database saving function
 	
 	static function save_to_database() {
 		return Order::save_to_database();
-  	}	
+  	}
+  	
 }
