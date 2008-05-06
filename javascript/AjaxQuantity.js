@@ -27,5 +27,27 @@ Behaviour.register({
 				);
 			}
 		}
+	},
+	'select.ajaxCountryField' : {
+		initialise: function() {
+			this.disabled = false;
+		},
+		onchange : function() {
+			// Improve the url checking
+			var url = document.URL + '/setCountry/?country=' + this.value;
+			
+			new Ajax.Request(
+				url,
+				{
+					method: 'get',
+					onFailure: function(response) {
+						alert("There was an error updating your order information. Please try again.");
+					},
+					onComplete: function(response) {
+						eval(response.responseText);
+					}
+				}
+			);
+		}
 	}
 });
