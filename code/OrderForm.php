@@ -46,6 +46,7 @@ class OrderForm extends Form{
 		// setup password fields
 		if(!$member || $member->Password == '') {
 			$membershipHeader = new HeaderField("Membership details", 3);
+			$memberField = new LiteralField('MemberInfo', "<p class=\"message good\">If your are already a member, please <a href=\"Security/login?BackURL=checkout\">login</a>.</p>");
 			$accountField = new LiteralField("AccountInfo", "<p>Please choose a password, so you can login and check your order history in the future.</p><br />");
 			$passwordField = new FieldGroup(
 				new ConfirmedPasswordField('Password', 'Password')
@@ -53,6 +54,7 @@ class OrderForm extends Form{
 			$member = new Member();
 		} else {
 			$membershipHeader = new HiddenField('MembershipHeaderHidden', '');
+			$memberField = new HiddenField('MemberInfo', '');
 			$accountField = new HiddenField('AccountInfo', '');
 			$passwordField = new HiddenField('PasswordHidden', '');
 		}
@@ -98,6 +100,7 @@ class OrderForm extends Form{
 			),
 			$right = new CompositeField(
 				$membershipHeader,
+				$memberField,
 				$accountField,
 				$passwordField
 			),
