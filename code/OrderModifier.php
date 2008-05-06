@@ -74,6 +74,7 @@ class OrderModifier extends DataObject {
 	// Functions called from the Order table
 	function ShowInOrderTable() {return true;}
 	function ClassNameForTable() {return $this->ID ? $this->ClassName : get_class($this);}
+	function TitleIdForTable() {return $this->ValueIdForTable() . '_Title';}
 	function TitleForTable() {return 'Modifier';}
 	function ValueIdForTable() {return 'Cost';}
 	function ValueForTable() {return $this->getValue();}
@@ -81,6 +82,12 @@ class OrderModifier extends DataObject {
 	final function getValue() {
 		$amount = $this->Amount();
 		return ($this->IsChargable() ? 1 : -1) * $amount;
+	}
+	
+	function updateJavascript(array &$js) {
+		$js[$this->ValueIdForCart()] = $this->ValueForCart();
+		$js[$this->ValueIdForTable()] = $this->ValueForTable();
+		$js[$this->TitleIdForTable()] = $this->TitleForTable();
 	}
 	
 	//3) Database Writing Functions
