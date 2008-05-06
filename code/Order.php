@@ -121,21 +121,14 @@
 	 * @param $codeOnly - if set, returns only the country code as opposed to the full name.
 	 */
 	function findShippingCountry($codeOnly = null) {
-		if($this->UseShippingAddress && $this->ShippingCountry) {
-			if($codeOnly) {
-				return $this->ShippingCountry;
-			} else {
-				return EcommerceRole::findCountryTitle($this->ShippingCountry);
-			}
-		} else {
-			if($codeOnly) {
-				return EcommerceRole::findCountry();
-			} else {
-				return EcommerceRole::findCountryTitle(EcommerceRole::findCountry());
-			}
+		if(! $this->ID) {
+			$country = CurrentOrder::has_country() ? CurrentOrder::get_country() : EcommerceRole::findCountry();
+			return $codeOnly ? $country : EcommerceRole::findCountryTitle($country);
 		}
+		else if($this->UseShippingAddress && $country = $this->ShippingCountry)	return $codeOnly ? $country : EcommerceRole::findCountryTitle($country);
+		else return $codeOnly ? EcommerceRole::findCountry() : EcommerceRole::findCountryTitle(EcommerceRole::findCountry());
 	}
-
+	
 	/**
 	 * If a Order is manually set to paid, update
 	 * the appropriate Payment. Also log the change of the Status automatically.
