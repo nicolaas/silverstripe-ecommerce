@@ -34,14 +34,14 @@ class OrderForm extends Form{
 		}
 		
 		// create country field to change country (so the order amounts can be recalculated if necessary)
-		$shippingCountryField = new DropdownField("ShippingCountry", "", Geoip::getCountryDropDown(), $shippingCountry);
+		/*$shippingCountryField = new DropdownField("ShippingCountry", "", Geoip::getCountryDropDown(), $shippingCountry);
 		$shippingCountryField = $shippingCountryField->performReadonlyTransformation();
 		$shippingCountryFieldGroup = new FieldGroup(
 			'Country',
 			$shippingCountryField,
 			new FormAction('ChangeCountry2', 'Change Country')
 		);
-		$shippingCountryFieldGroup->subfieldParam = 'Field';
+		$shippingCountryFieldGroup->subfieldParam = 'Field';*/
 
 		// setup password fields
 		if(!$member || $member->Password == '') {
@@ -70,11 +70,14 @@ class OrderForm extends Form{
 		// a custom country field setup
 
 		$contactFields = $member->getEcommerceFields();
-		//$contactFields->removeByName('Country');
-		$contactFields->fieldByName('Country')->addExtraClass('ajaxCountryField');
+		$contactFields->removeByName('Country');
+		//$contactFields->fieldByName('Country')->addExtraClass('ajaxCountryField');
+		$countryField = new DropdownField('Country', 'Country', Geoip::getCountryDropDown(), $sc->findShippingCountry(true));
+		if(! CurrentOrder::uses_different_shipping_address()) $countryField->addExtraClass('ajaxCountryField');
+		$contactFields->push($countryField);
 		
 		// setup the shipping fields, if UseShippingAddress is true (can be set when changing country)
-		if($sc->UseShippingAddress) {
+		/*if($sc->UseShippingAddress) {
 			$shippingFields =	new CompositeField(
 				new HeaderField("Send goods to different address", 3),
 				new LiteralField('ShippingNote', '<p class="warningMessage"><em>Your goods will be sent to the address below.</em></p>'),
@@ -84,6 +87,25 @@ class OrderForm extends Form{
 				new TextField("ShippingAddress2", ""),
 				new TextField("ShippingCity", "City"),
 				$shippingCountryFieldGroup,
+				new FormAction_WithoutLabel('useBillingAddress', 'Use Billing Address for Shipping')
+			);
+		} else {
+			$shippingFields = new FormAction_WithoutLabel('useDifferentShippingAddress', 'Use Different Shipping Address');
+			// $shippingFields = new HiddenField('ShippingDetailsHidden', '');
+		}*/
+		if(CurrentOrder::uses_different_shipping_address()) {
+			$country2Field = new DropdownField('ShippingCountry', 'Country', Geoip::getCountryDropDown(), $sc->findShippingCountry(true));
+			$country2Field->addExtraClass('ajaxCountryField');
+			$shippingFields = new CompositeField(
+				new HeaderField('Send goods to different address', 3),
+				new LiteralField('ShippingNote', '<p class="warningMessage"><em>Your goods will be sent to the address below.</em></p>'),
+				new LiteralField('Help', '<p>You can use this for gift giving; no billing information will be disclosed to this address.</p>'),
+				new TextField('ShippingName', 'Name', CurrentOrder::get_name_different_shipping_address()),
+				new TextField('ShippingAddress', 'Address', CurrentOrder::get_address_different_shipping_address()),
+				new TextField('ShippingAddress2', '', CurrentOrder::get_address2_different_shipping_address()),
+				new TextField('ShippingCity', 'City', CurrentOrder::get_city_different_shipping_address()),
+				$country2Field,
+				new HiddenField('UseShippingAddress', '', true),
 				new FormAction_WithoutLabel('useBillingAddress', 'Use Billing Address for Shipping')
 			);
 		} else {
@@ -140,7 +162,7 @@ class OrderForm extends Form{
 		}
 		
 		// if UseShippingAddress is true, require validation from these fields
-		if($sc->UseShippingAddress) {
+		if(CurrentOrder::uses_different_shipping_address()) {
 			$requiredFieldsArr[] = "ShippingName";
 			$requiredFieldsArr[] = "ShippingAddress";
 			$requiredFieldsArr[] = "ShippingAddress2";
@@ -170,6 +192,8 @@ class OrderForm extends Form{
 			$this->loadNonBlankDataFrom($member);
 		}
 		
+		// Update the country if necessary
+		if(! CurrentOrder::uses_different_shipping_address()) $countryField->setValue($sc->findShippingCountry(true));
 	}
 
 	/**

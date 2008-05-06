@@ -449,15 +449,16 @@ class CheckoutPage_Controller extends Page_Controller {
 	function useDifferentShippingAddress($data, $form) {
 		$member = EcommerceRole::createOrMerge($data);
 		//$sc = Order::ShoppingCart();
-		$sc = CurrentOrder::display_order();
+		//$sc = CurrentOrder::display_order();
 		if($member) {
 			$form->saveInto($member);
 			$member->write();
 			$member->login();
 		}
 		
-		$sc->UseShippingAddress = true;
-		$sc->write();
+		//$sc->UseShippingAddress = true;
+		//$sc->write();
+		CurrentOrder::set_uses_different_shipping_address(true);
 		
 		Director::redirectBack();
 	}
@@ -465,10 +466,15 @@ class CheckoutPage_Controller extends Page_Controller {
 	function useBillingAddress($data, $form) {
 		$member = EcommerceRole::createOrMerge($data);
 		//$sc = Order::ShoppingCart();
-		$sc = CurrentOrder::display_order();
-		
-		$sc->UseShippingAddress = false;
-		$sc->write();
+		//$sc = CurrentOrder::display_order();
+		if($member) {
+			$form->saveInto($member);
+			$member->write();
+			$member->login();
+		}
+		//$sc->UseShippingAddress = false;
+		//$sc->write();
+		CurrentOrder::set_uses_different_shipping_address(false);
 		
 		Director::redirectBack();
 	}

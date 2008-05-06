@@ -122,7 +122,10 @@
 	 */
 	function findShippingCountry($codeOnly = null) {
 		if(! $this->ID) {
-			$country = CurrentOrder::has_country() ? CurrentOrder::get_country() : EcommerceRole::findCountry();
+			if(CurrentOrder::uses_different_shipping_address()) {
+				if(! $country = CurrentOrder::get_country_different_shipping_address()) $country = CurrentOrder::has_country() ? CurrentOrder::get_country() : EcommerceRole::findCountry();
+			}
+			else $country = CurrentOrder::has_country() ? CurrentOrder::get_country() : EcommerceRole::findCountry();
 			return $codeOnly ? $country : EcommerceRole::findCountryTitle($country);
 		}
 		else if($this->UseShippingAddress && $country = $this->ShippingCountry)	return $codeOnly ? $country : EcommerceRole::findCountryTitle($country);
