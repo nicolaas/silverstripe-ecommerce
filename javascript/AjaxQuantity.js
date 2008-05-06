@@ -34,7 +34,8 @@ Behaviour.register({
 		},
 		onchange : function() {
 			// Improve the url checking
-			var url = document.URL + '/setCountry/?country=' + this.value;
+			var url = document.location.href.replace(/\/$/,'');
+			url += '/setCountry/?country=' + this.value;
 			
 			new Ajax.Request(
 				url,
