@@ -17,14 +17,14 @@ class OrderForm extends Form{
 		$member = Member::currentUser();
 		
 		// create country field to change country (so the order amounts can be recalculated if necessary)
-		$countryField = new DropdownField("Country", "", Geoip::getCountryDropDown(), EcommerceRole::findCountry());
+		/*$countryField = new DropdownField("Country", "", Geoip::getCountryDropDown(), EcommerceRole::findCountry());
 		$countryField = $countryField->performReadonlyTransformation();
 		$countryFieldGroup = new FieldGroup(
 			'Country',
 			$countryField,
 			new FormAction('ChangeCountry', 'Change Country')
 		);
-		$countryFieldGroup->subfieldParam = 'Field';
+		$countryFieldGroup->subfieldParam = 'Field';*/
 
 		// check if there is a shipping country set, otherwise use the findCountry function for a member
 		if($sc->ShippingCountry) {
@@ -68,7 +68,8 @@ class OrderForm extends Form{
 		// a custom country field setup
 
 		$contactFields = $member->getEcommerceFields();
-		$contactFields->removeByName('Country');
+		//$contactFields->removeByName('Country');
+		$contactFields->fieldByName('Country')->addExtraClass('ajaxCountryField');
 		
 		// setup the shipping fields, if UseShippingAddress is true (can be set when changing country)
 		if($sc->UseShippingAddress) {
@@ -92,7 +93,7 @@ class OrderForm extends Form{
 		$fields = new FieldSet(
 			$left = new CompositeField(
 				$contactFields,
-				$countryFieldGroup,
+				//$countryFieldGroup,
 				$shippingFields
 			),
 			$right = new CompositeField(
