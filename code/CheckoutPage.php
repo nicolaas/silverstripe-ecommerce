@@ -373,14 +373,15 @@ class CheckoutPage_Controller extends Page_Controller {
 			$sc = CurrentOrder::display_order();
 			
 			$js = array();
-			if($modifiers = $sc->Modifiers()) {
-				foreach($modifiers as $modifier) $modifier->updateJavascript($js);
-			}
-			
+						
 			$grand_total = '$' . number_format($sc->_Total(), 2) . " " . $sc->Currency();
 			$js['GrandTotal'] = $grand_total;
 			$js['OrderForm_OrderForm_Amount'] = $grand_total;
 			$js['Cart_GrandTotal'] = $grand_total;
+			
+			if($modifiers = $sc->Modifiers()) {
+				foreach($modifiers as $modifier) $modifier->updateJavascript($js);
+			}
 			
 			return Product::javascript_for_new_values($js);
 		}
