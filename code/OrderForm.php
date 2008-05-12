@@ -19,7 +19,6 @@ class OrderForm extends Form{
 		
 		if(ShoppingCart::uses_different_shipping_address()) {
 			$countryField = new DropdownField('ShippingCountry', 'Country', Geoip::getCountryDropDown(), EcommerceRole::findCountry());
-			$countryField->addExtraClass('ajaxCountryField');
 			$shippingFields = new CompositeField(
 				new HeaderField('Send goods to different address', 3),
 				new LiteralField('ShippingNote', '<p class="warningMessage"><em>Your goods will be sent to the address below.</em></p>'),
@@ -39,9 +38,11 @@ class OrderForm extends Form{
 			$requiredFields[] = 'ShippingCountry';
 		}
 		else {
-			$memberFields->fieldByName('Country')->addExtraClass('ajaxCountryField');
+			$countryField = $memberFields->fieldByName('Country');
 			$shippingFields = new FormAction_WithoutLabel('useDifferentShippingAddress', 'Use Different Shipping Address');
 		}
+		
+		$countryField->addExtraClass('ajaxCountryField');
 		
 		$leftFields = new CompositeField($memberFields, $shippingFields);
 		$leftFields->setID('LeftOrder');
@@ -97,6 +98,12 @@ class OrderForm extends Form{
 		// 7) Member details loading
 		
 		if($member->ID)	$this->loadNonBlankDataFrom($member);
+		
+		// 8) Country field value update
+		
+		$currentOrder = ShoppingCart::current_order();
+		$currentOrderCountry = $currentOrder->findShippingCountry(true);
+		$countryField->setValue($currentOrderCountry);
 	}
 
 	/**
