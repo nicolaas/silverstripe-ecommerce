@@ -102,8 +102,8 @@ class DPSPayment extends Payment {
 	        $e->send();
 	  	}
 	  	
-	  	if($result['Success']) {
-	  		$this->Status = "Success";
+	  	if($result[Payment::$success]) {
+	  		$this->Status = 'Success';
 	  		$order = $this->Order();
 	  		$order->Status = 'Paid';
 	  		$order->write();
