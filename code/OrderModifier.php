@@ -29,13 +29,9 @@ class OrderModifier extends DataObject {
 	 * This function is called when the order inits its modifiers.
 	 * It is better than directly construct the modifier in the Order class because, the user may need to create several modifiers or customize it.
 	 */
-	public static function init_for_order($className/*, Order $order*/) {
+	public static function init_for_order($className) {
 		$modifier = new $className();
-		//$order = Order::ShoppingCart();
-			//$order->add($this->data());
-		//$modifier->setOrder($order);
-		CurrentOrder::add_modifier($modifier);
-		//$order->addModifier($modifier->data());
+		ShoppingCart::add_modifier($modifier);
 	}
 	
 	//1) Attributes Functions Access
@@ -58,9 +54,7 @@ class OrderModifier extends DataObject {
 	 */
 	function Order() {
 		if($this->ID) return DataObject::get_by_id('Order', $this->OrderID);
-		else return CurrentOrder::display_order();
-		//else return Order::ShoppingCart();
-		//else return $this->order;
+		else return ShoppingCart::current_order();
 	}
 	
 	//2) Display Functions
