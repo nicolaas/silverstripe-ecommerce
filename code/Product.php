@@ -78,8 +78,7 @@ class Product extends Page {
 	 */
 	function Cart() {
 		HTTP::set_cache_age(0);
-		//return Order::ShoppingCart();
-		return CurrentOrder::display_order();
+		return ShoppingCart::current_order();
 	}
 
 	/**
@@ -109,9 +108,8 @@ class Product extends Page {
 	 * Return a field that will update the shopping cart using ajax when updated
 	 */
 	public function AjaxQuantityField() {
-		//$sc = Order::ShoppingCart();
-		$sc = CurrentOrder::display_order();
-		if($items = $sc->Items()) {
+		$currentOrder = ShoppingCart::current_order();
+		if($items = $currentOrder->Items()) {
 			foreach($items as $productID => $Quantity) {
 				if(is_object($Quantity)) {
 					if($Quantity->ProductID == $this->ID) $setQuantity = $Quantity->Quantity;
@@ -142,17 +140,13 @@ JS;
 	 * Returns the quantity of the current product in your cart
 	 */
 	function Quantity() {
-		//$order = Order::ShoppingCart();
-		$order = CurrentOrder::display_order();
-		if($items = $order->Items()) {
+		$currentOrder = ShoppingCart::current_order();
+		if($items = $currentOrder->Items()) {
 			foreach($items as $item) {
-				if($item->ProductID == $this->ID) {
-					return $item->Quantity;
-				}
+				if($item->ProductID == $this->ID) return $item->Quantity;
 			}
-		} else {
-			return false;
 		}
+		else return false;
 	}	
 
 	/**
@@ -191,9 +185,8 @@ JS;
 	 * Return the gloal tax information of the site.
 	 */
 	function TaxInfo() {
-		//$order = Order::ShoppingCart();
-		$order = CurrentOrder::display_order();
-		return $order->TaxInfo();
+		$currentOrder = ShoppingCart::current_order();
+		return $currentOrder->TaxInfo();
 	}
 	
 }
@@ -235,7 +228,7 @@ class Product_Controller extends Page_Controller {
 	
 	function add() {
 		if($this->AllowPurchase()) {
-			CurrentOrder::add_product($this);
+			ShoppingCart::add_product($this);
 			Director::redirectBack();
 		}
 		else return false;
@@ -248,16 +241,15 @@ class Product_Controller extends Page_Controller {
 		$quantity = $_REQUEST['quantity'];
 		if(is_numeric($quantity) && is_int($quantity + 0)) {
 			if($quantity > 0) {
-				CurrentOrder::set_product_quantity($this, $quantity);
-				//$sc = Order::ShoppingCart();
-				$sc = CurrentOrder::display_order();
+				ShoppingCart::set_product_quantity($this, $quantity);
+				$currentOrder = ShoppingCart::current_order();
 				
 				$item_subtotal = 0;
 				$item_quantity = 0;
 				$subtotal = 0;
 				$grand_total = 0;
 				
-				if($items = $sc->Items()) {
+				if($items = $currentOrder->Items()) {
 					foreach($items as $item) {
 						if($item->ProductID == $this->ID) {
 							$item_subtotal = $item->SubTotal;
@@ -268,8 +260,8 @@ class Product_Controller extends Page_Controller {
 								
 				// TODO Use glyphs instead of hard-coding to be the '$' glyph
 				$item_subtotal = '$' . number_format($item_subtotal, 2);
-				$subtotal = '$' . number_format($sc->_Subtotal(), 2);
-				$grand_total = '$' . number_format($sc->_Total(), 2) . " " . $sc->Currency();
+				$subtotal = '$' . number_format($currentOrder->_Subtotal(), 2);
+				$grand_total = '$' . number_format($currentOrder->_Total(), 2) . " " . $currentOrder->Currency();
 				
 				$js = array();
 				
@@ -282,7 +274,7 @@ class Product_Controller extends Page_Controller {
 				$js['Cart_Subtotal'] = $subtotal;
 				$js['Cart_GrandTotal'] = $grand_total;
 				
-				if($modifiers = $sc->Modifiers()) {
+				if($modifiers = $currentOrder->Modifiers()) {
 					foreach($modifiers as $modifier) $modifier->updateJavascript($js);
 				}
 				
@@ -358,7 +350,7 @@ class Product_Controller extends Page_Controller {
 	}*/
 	
 	function remove(){
-		CurrentOrder::remove_product($this);
+		ShoppingCart::remove_product($this);
 		Director::redirectBack();
 	}
 	
@@ -372,7 +364,7 @@ class Product_Controller extends Page_Controller {
 	}*/
 	
 	function removeall() {
-		CurrentOrder::remove_all_product($this);
+		ShoppingCart::remove_all_product($this);
 		Director::redirectBack();
 	}
 	
