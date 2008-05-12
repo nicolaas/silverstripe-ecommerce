@@ -33,8 +33,8 @@ Behaviour.register({
 			this.disabled = false;
 		},
 		onchange : function() {
-			// Improve the url checking
-			var url = document.location.href.replace(/\/$/,'');
+			var url = document.location.href.replace(/(\?.*)$/,'');
+			url = url.replace(/\/$/,'');
 			url += '/setCountry/?country=' + this.value;
 			
 			new Ajax.Request(
