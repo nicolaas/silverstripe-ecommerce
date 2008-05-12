@@ -31,8 +31,7 @@ class ProductGroup extends Page {
 	 */
 	function Cart() {
 		HTTP::set_cache_age(0);
-		//return Order::ShoppingCart();
-		return CurrentOrder::display_order();
+		return ShoppingCart::current_order();
 	}
 
 	/**
