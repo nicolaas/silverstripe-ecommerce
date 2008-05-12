@@ -15,6 +15,8 @@ class ShoppingCart extends Object {
 	static $current_order = 'current_order';
 		static $setting = 'setting';
 			static $initialized = 'initialized';
+			static $country = 'country';
+			static $uses_different_address = 'uses_different_address';
 		static $product = 'product';
 		static $modifier = 'modifier';
 	
@@ -23,6 +25,8 @@ class ShoppingCart extends Object {
 	private static function setting_table_name() {return self::$current_order . '.' . self::$setting;}
 	private static function setting_index($setting) {return self::setting_table_name() . '.' . $setting;}
 		private static function initialized_setting_index() {return self::setting_index(self::$initialized);}
+		private static function country_setting_index() {return self::setting_index(self::$country);}
+		private static function uses_different_shipping_address_index() {return self::setting_index(self::$uses_different_address);}
 	private static function product_table_name() {return self::$current_order . '.' . self::$product;}
 	private static function product_index(Product $product) {return self::product_table_name() . '.' . $product->ID;}
 	
@@ -44,7 +48,39 @@ class ShoppingCart extends Object {
 		$settingTableIndex = self::setting_table_name();
 		Session::clear($settingTableIndex);
 	}
-		
+	
+	//3 Bis) Shipping management
+	
+	static function has_country() {
+		$countrySettingIndex = self::country_setting_index();
+		return Session::get($countrySettingIndex) != null;
+	}
+	
+	static function set_country($country) {
+		$countrySettingIndex = self::country_setting_index();
+		Session::set($countrySettingIndex, $country);
+	}
+	
+	static function get_country() {
+		$countrySettingIndex = self::country_setting_index();
+		return Session::get($countrySettingIndex);
+	}
+	
+	static function remove_country() {
+		$countrySettingIndex = self::country_setting_index();
+		Session::clear($countrySettingIndex);
+	}
+	
+	static function set_uses_different_shipping_address($usesDifferentAddress) {
+		$usesDifferentShippingAddressIndex = self::uses_different_shipping_address_index();
+		$usesDifferentAddress ? Session::set($usesDifferentShippingAddressIndex, true) : Session::clear($usesDifferentShippingAddressIndex);
+	}
+	
+	static function uses_different_shipping_address() {
+		$usesDifferentShippingAddressIndex = self::uses_different_shipping_address_index();
+		return Session::get($usesDifferentShippingAddressIndex);
+	}
+	
 	//4) Product management
 	
 	static function add_product(Product $product) {
@@ -143,15 +179,15 @@ class ShoppingCart extends Object {
 		self::remove_all_modifiers();
 	}
 	
-	//7) Display Function
+	//7) Current order access function
 	
-	static function display_order() {
-		 return Order::display_order();
+	static function current_order() {
+		 return Order::current_order();
 	}
 	
 	//8) Database saving function
 	
-	static function save_to_database() {
+	static function save_current_order_to_database() {
 		return Order::save_to_database();
   	}
   	
