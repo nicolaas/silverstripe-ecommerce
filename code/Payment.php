@@ -33,6 +33,8 @@ class Payment extends DataObject {
 		"Order" => "Order"
 	);
 	
+	static $success = 'success';
+	
 	/**
 	 * Process this payment, and set the status message in the session.
 	 * Returns true on a successful payment, false on an error (such as CC declined).
