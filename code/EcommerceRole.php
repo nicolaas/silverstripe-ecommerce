@@ -91,6 +91,17 @@ class EcommerceRole extends DataObjectDecorator {
 		return new CompositeField($fields);
 		
 	}
+	
+	function getEcommerceRequiredFields() {
+		return array(
+			'FirstName',
+			'Surname',
+			'Email',
+			'Address',
+			'City',
+			'Country'
+		);
+	}
 
 	/**
 	 * Create a new member from the given data or merge with the built-in fields.
