@@ -27,32 +27,14 @@ Behaviour.register({
 		},
 		onclick: PaymentMethodChanged
 	},
-	'#OrderForm_OrderForm_action_ChangeCountry' : {
-		onclick: function() {
-			$('OrderForm_OrderForm').onsubmit = function() {
-				return true;
-			}
-		}
-	},
-	'#OrderForm_OrderForm_action_ChangeCountry2' : {
-		onclick: function() {
-			$('OrderForm_OrderForm').onsubmit = function() {
-				return true;
-			}
-		}
-	},
 	'#OrderForm_OrderForm_action_useDifferentShippingAddress' : {
 		onclick: function() {
-			$('OrderForm_OrderForm').onsubmit = function() {
-				return true;
-			}
+			$('OrderForm_OrderForm').onsubmit = function() {return true;}
 		}
 	},
-	'#OrderForm_OrderForm_action_useBillingAddress' : {
+	'#OrderForm_OrderForm_action_useMemberShippingAddress' : {
 		onclick: function() {
-			$('OrderForm_OrderForm').onsubmit = function() {
-				return true;
-			}
+			$('OrderForm_OrderForm').onsubmit = function() {return true;}
 		}
 	}
 });

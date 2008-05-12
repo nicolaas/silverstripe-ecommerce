@@ -8,202 +8,188 @@
   * Order form for the checkout object
   */
 class OrderForm extends Form{
+	
 	function __construct($controller, $name) {
-				
-		// get the orders and member info (if available) and define the total number format
-		//$sc = Order::ShoppingCart();
-		$sc = CurrentOrder::display_order();
-		$total = '$' . number_format($sc->Total(), 2);
-		$member = Member::currentUser();
 		
-		// create country field to change country (so the order amounts can be recalculated if necessary)
-		/*$countryField = new DropdownField("Country", "", Geoip::getCountryDropDown(), EcommerceRole::findCountry());
-		$countryField = $countryField->performReadonlyTransformation();
-		$countryFieldGroup = new FieldGroup(
-			'Country',
-			$countryField,
-			new FormAction('ChangeCountry', 'Change Country')
-		);
-		$countryFieldGroup->subfieldParam = 'Field';*/
-
-		// check if there is a shipping country set, otherwise use the findCountry function for a member
-		if($sc->ShippingCountry) {
-			$shippingCountry = $sc->ShippingCountry;
-		} else {
-			$shippingCountry = EcommerceRole::findCountry();
-		}
+		// 1) Member and shipping fields
 		
-		// create country field to change country (so the order amounts can be recalculated if necessary)
-		/*$shippingCountryField = new DropdownField("ShippingCountry", "", Geoip::getCountryDropDown(), $shippingCountry);
-		$shippingCountryField = $shippingCountryField->performReadonlyTransformation();
-		$shippingCountryFieldGroup = new FieldGroup(
-			'Country',
-			$shippingCountryField,
-			new FormAction('ChangeCountry2', 'Change Country')
-		);
-		$shippingCountryFieldGroup->subfieldParam = 'Field';*/
-
-		// setup password fields
-		if(!$member || $member->Password == '') {
-			$membershipHeader = new HeaderField("Membership details", 3);
-			$memberField = new LiteralField('MemberInfo', "<p class=\"message good\">If your are already a member, please <a href=\"Security/login?BackURL=checkout/\">login</a>.</p>");
-			$accountField = new LiteralField("AccountInfo", "<p>Please choose a password, so you can login and check your order history in the future.</p><br />");
-			$passwordField = new FieldGroup(
-				new ConfirmedPasswordField('Password', 'Password')
-			);
-			$member = new Member();
-		} else {
-			$membershipHeader = new HiddenField('MembershipHeaderHidden', '');
-			$memberField = new HiddenField('MemberInfo', '');
-			$accountField = new HiddenField('AccountInfo', '');
-			$passwordField = new HiddenField('PasswordHidden', '');
-		}
+		$member = Member::currentUser() ? Member::currentUser() : new Member();
+		$memberFields = $member->getEcommerceFields();
+		$requiredFields = $member->getEcommerceRequiredFields();
 		
-		// if a terms page is in the system, create a field to confirm the user read it
-		if($tacPage = DataObject::get_one('EcommerceTermsPage')) {
-			$readConditionsField = new CheckboxField('ReadConditions', "I agree to the terms and conditions stated on the <a href=\"$tacPage->URLSegment\" title=\"Read the shop terms and conditions for this site\">terms and conditions</a> page");
-		} else {
-			$readConditionsField = new HiddenField('ReadConditions', '');
-		}
-		
-		// initialise variables with contact fields from member, remove country because orderform requires
-		// a custom country field setup
-
-		$contactFields = $member->getEcommerceFields();
-		$contactFields->removeByName('Country');
-		//$contactFields->fieldByName('Country')->addExtraClass('ajaxCountryField');
-		$countryField = new DropdownField('Country', 'Country', Geoip::getCountryDropDown(), $sc->findShippingCountry(true));
-		if(! CurrentOrder::uses_different_shipping_address()) $countryField->addExtraClass('ajaxCountryField');
-		$contactFields->push($countryField);
-		
-		// setup the shipping fields, if UseShippingAddress is true (can be set when changing country)
-		/*if($sc->UseShippingAddress) {
-			$shippingFields =	new CompositeField(
-				new HeaderField("Send goods to different address", 3),
-				new LiteralField('ShippingNote', '<p class="warningMessage"><em>Your goods will be sent to the address below.</em></p>'),
-				new LiteralField("Help", "<p>You can use this for gift giving; no billing information will be disclosed to this address.</p>"),
-				new TextField("ShippingName", "Name"),
-				new TextField("ShippingAddress", "Address"),
-				new TextField("ShippingAddress2", ""),
-				new TextField("ShippingCity", "City"),
-				$shippingCountryFieldGroup,
-				new FormAction_WithoutLabel('useBillingAddress', 'Use Billing Address for Shipping')
-			);
-		} else {
-			$shippingFields = new FormAction_WithoutLabel('useDifferentShippingAddress', 'Use Different Shipping Address');
-			// $shippingFields = new HiddenField('ShippingDetailsHidden', '');
-		}*/
-		if(CurrentOrder::uses_different_shipping_address()) {
-			$country2Field = new DropdownField('ShippingCountry', 'Country', Geoip::getCountryDropDown(), $sc->findShippingCountry(true));
-			$country2Field->addExtraClass('ajaxCountryField');
+		if(ShoppingCart::uses_different_shipping_address()) {
+			$countryField = new DropdownField('ShippingCountry', 'Country', Geoip::getCountryDropDown(), EcommerceRole::findCountry());
+			$countryField->addExtraClass('ajaxCountryField');
 			$shippingFields = new CompositeField(
 				new HeaderField('Send goods to different address', 3),
 				new LiteralField('ShippingNote', '<p class="warningMessage"><em>Your goods will be sent to the address below.</em></p>'),
-				new LiteralField('Help', '<p>You can use this for gift giving; no billing information will be disclosed to this address.</p>'),
-				new TextField('ShippingName', 'Name', CurrentOrder::get_name_different_shipping_address()),
-				new TextField('ShippingAddress', 'Address', CurrentOrder::get_address_different_shipping_address()),
-				new TextField('ShippingAddress2', '', CurrentOrder::get_address2_different_shipping_address()),
-				new TextField('ShippingCity', 'City', CurrentOrder::get_city_different_shipping_address()),
-				$country2Field,
+				new LiteralField('Help', '<p>You can use this for gift giving. No billing information will be disclosed to this address.</p>'),
+				new TextField('ShippingName', 'Name'),
+				new TextField('ShippingAddress', 'Address'),
+				new TextField('ShippingAddress2', ''),
+				new TextField('ShippingCity', 'City'),
+				$countryField,
 				new HiddenField('UseShippingAddress', '', true),
-				new FormAction_WithoutLabel('useBillingAddress', 'Use Billing Address for Shipping')
+				new FormAction_WithoutLabel('useMemberShippingAddress', 'Use Billing Address for Shipping')
 			);
-		} else {
+			
+			$requiredFields[] = 'ShippingName';
+			$requiredFields[] = 'ShippingAddress';
+			$requiredFields[] = 'ShippingCity';
+			$requiredFields[] = 'ShippingCountry';
+		}
+		else {
+			$memberFields->fieldByName('Country')->addExtraClass('ajaxCountryField');
 			$shippingFields = new FormAction_WithoutLabel('useDifferentShippingAddress', 'Use Different Shipping Address');
-			// $shippingFields = new HiddenField('ShippingDetailsHidden', '');
 		}
 		
-		// setup the fields into a fieldset
-		$fields = new FieldSet(
-			$left = new CompositeField(
-				$contactFields,
-				//$countryFieldGroup,
-				$shippingFields
-			),
-			$right = new CompositeField(
-				$membershipHeader,
-				$memberField,
-				$accountField,
-				$passwordField
-			),
-			$bottom = new CompositeField(
-				$readConditionsField
-			)
-		);
+		$leftFields = new CompositeField($memberFields, $shippingFields);
+		$leftFields->setID('LeftOrder');
+				
+		$rightFields = new CompositeField();
+		$rightFields->setID('RightOrder');
 		
-		// apply IDs so we can style these blocks of fields
-		$left->setID('LeftOrder');
-		$right->setID('RightOrder');
-		$bottom->setID('BottomOrder');
-		
-		
-		// Add the payment processing fields 
-		$paymentFields = Payment::combined_form_fields($total . " " . $sc->Currency(), $sc->Subtotal());
-		foreach($paymentFields as $field) {
-			$right->push($field);
+		if(! $member->ID || $member->Password == '') {
+			$rightFields->push(new HeaderField('Membership Details', 3));
+			$rightFields->push(new LiteralField('MemberInfo', "<p class=\"message good\">If your are already a member, please <a href=\"Security/login?BackURL=checkout/\">login</a>.</p>"));
+			$rightFields->push(new LiteralField('AccountInfo', "<p>Please choose a password, so you can login and check your order history in the future.</p><br/>"));
+			$rightFields->push(new FieldGroup(new ConfirmedPasswordField('Password', 'Password')));
+			
+			$requiredFields[] = 'Password[_Password]';
+			$requiredFields[] = 'Password[_ConfirmPassword]';
 		}
 		
-		$actions = 	new FieldSet(
-			new FormAction("processOrder", "Place order and make payment")
-		);
+		// 2) Payment fields
 		
-		// setup required fields
-		$requiredFieldsArr = array(
-			"FirstName",
-			"Surname",
-			"Address",
-			"Email",
-			"City"
-		);
-
-		// if terms page exists, add validation for the field on the form
-		if($tacPage) {
-			$requiredFieldsArr[] = 'ReadConditions';
+		$currentOrder = ShoppingCart::current_order();
+		$total = '$' . number_format($currentOrder->Total(), 2);
+		$paymentFields = Payment::combined_form_fields("$total " . $currentOrder->Currency(), $currentOrder->Subtotal());
+		foreach($paymentFields as $field) $rightFields->push($field);
+		
+		if($paymentRequiredFields = Payment::combined_form_requirements()) $requiredFields = array_merge($requiredFields, $paymentRequiredFields);
+		
+		// 3) Put all the fields in one FieldSet
+		
+		$fields = new FieldSet($leftFields, $rightFields);
+		
+		// 4) Terms and conditions field
+		
+		// If a terms and conditions page exists, we need to create a field to confirm the user has read it
+		if($tacPage = DataObject::get_one('EcommerceTermsPage')) {
+			$bottomFields = new CompositeField(new CheckboxField('ReadTermsAndConditions', "I agree to the terms and conditions stated on the <a href=\"$tacPage->URLSegment\" title=\"Read the shop terms and conditions for this site\">terms and conditions</a> page"));
+			$bottomFields->setID('BottomOrder');
+			
+			$fields->push($bottomFields);
+			
+			$requiredFields[] = 'ReadTermsAndConditions';
 		}
 		
-		// if UseShippingAddress is true, require validation from these fields
-		if(CurrentOrder::uses_different_shipping_address()) {
-			$requiredFieldsArr[] = "ShippingName";
-			$requiredFieldsArr[] = "ShippingAddress";
-			$requiredFieldsArr[] = "ShippingAddress2";
-			$requiredFieldsArr[] = "ShippingCity";
-		}
+		// 5) Actions and required fields creation
 		
-		// merge payment field requirements
-		if($methodRequirements = Payment::combined_form_requirements()) {
-			$requiredFieldsArr = array_merge($requiredFieldsArr, $methodRequirements);
-		}
+		$actions = 	new FieldSet(new FormAction('processOrder', 'Place order and make payment'));
 		
-		// apply the required fields array we've accumulated into the object		
-		$RequiredFields = new CustomRequiredFields(
-			$requiredFieldsArr
-		);
-
-		parent::__construct($controller, $name, $fields, $actions, $RequiredFields);
+		$requiredFields = new CustomRequiredFields($requiredFields);
 		
-		// Load any data available from our serialized data into the form
-		if($serialized_data = Session::get("MemberOrderData")) {
-			$unserialized_data = unserialize($serialized_data);
-			$this->loadNonBlankDataFrom($unserialized_data);
-		}
+		// 6) Form construction
 		
-		// Load any data avaliable into the form.
-		if($member = Member::currentUser()){
-			$this->loadNonBlankDataFrom($member);
-		}
+		parent::__construct($controller, $name, $fields, $actions, $requiredFields);
 		
-		// Update the country if necessary
-		if(! CurrentOrder::uses_different_shipping_address()) $countryField->setValue($sc->findShippingCountry(true));
+		// 7) Member details loading
+		
+		if($member->ID)	$this->loadNonBlankDataFrom($member);
 	}
 
 	/**
-	 * Disable the validator when you're calling ChangeCountry
+	 * Disable the validator when the action clicked is to use a different shipping address
+	 * or use the member shipping address.
 	 */
 	function beforeProcessing() {
-		if(isset($_REQUEST['action_ChangeCountry']) || isset($_REQUEST['action_ChangeCountry2']) || isset($_REQUEST['action_useDifferentShippingAddress']) ||  isset($_REQUEST['action_useBillingAddress'])) {
-			return true;
-		} else {
-			return parent::beforeProcessing();
+		if(isset($_REQUEST['action_useDifferentShippingAddress']) || isset($_REQUEST['action_useMemberShippingAddress'])) return true;
+		else return parent::beforeProcessing();
+	}
+	
+	/*
+	 * Save in the session that the current member wants to use a different shipping address.
+	 */
+	function useDifferentShippingAddress($data, $form) {
+		ShoppingCart::set_uses_different_shipping_address(true);
+		Director::redirectBack();
+	}
+	
+	/*
+	 * Save in the session that the current member wants to use his address as a shipping address.
+	 */
+	function useMemberShippingAddress($data, $form) {
+		ShoppingCart::set_uses_different_shipping_address(false);
+		Director::redirectBack();
+	}
+	
+	/** 
+	 * Processes the order information from the Shopping cart, creates or merges
+	 * the member from the database, and then processes the payment.
+	 * This function concerns only the current order
+	 */
+	function processOrder($data, $form) {
+		
+		// 1) Check to see if there are still items in the current order
+		
+		if(ShoppingCart::has_products()) {
+			
+			// 2) Save the member details
+			
+			$member = EcommerceRole::createOrMerge($data);
+			$member->write();
+			$member->logIn();
+			
+			// 3) Save the current order details (items and modifiers) (which are at the moment in the session) in the database
+			
+			$order = ShoppingCart::save_current_order_to_database();
+			
+			// 4) Save shipping address details
+			
+			$form->saveInto($order);
+			
+			$order->write();
+			
+			// 5) Proceed to payment
+			
+			$data['BillingId'] = $order->ID;
+			
+			// Save payment data from form and process payment
+						
+			$payment = Object::create($data['PaymentMethod']);
+			if(! $payment instanceof Payment) user_error(get_class($payment) . ' is not a Payment object !', E_USER_ERROR);
+			$form->saveInto($payment);
+			$payment->OrderID = $order->ID;
+			$payment->Amount = $order->Total();
+			
+			// Worldpay doesn't have a payment object so we write one here
+			if($data['PaymentMethod'] == 'WorldpayPayment')	$payment->write();
+			
+			$result = $payment->processPayment($data, $form);
+			
+			if($result[Payment::$success]) { // Successful payment
+				$order->sendReceipt();
+				$order->write();
+				
+				ShoppingCart::clear();
+				
+				Director::redirect(CheckoutPage::find_link() . "OrderSuccessful/$order->ID");
+				return;
+			}
+			// Longer payment process, such as Worldpay
+			else if($result['Processing']) return $result['ReturnValue'];
+	 		
+			else { // Failed payment
+				$form->sessionMessage("Sorry, your payment was not accepted, please try again<br/><strong>$result[HelpText]:</strong> $result[MerchantHelpText]", 'bad');
+	 			Director::redirect(CheckoutPage::find_link() . $order->ID);
+	 			return;
+			}
+		}
+		else { // There is no items in the current order
+			$form->sessionMessage('Please add some items to your cart', 'warning');
+		   	Director::redirectBack();
+		   	return;
 		}
 	}
 }
