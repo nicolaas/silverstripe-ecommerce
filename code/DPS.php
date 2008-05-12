@@ -89,7 +89,7 @@ class DPS {
 			user_error("dpsRequest_pxd not passed credentials", E_USER_ERROR);
 	
 			return array(
-				"Success" => false,
+				Payment::$success => false,
 				"Fatal" => true,
 				"ResponseText" => "MISSING_CREDENTIALS",
 				"HelpText" => "The server has been misconfigured",
@@ -103,7 +103,7 @@ class DPS {
 		foreach($requiredDetails[$details[TxnType]] as $k) {
 			if(!$details[$k]) {
 				return array(
-					"Success" => false,
+					Payment::$success => false,
 					"Fatal" => true,
 					"ResponseText" => "MISSING_DETAILS",
 					"HelpText" => "The server has been misconfigured",
@@ -137,7 +137,7 @@ class DPS {
 	 	
 		if(!$response)
 			return array(
-				"Success" => 0,
+				Payment::$success => 0,
 				"ReCo" => "X1",
 				"ResponseText" => "COMMUNICATIONS ERROR",
 				"HelpText" => "There has been a communication error with the payment server",
@@ -163,7 +163,7 @@ class DPS {
 
 			if(!$statusResponse) 
 				return array( 
-					"Success" => 0, 
+					Payment::$success => 0, 
 					"ReCo" => "X1", 
 					"ResponseText" => "COMMUNICATIONS ERROR", 
 					"HelpText" => "There has been a communication error with the payment server", 
@@ -190,7 +190,7 @@ class DPS {
 		$txnref = $msg->get_element_text("DpsTxnRef");
 	
 		$returnVal = array(
-			"Success" => $success,
+			Payment::$success => $success,
 			"ReCo" => $reco,
 			"ResponseText" => $responsetext,
 			"HelpText" => $helptext,
