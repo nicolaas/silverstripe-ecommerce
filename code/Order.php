@@ -101,7 +101,7 @@
 	static function site_currency() {
 		return self::$site_currency;
 	}
-
+		
 	/*
 	 * The modifiers represent the additional charges or deductions associated to an order like shipping, tax but also vounchers, etc...
 	 */
@@ -120,16 +120,10 @@
 	 * shipping country then it uses that. Else it's the member's country.
 	 * @param $codeOnly - if set, returns only the country code as opposed to the full name.
 	 */
-	function findShippingCountry($codeOnly = null) {
-		if(! $this->ID) {
-			if(CurrentOrder::uses_different_shipping_address()) {
-				if(! $country = CurrentOrder::get_country_different_shipping_address()) $country = CurrentOrder::has_country() ? CurrentOrder::get_country() : EcommerceRole::findCountry();
-			}
-			else $country = CurrentOrder::has_country() ? CurrentOrder::get_country() : EcommerceRole::findCountry();
-			return $codeOnly ? $country : EcommerceRole::findCountryTitle($country);
-		}
-		else if($this->UseShippingAddress && $country = $this->ShippingCountry)	return $codeOnly ? $country : EcommerceRole::findCountryTitle($country);
-		else return $codeOnly ? EcommerceRole::findCountry() : EcommerceRole::findCountryTitle(EcommerceRole::findCountry());
+	function findShippingCountry($codeOnly = false) {
+		if(! $this->ID)	$country = ShoppingCart::has_country() ? ShoppingCart::get_country() : EcommerceRole::findCountry();
+		else if(! $this->UseShippingAddress || ! $country = $this->ShippingCountry)	$country = EcommerceRole::findCountry();
+		return $codeOnly ? $country : EcommerceRole::findCountryTitle($country);
 	}
 	
 	/**
@@ -141,7 +135,7 @@
 			// if the status was set to paid for the first time, update a payment-object
 			$payment = DataObject::get_one('Payment', "OrderID = {$this->ID}");
 			if($payment) {
-				$payment->Status = "Success";
+				$payment->Status = 'Success';
 				$payment->write();
 			}
 		} else if($this->Status == 'Unpaid') {
@@ -233,7 +227,7 @@
 		return $this;
 	} */
 	
-	static function display_order() {return new Order();} 
+	static function current_order() {return new Order();}
 	
 	static function save_to_database() {
 		
@@ -244,11 +238,11 @@
 				
 		//2) Products saving
 		
-		if($products = CurrentOrder::get_products()) $order->createOrderItems($products, true);
+		if($products = ShoppingCart::get_products()) $order->createOrderItems($products, true);
 		
 		//3) Modifiers saving
 		
-		if($modifiers = CurrentOrder::get_modifiers()) $order->createOrderModifiers($modifiers, true);
+		if($modifiers = ShoppingCart::get_modifiers()) $order->createOrderModifiers($modifiers, true);
 		
 		//4) Member saving
 		
@@ -436,7 +430,7 @@
 	function Items() {
  		// If we have an ID, assume that this is a database order
  		if($this->ID) return $this->itemsFromDatabase();
- 		else if($products = CurrentOrder::get_products()) return $this->createOrderItems($products);
+ 		else if($products = ShoppingCart::get_products()) return $this->createOrderItems($products);
  		else return null;
 	}
 
@@ -516,7 +510,7 @@
  	function Modifiers(){
  		// If we have an ID, assume that this is a database order
  		if($this->ID) return $this->modifiersFromDatabase();
- 		else if($modifiers = CurrentOrder::get_modifiers()) return $this->createOrderModifiers($modifiers);
+ 		else if($modifiers = ShoppingCart::get_modifiers()) return $this->createOrderModifiers($modifiers);
  		else return null;
 	}
 			
@@ -612,7 +606,7 @@
 		$payment->OrderID = $this->ID;
 		$result = $payment->processPayment();
 				
-		if($result[Success]) {
+		if($result[Payment::$success]) {
 			// PURCHASE COMPLETE
 		  return true;
 		} else {
