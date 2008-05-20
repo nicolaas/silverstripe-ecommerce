@@ -17,8 +17,8 @@ class ShoppingCart extends Object {
 			static $initialized = 'initialized';
 			static $country = 'country';
 			static $uses_different_address = 'uses_different_address';
-		static $product = 'product';
-		static $modifier = 'modifier';
+		static $items = 'items';
+		static $modifiers = 'modifiers';
 	
 	//2) Functions which return variable names stored in the session
 	
@@ -27,10 +27,9 @@ class ShoppingCart extends Object {
 		private static function initialized_setting_index() {return self::setting_index(self::$initialized);}
 		private static function country_setting_index() {return self::setting_index(self::$country);}
 		private static function uses_different_shipping_address_index() {return self::setting_index(self::$uses_different_address);}
-	private static function product_table_name() {return self::$current_order . '.' . self::$product;}
-	private static function product_index(Product $product) {return self::product_table_name() . '.' . $product->ID;}
-	
-	private static function modifier_table_name() {return self::$current_order . '.' . self::$modifier;}
+	private static function items_table_name() {return self::$current_order . '.' . self::$items;}
+	private static function item_index($index) {return self::items_table_name() . '.' . $index;}
+	private static function modifiers_table_name() {return self::$current_order . '.' . self::$modifiers;}
 		
 	//3) Initialisation management
 	
@@ -83,7 +82,7 @@ class ShoppingCart extends Object {
 	
 	//4) Product management
 	
-	static function add_product(Product $product) {
+	/*static function add_product(Product $product) {
 		$productIndex = self::product_index($product);
 		$newQuantity = Session::get($productIndex) + 1;
 		Session::set($productIndex, $newQuantity);
@@ -121,40 +120,109 @@ class ShoppingCart extends Object {
 	static function get_products() {
 		$productTableIndex = self::product_table_name();
 		return Session::get($productTableIndex);
+	}*/
+	
+	static function add_new_item(OrderItem $item) {
+		$itemsTableIndex = self::items_table_name();
+		if($serializedItems = Session::get($itemsTableIndex)) {
+			foreach($serializedItems as $itemIndex => $serializedItem) {
+				if($serializedItem != null) {
+					$unserializedItem = unserialize($serializedItem);
+					if($unserializedItem->hasSameContent($item)) return self::add_item($itemIndex, $item->getQuantity());
+				}
+			}
+		}
+		Session::addToArray($itemsTableIndex, serialize($item));
+	}
+	
+	static function add_item($itemIndex, $quantity = 1) {
+		$serializedItemIndex = self::item_index($itemIndex);
+		$serializedItem = Session::get($serializedItemIndex);
+		$unserializedItem = unserialize($serializedItem);
+		$unserializedItem->addQuantity($quantity);
+		self::set_item($itemIndex, $unserializedItem);
+	}
+	
+	protected static function set_item($itemIndex, Order_item $item) {
+		$serializedItemIndex = self::item_index($itemIndex);
+		Session::set($serializedItemIndex, serialize($item));
+	}
+	
+	static function set_item_quantity($itemIndex, $quantity) {
+		$serializedItemIndex = self::item_index($itemIndex);
+		$serializedItem = Session::get($serializedItemIndex);
+		$unserializedItem = unserialize($serializedItem);
+		$unserializedItem->setQuantity($quantity);
+		self::set_item($itemIndex, $unserializedItem);
+	}
+	
+	static function remove_item($itemIndex, $quantity = 1) {
+		$serializedItemIndex = self::item_index($itemIndex);
+		$serializedItem = Session::get($serializedItemIndex);
+		$unserializedItem = unserialize($serializedItem);
+		$newQuantity = $unserializedItem->getQuantity() - $quantity;
+		if($newQuantity > 0) {
+			$unserializedItem->setQuantity($newQuantity);
+			self::set_item($itemIndex, $unserializedItem);
+		}
+		else Session::clear($serializedItemIndex);
+	}
+	
+	static function remove_all_item($itemIndex) {
+		$serializedItemIndex = self::item_index($itemIndex);
+		Session::clear($serializedItemIndex);
+	}
+	
+	static function remove_all_items() {
+		$itemsTableIndex = self::items_table_name();
+		Session::clear($itemsTableIndex);
+	}
+	
+	static function has_items() {
+		$itemsTableIndex = self::items_table_name();
+		return Session::get($itemsTableIndex) != null;
+	}
+		
+	static function get_items() {
+		$itemsTableIndex = self::items_table_name();
+		if($serializedItems = Session::get($itemsTableIndex)) {
+			$items = array();
+			foreach($serializedItems as $itemIndex => $serializedItem) {
+				if($serializedItem != null) {
+					$unserializedItem = unserialize($serializedItem);
+					$unserializedItem->setId($itemIndex);
+					array_push($items, $unserializedItem);
+				}
+			}
+			return $items;
+		}
+		return null;
 	}
 	
 	//5) Modifier management
-	
-	static function add_modifier(OrderModifier $modifier) {
-		$modifierTableIndex = self::modifier_table_name();
-		Session::addToArray($modifierTableIndex, serialize($modifier));
-	}
 	
 	static function init_all_modifiers() {
 		Order::init_all_modifiers();
 	}
 	
-	static function remove_modifier(OrderModifier $modifier) {
-		$modifierTableIndex = self::modifier_table_name();
-		$modifierTable = Session::get($modifierTableIndex);
-		self::remove_all_modifiers();
-		foreach($modifierTable as $serializeModifier) {
-			if(unserialize($serializeModifier) !== $modifier)
-				Session::addToArray($modifierTableIndex, $serializeModifier);
-		}
-		$modifierTable = Session::get($modifierTableIndex);
-		if(count($modifierTable) == 0)
-			Session::clear($modifierTableIndex);
+	static function add_new_modifier(OrderModifier $modifier) {
+		$modifiersTableIndex = self::modifiers_table_name();
+		Session::addToArray($modifiersTableIndex, serialize($modifier));
 	}
 		
+	static function remove_modifier($modifierIndex) {
+		$serializedModifierIndex = self::modifier_index($modifierIndex);
+		Session::clear($serializedModifierIndex);
+	}
+			
 	static function remove_all_modifiers() {
-		$modifierTableIndex = self::modifier_table_name();
-		Session::clear($modifierTableIndex);
+		$modifiersTableIndex = self::modifiers_table_name();
+		Session::clear($modifiersTableIndex);
 	}
 	
 	static function has_modifiers() {
-		$modifierTableIndex = self::modifier_table_name();
-		return Session::get($modifierTableIndex) != null;
+		$modifiersTableIndex = self::modifiers_table_name();
+		return Session::get($modifiersTableIndex) != null;
 	}
 		
 	static function get_modifiers() {
@@ -162,10 +230,16 @@ class ShoppingCart extends Object {
 			self::init_all_modifiers();
 			self::set_initialized(true);
 		}
-		$modifierTableIndex = self::modifier_table_name();
-		if($serializeModifiers = Session::get($modifierTableIndex)) {
+		$modifiersTableIndex = self::modifiers_table_name();
+		if($serializedModifiers = Session::get($modifiersTableIndex)) {
 			$modifiers = array();
-			foreach($serializeModifiers as $serializeModifier) array_push($modifiers, unserialize($serializeModifier));
+			foreach($serializedModifiers as $modifierIndex => $serializedModifier) {
+				if($serializedModifier != null) {
+					$unserializedModifier = unserialize($serializedModifier);
+					$unserializedModifier->setId($modifierIndex);
+					array_push($modifiers, $unserializedModifier);
+				}
+			}
 			return $modifiers;
 		}
 		return null;
@@ -175,7 +249,7 @@ class ShoppingCart extends Object {
 	
 	static function clear() {
 		self::remove_all_settings();
-		self::remove_all_products();
+		self::remove_all_items();
 		self::remove_all_modifiers();
 	}
 	
@@ -191,4 +265,102 @@ class ShoppingCart extends Object {
 		return Order::save_to_database();
   	}
   	
+}
+
+class ShoppingCart_Controller extends Controller {
+	
+	static $URLSegment = 'shoppingcart';
+	
+	static function additemLink($id) {return self::$URLSegment . '/additem/' . $id;}
+	static function removeitemLink($id) {return self::$URLSegment . '/removeitem/' . $id;}
+	static function removeallitemLink($id) {return self::$URLSegment . '/removeallitem/' . $id;}
+	static function setquantityLink($id) {return self::$URLSegment . '/setquantity/' . $id;}
+	
+	static function removemodifierLink($id) {return self::$URLSegment . '/removemodifier/' . $id;}
+	
+	function additem() {
+		$itemId = $this->urlParams['ID'];
+		ShoppingCart::add_item($itemId);
+		Director::redirectBack();
+	}
+	
+	function removeitem() {
+		$itemId = $this->urlParams['ID'];
+		ShoppingCart::remove_item($itemId);
+		Director::redirectBack();
+	}
+	
+	function removeallitem() {
+		$itemId = $this->urlParams['ID'];
+		ShoppingCart::remove_all_item($itemId);
+		Director::redirectBack();
+	}
+	
+	/**
+	 * Ajax method to set an item quantity
+	 */
+	function setquantity() {
+		$itemId = $this->urlParams['ID'];
+		$quantity = $_REQUEST['quantity'];
+		if(is_numeric($quantity) && is_int($quantity + 0)) {
+			if($quantity > 0) {
+				ShoppingCart::set_item_quantity($itemId, $quantity);
+				$currentOrder = ShoppingCart::current_order();
+				
+				$js = array();
+				
+				if($items = $currentOrder->Items()) {
+					foreach($items as $item) $item->updateForAjax($js);
+				}
+				
+				if($modifiers = $currentOrder->Modifiers()) {
+					foreach($modifiers as $modifier) $modifier->updateForAjax($js);
+				}
+				
+				$currentOrder->updateForAjax($js);
+				
+				/*$item_subtotal = 0;
+				$item_quantity = 0;
+				$subtotal = 0;
+				$grand_total = 0;
+				
+				if($items = $currentOrder->Items()) {
+					foreach($items as $item) {
+						if($item->ProductID == $this->ID) {
+							$item_subtotal = $item->SubTotal;
+							$item_quantity = $item->Quantity;
+						}
+					}
+				}
+								
+				// TODO Use glyphs instead of hard-coding to be the '$' glyph
+				$item_subtotal = '$' . number_format($item_subtotal, 2);
+				$subtotal = '$' . number_format($currentOrder->_Subtotal(), 2);
+				$grand_total = '$' . number_format($currentOrder->_Total(), 2) . " " . $currentOrder->Currency();
+				
+				$js = array();
+				
+				$js['Item' . $this->ID . '_Subtotal'] = $item_subtotal;
+				$js['Subtotal'] = $subtotal;
+				$js['GrandTotal'] = $grand_total;
+				$js['OrderForm_OrderForm_Amount'] = $grand_total;
+				
+				$js['Cart_Item' . $this->ID . '_Quantity'] = $item_quantity;
+				$js['Cart_Subtotal'] = $subtotal;
+				$js['Cart_GrandTotal'] = $grand_total;
+					*/			
+				return Product::javascript_for_new_values($js);
+				//return $js;
+			}
+			else user_error("Bad data to Product->setQuantity: quantity=$quantity", E_USER_WARNING);
+		}
+		else user_error("Bad data to Product->setQuantity: quantity=$quantity", E_USER_WARNING);
+	}
+	
+	function removemodifier() {
+		$modifierId = $this->urlParams['ID'];
+		ShoppingCart::remove_modifier($modifierId);
+		Director::redirectBack();
+	}
+		
 }
