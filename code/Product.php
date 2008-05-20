@@ -37,17 +37,7 @@ class Product extends Page {
 	static $defaults = array(
 		'AllowPurchase' => true
 	);
-
-	protected $cart;
-
-	/** 
-	 * Allows this product to know which
-	 * order it has been added to
-	 */
-	function setCart($cart) {
-		$this->cart = $cart;
-	}
-
+	
 	/**
 	 * Create the fields for a product within the CMS
 	 */
@@ -103,29 +93,7 @@ class Product extends Page {
 			return $p->GroupsMenu();
 		}
 	}
-
-	/**
-	 * Return a field that will update the shopping cart using ajax when updated
-	 */
-	public function AjaxQuantityField() {
-		$currentOrder = ShoppingCart::current_order();
-		if($items = $currentOrder->Items()) {
-			foreach($items as $productID => $Quantity) {
-				if(is_object($Quantity)) {
-					if($Quantity->ProductID == $this->ID) $setQuantity = $Quantity->Quantity;
-				}
-				else {
-					if($productID == $this->ID) $setQuantity = $Quantity;
-				}
-			}
-		}
-		//return "<input class=\"ajaxQuantityField product-$this->ID\" type=\"text\" value=\"$setQuantity\" size=\"3\" maxlength=\"3\" disabled=\"disabled\" />";
-		return <<<HTML
-	<input class="ajaxQuantityField product-$this->ID" type="text" value="$setQuantity" size="3" maxlength="3" disabled="disabled"/>
-	<input type="hidden" id="Product-$this->ID-URLSegment" name="product-$this->ID-URLSegment" value="$this->URLSegment"/>
-HTML;
-	}
-	
+		
 	static function javascript_for_new_values(array $values) {
 		$result = array();
 		foreach($values as $id => $value) {
@@ -139,7 +107,7 @@ JS;
 	/**
 	 * Returns the quantity of the current product in your cart
 	 */
-	function Quantity() {
+	/*function Quantity() {
 		$currentOrder = ShoppingCart::current_order();
 		if($items = $currentOrder->Items()) {
 			foreach($items as $item) {
@@ -147,12 +115,12 @@ JS;
 			}
 		}
 		else return false;
-	}	
+	}*/	
 
 	/**
 	 * Returns the quantity field
 	 */
-	function QuantityField() {	
+	/*function QuantityField() {	
 		$sc = Order::ShoppingCart();
 		if($items = $sc->Items()) {
 			foreach($items as $item) {
@@ -165,13 +133,28 @@ JS;
 			$setQuantity = 1;
 		}
 		return new TextField("Quantity", "Copies", $setQuantity, 3);	
-	}
-
-	/**
-	 * Checks if the product is in the cart or not
+	}*/
+	
+	/*
+	 * Returns if the product is already in the shopping cart.
+	 * Note : This function is usable in the Product context because a
+	 * Product_OrderItem only has a Product object in attribute
 	 */
-	function IsInCart() {
-		return (bool) $this->Quantity();
+	function IsInCart() {return $this->Item() ? true : false;}
+	
+	/*
+	 * Returns the order item which contains the product
+	 * Note : This function is usable in the Product context because a
+	 * Product_OrderItem only has a Product object in attribute
+	 */
+	function Item() {
+		$currentOrder = ShoppingCart::current_order();
+		if($items = $currentOrder->Items()) {
+			foreach($items as $item) {
+				if($item instanceof Product_OrderItem && $item->getProduct()->ID == $this->ID) return $item;
+			}
+		}
+		else return null;
 	}
 	
 	/**
@@ -216,76 +199,15 @@ class Product_Controller extends Page_Controller {
 	/**
 	 * This is used by the OrderForm to add more of this product to the current cart.
 	 */
-	/*function add() {
-		if($this->AllowPurchase && $this->Price) {
-			$order = Order::ShoppingCart();
-			$order->add($this->data());
-			Director::redirectBack();
-		} else {
-			return false;
-		}
-	}*/
 	
 	function add() {
 		if($this->AllowPurchase()) {
-			ShoppingCart::add_product($this);
+			ShoppingCart::add_new_item(new Product_OrderItem($this));
 			Director::redirectBack();
 		}
 		else return false;
 	}
-	
-	/**
-	 * Ajax method to set the cart quantity
-	 */
-	function setQuantity() {
-		$quantity = $_REQUEST['quantity'];
-		if(is_numeric($quantity) && is_int($quantity + 0)) {
-			if($quantity > 0) {
-				ShoppingCart::set_product_quantity($this, $quantity);
-				$currentOrder = ShoppingCart::current_order();
-				
-				$item_subtotal = 0;
-				$item_quantity = 0;
-				$subtotal = 0;
-				$grand_total = 0;
-				
-				if($items = $currentOrder->Items()) {
-					foreach($items as $item) {
-						if($item->ProductID == $this->ID) {
-							$item_subtotal = $item->SubTotal;
-							$item_quantity = $item->Quantity;
-						}
-					}
-				}
-								
-				// TODO Use glyphs instead of hard-coding to be the '$' glyph
-				$item_subtotal = '$' . number_format($item_subtotal, 2);
-				$subtotal = '$' . number_format($currentOrder->_Subtotal(), 2);
-				$grand_total = '$' . number_format($currentOrder->_Total(), 2) . " " . $currentOrder->Currency();
-				
-				$js = array();
-				
-				$js['Item' . $this->ID . '_Subtotal'] = $item_subtotal;
-				$js['Subtotal'] = $subtotal;
-				$js['GrandTotal'] = $grand_total;
-				$js['OrderForm_OrderForm_Amount'] = $grand_total;
-				
-				$js['Cart_Item' . $this->ID . '_Quantity'] = $item_quantity;
-				$js['Cart_Subtotal'] = $subtotal;
-				$js['Cart_GrandTotal'] = $grand_total;
-				
-				if($modifiers = $currentOrder->Modifiers()) {
-					foreach($modifiers as $modifier) $modifier->updateJavascript($js);
-				}
-				
-				return Product::javascript_for_new_values($js);
-			}
-			else user_error("Bad data to Product->setQuantity: quantity=$quantity", E_USER_WARNING);
-		}
-		else user_error("Bad data to Product->setQuantity: quantity=$quantity", E_USER_WARNING);
-	}
-	
-	
+		
 	/**
 	 * Adds a product to your cart then redirects you to the checkout
 	 */
@@ -344,30 +266,18 @@ class Product_Controller extends Page_Controller {
 	 * This is used by the OrderForm to remove the item(s) from your cart.
 	 */
 	/*function remove(){
-		$order = Order::ShoppingCart();
-		$order->remove($this->data());
-		Director::redirectBack();
-	}*/
-	
-	function remove(){
 		ShoppingCart::remove_product($this);
 		Director::redirectBack();
-	}
-	
+	}*/
+		
 	/**
 	 * Remove all of the current product from the cart.
 	 */
 	/*function removeall() {
-		$order = Order::ShoppingCart();
-		$order->removeall($this);
-		Director::redirectBack();
-	}*/
-	
-	function removeall() {
 		ShoppingCart::remove_all_product($this);
 		Director::redirectBack();
-	}
-	
+	}*/
+		
 	/**
 	 * Uses the find_link() method on CheckoutPage to find
 	 * the link for the checkout page used on the site.
@@ -399,6 +309,112 @@ class Product_Image extends Image {
 		return $gd->resizeByWidth(600);
 	}
 	
+}
+
+class Product_OrderItem extends OrderItem {
+	
+	protected $product;
+	
+	static $db = array(
+		'ProductVersion' => 'Int'
+	);
+	
+	static $has_one = array(
+		'Product' => 'Product'
+	);
+	
+	public function __construct($product = null, $quantity = 1) {
+		if(is_array($product)) { // Constructed by the static function get of DataObject
+  			$this->ProductVersion = $product['ProductVersion'];
+  			if($dbProduct = DataObject::get_by_id('Product', $product['ProductID'])) {
+  				$this->ProductID = $product['ProductID'];
+				$this->product = $dbProduct;
+				$this->failover = $dbProduct;
+  				parent::__construct($product, $quantity);
+  			}
+			else user_error("Product #$product[ProductID] not found", E_USER_ERROR);
+		}
+		else if(is_object($product)) { // Constructed in memory
+			parent::__construct($product, $quantity);
+ 			$this->ProductVersion = $product->Version;
+ 			$this->product = $product;
+ 			$this->failover = $product;
+ 			$this->ProductID = $product->ID;
+		}
+		else parent::__construct();
+	}
+	
+	public function ProductVersioned() {
+		return Versioned::get_version('Product', $this->ProductID, $this->ProductVersion);
+	}
+	
+	function getProduct() {return $this->product;}
+	
+	// Functions to overload
+	
+	function hasSameContent($orderItem) {
+		$equals = parent::hasSameContent($orderItem);
+		return $equals && $orderItem instanceof Product_OrderItem && $this->product == $orderItem->product;
+	}
+	
+	function UnitPrice() {return $this->product->Price;}
+	
+	function Title() {return $this->product->Title;}
+	function Link() {return $this->product->Link();}
+	
+	/*
+	public function AjaxQuantityField() {
+		if($this->failover->hasMethod('AjaxQuantityField'))	return $this->failover->AjaxQuantityField();
+		else return null;
+	}
+	
+	public function addToCart($items = 1) {
+   	$this->quantity += $items;
+	}
+		
+	protected $cart;
+		
+	function ThumbnailLink(){
+		$image = $this->product->Image();
+
+		return Director::AbsoluteBaseURL().$image->Filename;
+	}
+
+	//-----------------------------------------------------------------------------------------//
+	function getTotal() {
+		return $this->__get("UnitPrice") * $this->__get("Quantity");
+	} */
+			
+	// Database Writing Methods
+	
+	function onBeforeWrite() {
+		parent::onBeforeWrite();
+		$this->ProductVersion = $this->product->Version;
+		$this->ProductID = $this->product->ID;
+	}
+	
+	// Debug Function
+		
+	public function debug() {
+		if($this->ID) {
+			$productTitle = $this->ProductVersioned()->Title;
+			$productID = $this->ProductID;
+			$productVersion = $this->ProductVersion;
+		}
+		else {
+			$productTitle = $this->product->Title;
+			$productID = $this->product->ID;
+			$productVersion = $this->product->Version;
+		}
+		return parent::debug() .<<<HTML
+			<h3>Product_OrderItem class details</h3>
+			<p>
+				<b>Product Title : </b>$productTitle<br/>
+				<b>Product ID : </b>$productID<br/>
+				<b>Product Version : </b>$productVersion
+			</p>
+HTML;
+	}
 }
 
 ?>
