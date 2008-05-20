@@ -31,28 +31,228 @@
 	);
 	
 	static $has_one = array (
-		"Member" => "Member"
+		'Member' => 'Member'
 	);
 	
 	static $has_many = array(
-		"Items" => "Order_Item",
-		"OrderStatusLogs" => "OrderStatusLog",
-		'OrderModifier' => 'OrderModifier'
+		'Items' => 'OrderItem',
+		'Modifiers' => 'OrderModifier',
+		'OrderStatusLogs' => 'OrderStatusLog'
 	);
 	
 	static $casting = array(
-		"Subtotal" => "Currency",
+		"SubTotal" => "Currency",
 		"Total" => "Currency",
 		"Shipping" => "Currency",
 		"TotalOutstanding" => "Currency",
 	);
-
-	/**
-	 * Class used to create order items.  Redefine this in subclasses if you've made your
-	 * own Order_Item subclass
-	 */
-	static $item_class = "Order_Item";	
 	
+	// Static Values And Management
+	
+	/**
+	 * Currency used in orders
+	 */
+	protected static $site_currency = 'USD';
+	
+	static function set_site_currency($currency) {self::$site_currency = $currency;}
+	static function site_currency() {return self::$site_currency;}
+	
+	/**
+	 * The modifiers represent the additional charges or deductions associated to an order like shipping, tax but also vounchers, etc...
+	 */
+	protected static $modifiers = array();
+	
+	static function set_modifiers($modifiers) {self::$modifiers = $modifiers;}
+	
+	// Items Management
+	
+	/**
+	 * Returns the items of the order, if it hasn't been saved yet
+	 * it returns the items from session, if it has, it returns them 
+	 * from the DB entry.
+	 */
+	function Items() {
+ 		if($this->ID) return $this->itemsFromDatabase();
+ 		else if($items = ShoppingCart::get_items()) return $this->createItems($items);
+ 		else return null;
+	}
+	
+	protected function itemsFromDatabase() {
+		return DataObject::get('OrderItem', "`OrderID` = '$this->ID'");
+	}
+	
+	protected function createItems(array $items, $write = false) {
+		if($write) {
+			foreach($items as $item) {
+				$item->OrderID = $this->ID;
+				$item->write();
+			}
+		}
+		return $write ? $this->itemsFromDatabase() : new DataObjectSet($items);
+	}
+	
+	/**
+	 * Returns the subtotal of the items for this order.
+	 */
+	function _SubTotal() {
+		$result = 0;
+		if($items = $this->Items()) {
+			foreach($items as $item) $result += $item->Total();
+		}
+		return $result;
+	}
+	
+	// Modifiers Management
+	
+	/**
+	 * Returns the modifiers of the order, if it hasn't been saved yet
+	 * it returns the modifiers from session, if it has, it returns them 
+	 * from the DB entry.
+	 */ 
+ 	function Modifiers() {
+ 		if($this->ID) return $this->modifiersFromDatabase();
+ 		else if($modifiers = ShoppingCart::get_modifiers()) return $this->createModifiers($modifiers);
+ 		else return null;
+	}
+	
+	protected function modifiersFromDatabase() {
+		return DataObject::get('OrderModifier', "`OrderID` = '$this->ID'");
+	}
+	
+	protected function createModifiers(array $modifiers, $write = false) {
+		if($write) {
+			foreach($modifiers as $modifier) {
+				$modifier->OrderID = $this->ID;
+				$modifier->write();
+			}
+		}
+		return $write ? $this->modifiersFromDatabase() : new DataObjectSet($modifiers);
+	}
+	
+	/**
+	 * Returns the subtotal of the modifiers of this order without those in the optional array parameter (usefull for the tax calculation).
+	 */
+	function _ModifiersSubTotal($modifiersNameExcluded = null) {
+		$total = 0;
+		if($modifiers = $this->Modifiers()) {
+			foreach($modifiers as $modifier) {
+				if(! $modifiersNameExcluded || ! is_array($modifiersNameExcluded) || ! in_array(self::$modifiersName, get_class($modifier))) $total += $modifier->getValue();
+			}
+		}
+		return $total;
+	}
+	
+	static function init_all_modifiers() {
+		if(self::$modifiers && is_array(self::$modifiers) && count(self::$modifiers) > 0) {
+			foreach(self::$modifiers as $className) {
+				if(class_exists($className)) {
+					$modifier = new $className();
+					if($modifier instanceof OrderModifier) eval("$className::init_for_order(\$className);");
+				}
+			}
+		}
+	}
+	
+	/*
+	 * Return a DataObjectSet which contains the forms to add some modifiers to update the OrderInformation table
+	 */
+	static function get_modifier_forms($controller) {
+		$forms = array();
+		if(self::$modifiers && is_array(self::$modifiers) && count(self::$modifiers) > 0) {
+			foreach(self::$modifiers as $className) {
+				if(class_exists($className)) {
+					$modifier = new $className();
+					if($modifier instanceof OrderModifier && eval("return $className::show_form();") && $form = eval("return $className::get_form(\$controller);")) array_push($forms, $form);
+				}
+			}
+		}
+		return count($forms) > 0 ? new DataObjectSet($forms) : null;
+	}
+	
+	// Order Management
+	
+	/**
+  	 * Returns the total cost of an order including the additional charges or deductions of its modifiers.
+  	 */
+	function _Total() {return $this->_SubTotal() + $this->_ModifiersSubTotal();}
+	
+	/**
+	 * Checks to see if any payments have been made on this order
+	 * and if so, subracts the payment amount from the order
+	 * ASSUMPTION : Only one payment per order
+	 */
+	function _TotalOutstanding(){
+		// TODO Total is returning a casted object which you can't do addition too.... DUM
+		$total = $this->_Total();
+		if($this->ID) {
+			$payment = Object::create("Payment");
+			$payment = DataObject::get_one(get_class($payment),"Payment.OrderID = $this->ID");
+
+			// revised rounding from Hayden
+			// we HAVE to do this, because we use $Title.Nice on the front end which is inconsistent
+			// with the calculation in php
+			
+			// TODO - find a better way to do this. Sean and Hayden @ SS had a crack at it, but couldn't
+			// get anywhere but do this
+			$difference = (round($total * 100) - round($payment->Amount * 100)) / 100;
+			
+			if($payment->Status == 'Success') {
+				return $difference;
+			} else {
+				return $total;
+			}
+		} else {
+			return $total;
+		}
+	}
+	
+	/**
+	 * Return the currency of this order.
+	 * Note: this is a fixed value across the entire site. 
+	 */
+	function Currency() {return self::site_currency();}
+	
+	static function current_order() {return new Order();}
+	
+	static function save_to_database() {
+		
+		//1) Order creation
+		
+		$order = new Order();
+		$order->write();
+				
+		//2) Items saving
+		
+		if($items = ShoppingCart::get_items()) $order->createItems($items, true);
+		
+		//3) Modifiers saving
+		
+		if($modifiers = ShoppingCart::get_modifiers()) $order->createModifiers($modifiers, true);
+		
+		//4) Member saving
+		
+		$order->MemberID = Member::currentUserID();
+		
+		$order->write();
+		
+		return $order;
+	}
+	
+	// Order Template Management
+	
+	function SubTotalIDForTable() {return 'Table_Order_SubTotal';}
+	function TotalIDForTable() {return 'Table_Order_Total';}
+	
+	function SubTotalIDForCart() {return 'Cart_Order_SubTotal';}
+	function TotalIDForCart() {return 'Cart_Order_Total';}
+	
+	function updateForAjax(array &$js) {
+		$js[$this->SubTotalIDForTable()] = $this->_SubTotal();
+		$js[$this->TotalIDForTable()] = $this->_Total();
+		$js[$this->SubTotalIDForCart()] = $this->_SubTotal();
+		$js[$this->TotalIDForCart()] = $this->_Total();
+	}
+		
 	static $factory_class = "Order";
 
 	/**
@@ -89,32 +289,7 @@
 	static function set_subject($subject) {
 		self::$receiptSubject = $subject;
 	}
-
-	/**
-	 * Currency used in orders
-	 */
-	protected static $site_currency = "USD";
-	
-	static function set_site_currency($currency) {
-		self::$site_currency = $currency;
-	}
-	static function site_currency() {
-		return self::$site_currency;
-	}
 		
-	/*
-	 * The modifiers represent the additional charges or deductions associated to an order like shipping, tax but also vounchers, etc...
-	 */
-	//protected $modifiers;
-	
-	//protected $modifiersInitDone = false;
-	
-	protected static $modifiersName = array();
-	
-	static function set_modifiers($modifiers) {
-		self::$modifiersName = $modifiers;
-	}
-
 	/**
 	 * Returns the correct shipping address. If there is an alternate
 	 * shipping country then it uses that. Else it's the member's country.
@@ -227,32 +402,6 @@
 		return $this;
 	} */
 	
-	static function current_order() {return new Order();}
-	
-	static function save_to_database() {
-		
-		//1) Order creation
-		
-		$order = new Order();
-		$order->write();
-				
-		//2) Products saving
-		
-		if($products = ShoppingCart::get_products()) $order->createOrderItems($products, true);
-		
-		//3) Modifiers saving
-		
-		if($modifiers = ShoppingCart::get_modifiers()) $order->createOrderModifiers($modifiers, true);
-		
-		//4) Member saving
-		
-		$order->MemberID = Member::currentUserID();
-		
-		$order->write();
-		
-		return $order;
-	} 
-
 	/**
 	 * Returns the value of a particular field.
 	 * This makes use of the dataHandler where necessary.
@@ -394,46 +543,14 @@
 			$orderItem->delete();
 		}		
 	}*/
-
-	/**
-	 * Get the items for this order from the database, and returns them
-	 */
-	function itemsFromDatabase(){
-		$orderItems = DataObject::get($this->stat('item_class'),"OrderID = $this->ID");
-		/*if($orderItems)
-			foreach($orderItems as $item) $item->setCart($this);
-		else{
-			// user_error("Order: No Order_Items saved to Order: $this->ID", E_USER_WARNING);
-		}*/
-		return $orderItems;
-	}
-
-	/**
-	 * Returns the items of the order, if it hasn't been saved yet
-	 * it returns the items from session, if it has, it returns them 
-	 * from the DB entry.
-	 */ 
- 	/*function Items() {
- 		// If we have an ID, assume that this is a database order
- 		if($this->ID) {
-			return $this->itemsFromDatabase();
- 		} else {
- 			$sourceItems = $this->items;
- 		}
- 		if($sourceItems){
- 			return $this->createOrderItems($sourceItems);
- 		}else{
- 			// No items in order 
- 			return null;
- 		}
-	}*/
-	function Items() {
+	
+	/*function Items() {
  		// If we have an ID, assume that this is a database order
  		if($this->ID) return $this->itemsFromDatabase();
  		else if($products = ShoppingCart::get_products()) return $this->createOrderItems($products);
  		else return null;
-	}
-
+	}*/
+	
 	function ContinueCountItems() {
 		if($items = $this->Items()) {
 			$i = 1;
@@ -441,33 +558,8 @@
 		}
 		return $items;
 	}
-	
-	/*function createOrderItems(array $sourceItems){
-		// We don't want items with no quantity..
-		$sourceItemsFixed = array();
-		foreach($sourceItems as $key => $value) {
-			if($value > 0) {
-				$sourceItemsFixed[$key] = $value;
-			}
-		}
 		
-		$ids = '';
-	  	if($sourceItemsFixed) $ids = implode(',', array_keys($sourceItemsFixed));
-		if($ids) {
-			$products = DataObject::get("Product", "`SiteTree`.ID IN ($ids)", "Title");
-			if($products) {
-				$items = new DataObjectSet();
-				foreach($products as $product) {
-					$item = $this->createOrderItem($product, $sourceItemsFixed[$product->ID]);
-					$item->setCart($this);
-					$items->push($item);
-				}
-				return $items;
-			}
-		}
-	}*/
-	
-	protected function createOrderItems(array $products, $write = false) {
+	/*protected function createOrderItems(array $products, $write = false) {
 		$orderItems = array();
 		$orderItemClass = $this->stat('item_class');
 		foreach($products as $productID => $quantity) {
@@ -482,56 +574,8 @@
 			}
 		}
 		return $write ? $this->itemsFromDatabase() : new DataObjectSet($orderItems);
-	}
-	
-	protected function createOrderModifiers(array $modifiers, $write = false) {
-		if($write) {
-			foreach($modifiers as $modifier) {
-				$modifier->OrderID = $this->ID;
-				$modifier->write();
-			}
-			return $this->modifiersFromDatabase();
-		}
-		else return new DataObjectSet($modifiers);
-	}
+	}*/
 		
-	/**
-	 * Get the modifiers for this order from the database, and returns them
-	 */
-	function modifiersFromDatabase(){
-		return DataObject::get('OrderModifier',"OrderID = $this->ID");
-	}
-	
-	/**
-	 * Returns the modifiers of the order, if it hasn't been saved yet
-	 * it returns the modifiers from session, if it has, it returns them 
-	 * from the DB entry.
-	 */ 
- 	function Modifiers(){
- 		// If we have an ID, assume that this is a database order
- 		if($this->ID) return $this->modifiersFromDatabase();
- 		else if($modifiers = ShoppingCart::get_modifiers()) return $this->createOrderModifiers($modifiers);
- 		else return null;
-	}
-			
-	static function init_all_modifiers() {
-		if(self::$modifiersName && is_array(self::$modifiersName) && count(self::$modifiersName) > 0) {
-			foreach(self::$modifiersName as $className) {
-				if(class_exists($className)) {
-					$modifier = new $className();
-					if($modifier instanceof OrderModifier) {
-						//$this->modifiers->push(new $className($this));
-						//eval("$className::init_for_order(\$className, \$this);");
-						eval("$className::init_for_order(\$className);");
-					}
-				}
-			}
-		}
-		//$this->modifiersInitDone = true;
-		//return $this->modifiers;
-	}
-	
-	
 	/*function addModifier(OrderModifier $modifier) {
 		if(! $this->modifiers) $this->modifiers = new DataObjectSet();
 		$this->modifiers->push($modifier);
@@ -540,13 +584,7 @@
 			$this->addToDatabase($product);
 		}*/
 	//}
-	
-	function updateModifiers() {
-		/*if($modifiers = $this->Modifiers()) {
-			foreach($modifiers as $modifier) $modifier->update();
-		}*/
-	}
-	
+		
    /** 
 	* Removes a modifier
 	* @param modifier : Modifier to remove
@@ -565,28 +603,7 @@
 				
 		if($this->modifiers->Count() == 0) $this->modifiers = null;
 	}*/
-	
-	/*
-	 * Return a DataObjectSet which contains the forms to add some modifiers to update the OrderInformation table
-	 */
-	static function ModifierForms(CheckoutPage $checkoutPage) {
-		$forms = array();
-		if(self::$modifiersName && is_array(self::$modifiersName) && count(self::$modifiersName) > 0) {
-			foreach(self::$modifiersName as $className) {
-				if(class_exists($className)) {
-					$modifier = new $className();
-					/*if($modifier instanceof OrderModifier && eval("return $className::show_form(\$this);") && $form = eval("return $className::get_form(\$this, \$checkoutPage);")) {
-						array_push($forms, $form);
-					}*/
-					if($modifier instanceof OrderModifier && eval("return $className::show_form();") && $form = eval("return $className::get_form(\$checkoutPage);")) {
-						array_push($forms, $form);
-					}
-				}
-			}
-		}
 		
-		return count($forms) > 0 ? new DataObjectSet($forms) : null;
-	}		
 	/**
 	 * Attempts to process this orders payment.
 	 * Assummes the correct payment data, for each payement type is 
@@ -653,36 +670,7 @@
 			}
 		}
 	}
-  
-	/**
-	* Returns the subtotal for this order.
-	*/
-	function _Subtotal() {
-		$items = $this->Items();
-		if($items) {
-			$goodsCost = 0;
-			foreach($items as $item) {
-		  		$goodsCost += $item->Price * $item->Quantity;
-			}
-		} else {
-			return 0;
-		}
-		return $goodsCost;
-	}
-	
-	/**
-	* Returns the modifiers subtotal without those in the optional array parameter (usefull for the tax calculation).
-	*/
-	function ModifiersSubTotal($modifiersNameExcluded = null) {
-		$total = 0;
-		if($modifiers = $this->Modifiers()) {
-			foreach($modifiers as $modifier) {
-				if(! $modifiersNameExcluded || ! is_array($modifiersNameExcluded) || ! in_array(self::$modifiersName, get_class($modifier))) $total += $modifier->getValue();
-			}
-		}
-		return $total;
-	}
-	
+			
 	/*
 	 * Returns a TaxModifier object that provides information about tax on this order.
 	 */
@@ -694,43 +682,6 @@
 		}
 	}
   	
-  	/**
-  	 * Returns the total cost of an order including the additional charges or deductions of its modifiers.
-  	 */
-	function _Total(){
-		return $this->_Subtotal() + $this->ModifiersSubTotal();
-	}
-		
-	/**
-	 * Checks to see if any payments have been made on this order
-	 * and if so, subracts the payment amount from the order
-	 * ASSUMPTION : Only one payment per order
-	 */
-	function _TotalOutstanding(){
-		// TODO Total is returning a casted object which you can't do addition too.... DUM
-		$total = $this->_Total();
-		if($this->ID) {
-			$payment = Object::create("Payment");
-			$payment = DataObject::get_one(get_class($payment),"Payment.OrderID = $this->ID");
-
-			// revised rounding from Hayden
-			// we HAVE to do this, because we use $Title.Nice on the front end which is inconsistent
-			// with the calculation in php
-			
-			// TODO - find a better way to do this. Sean and Hayden @ SS had a crack at it, but couldn't
-			// get anywhere but do this
-			$difference = (round($total * 100) - round($payment->Amount * 100)) / 100;
-			
-			if($payment->Status == 'Success') {
-				return $difference;
-			} else {
-				return $total;
-			}
-		} else {
-			return $total;
-		}
-	}
-
 	/**
 	 * Sends an receipt to the client (and another to the admin)
 	 * ASSUMPTION : Member MUST be set for this order.
@@ -819,64 +770,7 @@
 		$e->setTo($member->Email);
 		$e->send();
 	}
-
-	/**
-	 * Ajax method to set the cart quantity
-	 */
-	function setCartQuantity() {
-		if(is_numeric($_REQUEST['ProductID']) && is_numeric($_REQUEST['Quantity'])) {
-			$sc = Order::ShoppingCart();
-			
-			$prod = DataObject::get_by_id('Product', $_REQUEST['ProductID']);
-			
-			$sc->removeall($prod);
-			$sc->add($prod, $_REQUEST['Quantity']);
-			
-			$item_subtotal = 0;
-			$item_quantity = 0;
-			$subtotal = 0;
-			$shipping = 0;
-			$grand_total = 0;
-			
-			if($sc->Items()) {
-				foreach($sc->Items() as $item) {
-					if($item->ProductID == $prod->ID) {
-						$item_subtotal = $item->SubTotal;
-						$item_quantity = $item->Quantity;
-					}
-				}
-			}
-			
-			// TODO Use glyphs instead of hard-coding to be the '$' glyph
-			$item_subtotal = '$' . number_format($item_subtotal, 2);
-			$subtotal = '$' . number_format($sc->_Subtotal(), 2);
-			//$shipping = '$' . number_format($sc->Shipping(), 2);
-			//$tax = '$' . number_format($sc->calcAddedTax(), 2);		
-			$grand_total = '$' . number_format($sc->_Total(), 2) . " " . $sc->Currency();
-			
-			$js = array();
-			
-			if($_REQUEST['isCheckout']) {
-				$js[] = '$(\'Item' . $prod->ID . '_Subtotal\').innerHTML = "' . $item_subtotal . '"; ';
-				$js[] = '$(\'Subtotal\').innerHTML = "' . $subtotal . '"; ';
-				//$js[] = 'if($(\'ShippingCost\')) $(\'ShippingCost\').innerHTML = "' . $shipping . '"; ';
-				//$js[] = 'if($(\'TaxCost\')) $(\'TaxCost\').innerHTML = "' . $tax . '"; ';	
-				$js[] = '$(\'GrandTotal\').innerHTML = "' . $grand_total . '"; ';
-				$js[] = '$(\'OrderForm_OrderForm_Amount\').innerHTML = "' . $grand_total . '"; ';
-			} elseif($_REQUEST['isProduct'] || $_REQUEST['isProductGroup']) {
-				$js[] = '$(\'Cart_Item' . $prod->ID . '_Quantity\').innerHTML = "' . $item_quantity . '"; ';
-				$js[] = '$(\'Cart_Subtotal\').innerHTML = "' . $subtotal . '"; ';
-				//$js[] = 'if($(\'Cart_ShippingCost\')) $(\'Cart_ShippingCost\').innerHTML = "' . $shipping . '"; ';
-				//$js[] = 'if($(\'Cart_TaxCost\')) $(\'Cart_TaxCost\').innerHTML = "' . $tax . '"; ';
-				$js[] = '$(\'Cart_GrandTotal\').innerHTML = "' . $grand_total . '"; ';
-			}
-			return implode("\n", $js);
-			
-		} else {
-			user_error("Bad data to Order::setCartQuantity: ProductID=$_REQUEST[ProductID], Quantity=$_REQUEST[Quantity]", E_USER_WARNING);
-		}
-	}
-	
+		
 	function _SuccessfulPaymentLink(){
 		return Director::AbsoluteBaseURL(). CheckoutPage::find_link() . "paid";
 	}
@@ -1109,165 +1003,74 @@
 	 */
 	function OrderContentIncomplete() {return DataObject::get_one('CheckoutPage')->PurchaseIncomplete;}
 	
-	/**
-	 * Return the currency of this order.
-	 * Note: this is a fixed value across the entire site. 
-	 */
-	function Currency() {return self::site_currency();}
 }
 
 /**
  * Our controller points us to the correct order information
  */
-class Order_Controller extends Page_Controller{
-
-	function Link($action) {
-		return 'Order/'. $this->ID . "/$action";
-	}
-
-}
-
-
-/** 
- * An order item is a product which has been added to an order, 
- * ready for purchase. An order item is typically a product itself,
- * but also can include references to other information such as 
- * product attributes like colour, size, or type.
- */
-class Order_Item extends DataObject {
-	public $product;
-	public $quantity;
-
-	static $db = array(
-		"Quantity" => "Int",
-		"UnitPrice" => "Currency",
-		"Title" => "Varchar",
-		"OrderID" => "Int",
-		"ProductID" => "Int",
-		"ProductVersion" => "Int"
-	);
-
-	static $casting = array(
-		"SubTotal" => "Currency",
-	);
-	static $has_one = array(
-		"Order" => "Order", // Internal field becomes OrderID, not Order
-		"Product" => "Product",
-	);
-	static $has_many = array(
-	);
+class Order_Controller extends Controller {
 	
+	static $URLSegment = 'order';
 	
-	public function __construct($product = null, $quantity = 1) {
-		// Constructed by DataObject::get
-		if(is_array($product)) {
-  			$this->quantity = $product['Quantity'];
-  			$this->UnitPrice = $product['UnitPrice'];
-  			$this->ProductVersion = $product['ProductVersion'];
-  			$this->ProductID = $product['ProductID'];
-			if($this->ProductID){
-				$this->product = DataObject::get_by_id("Product",$this->ProductID);
-			} else {
-  				user_error("Product #$product[ProductID] not found", E_USER_ERROR);
+	static function showLink($id) {return self::$URLSegment . '/show/' . $id;}
+	
+	function show() {
+		if($orderID = Director::urlParam('ID')) {
+			if($memberID = Member::currentUserID()) return DataObject::get_one('Order', "`Order`.`ID` = '$orderID' AND `MemberID` = '$memberID'");
+			else {
+				Session::setFormMessage('Login', 'You need to be logged in to view that page', 'warning');
+				Director::redirect('Security/login/');
+				return;
 			}
-				
- 			$this->failover = $this->product;
-  			parent::__construct($product);  			
-		// Constructed in memory
-		} else if(is_object($product)) {
-			parent::__construct();
- 			$this->product = $product;
- 			$this->failover = $product;
- 			$this->ProductID = $product->ID;
- 			$this->UnitPrice = $product->Price;
- 			$this->ProductVersion = $product->Version;
-			$this->quantity = $quantity;
-		} else {
-			parent::__construct();
 		}
 	}
-	public function getQuantity() {
-		return $this->quantity;
-	}
 	
-	function PlainContent() {
-		return Convert::raw2att(Convert::html2raw($this->Content));
-	}
-	
-	public function AjaxQuantityField() {
-		if($this->failover->hasMethod('AjaxQuantityField')) {
-			return $this->failover->AjaxQuantityField();
+	function DisplayOrder() {
+		if($orderID = Director::urlParam('ID')) {
+			if($memberID = Member::currentUserID()) return DataObject::get_one('Order', "`Order`.`ID` = '$orderID' AND `MemberID` = '$memberID'");
+			else return null;
 		}
-	}
-
-	public function getSubTotal(){
-		return ($this->quantity * $this->Price);	
-	}
-
-	public function addToCart($items = 1) {
-   	$this->quantity += $items;
-	}
-
-	public function write() {
-		$this->ProductID = $this->product->ID;
-		$this->Quantity = $this->quantity;
-		$this->UnitPrice = $this->product->Price;
-		$this->Title = $this->product->Title;
-		$this->ProductVersion = $this->product->Version;
-		parent::write();
-	}
-		
-
-  function setCart($cart) {
-  	$this->cart = $cart;
-  	if($this->product)
-		$this->product->setCart($cart);
-  }
-
-
-	public function debug() {
-		return "
-			<h2>Order Item $this->class</h2>\n" . 
-				"<p><b>Product:</b> ". $this->product->Title . "<br>" .
-				"<b>Quantity:</b>" . $this->quantity.
-				"<br><b>UnitPrice:</b>" .$this->UnitPrice.
-				"<br><b>Title:</b>". $this->Title.
-				"<br><b>OrderID:</b> ".$this->OrderID.
-				"<br><b>ProductID:</b>". $this->ProductID.
-				"<br><b>ProductVersion:</b>". $this->ProductVersion;
-	}
-	protected $cart;
+		else return ShoppingCart::current_order();
+	}	
 	
 	/**
-	 * Failover doesn't work because DataObject, and hence Order_Item, already has
-	 * a Link() method that is retarded and pointless in this specific class.
-	 * We'll give the failover "a little push" by explcitly defining this method.
+	 * Return the order ID
 	 */
-	function Link() {
-		return $this->product->Link();
+	/*function orderID() {
+		$orderID = $this->urlParams["ID"];
+		if(!$orderID) $orderID = Session::get('Order.OrderID');
+		return $orderID;
+	}*/
+	
+	/**
+	 * Displays the order information  @where is this used ?
+	 */
+	function DisplayFinalisedOrder(){
+		/*if($orderID = $this->orderID()){
+			$member = Member();
+			if($orderID && $member){
+				$order = DataObject::get_one("Order", "`Order`.ID = $orderID && MemberID = $member->ID");
+				return $order;
+			}
+		}*/
+		if($orderID = Director::urlParam('ID') && $memberID = Member::currentUserID()) return DataObject::get_one('Order', "`Order`.`ID` = '$orderID' AND `MemberID` = '$memberID'");
+		else return null;
 	}
 	
-	function ThumbnailLink(){
-		$image = $this->product->Image();
+	/**
+	 * Check if the Member exists before displaying the order content,
+	 * redirect them back to the Security section if not
+	 */
+	function OrderSuccessful() {
+		if($member = Member::currentMember()) return array();
+		else {
+			Session::setFormMessage('Login', 'You need to be logged in to view that page', 'warning');
+			Director::redirect('Security/login/');
+			return;
+		}
+	}
 
-		return Director::AbsoluteBaseURL().$image->Filename;
-	}
-
-	//-----------------------------------------------------------------------------------------//
-	function getTotal() {
-		return $this->__get("UnitPrice") * $this->__get("Quantity");
-	} 
-	
-	protected $countID;
-	function setCountID($i) {
-		$this->countID = $i;
-	}
-	
-	function getCountID(){
-		return $this->countID;
-	}
 }
-
 
 /**
  * This class stores extra information about the order item,
