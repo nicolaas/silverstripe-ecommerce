@@ -27,3 +27,13 @@
 .buyProducts {
 	font-weight: bold;
 }
+
+.cart .itemdetails {
+	float: left;
+	width: 173px;
+}
+
+.cart .remove {
+	float: right;
+	width: 20px;
+}
