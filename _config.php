@@ -7,6 +7,11 @@
 // Extend the Member with e-commerce related fields.
 DataObject::add_extension('Member', 'EcommerceRole');
 
+Director::addRules(50, array(
+	Order_Controller::$URLSegment . '/$Action/$ID' => 'Order_Controller',
+	ShoppingCart_Controller::$URLSegment . '/$Action/$ID' => 'ShoppingCart_Controller'
+));
+
 // This is the default shipping method class - SimpleShippingModifier.
 // To use your own one, copy this line, with the second argument as your
 // custom shipping class into mysite/_config.php - this will override
