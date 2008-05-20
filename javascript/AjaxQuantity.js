@@ -1,17 +1,20 @@
 Behaviour.register({
-	'.ajaxQuantityField' : {
+	'input.ajaxQuantityField' : {
 		initialise: function() {
 			this.disabled = false;
 		},
 		onchange : function() {
-			var matches = this.className.match(/product-([0-9]+)/);
+			//var matches = this.className.match(/product-([0-9]+)/);
+			var setQuantityLink = $(this.id + '_SetQuantityLink');
 			
-			if(matches) {
+			if(setQuantityLink) {
 				this.value = this.value.replace(/[^0-9]+/g,'');
 				if(!this.value) this.value = 0;
-				var productID = matches[1];
-				var URLSegment = $('Product-' + productID + '-URLSegment').value;
-				var url = document.getElementsByTagName('base')[0].href + URLSegment + '/setQuantity?quantity=' + this.value;
+				//var productID = matches[1];
+				//var URLSegment = $('Product-' + productID + '-URLSegment').value;
+				//var url = document.getElementsByTagName('base')[0].href + URLSegment + '/setQuantity?quantity=' + this.value;
+				
+				var url = document.getElementsByTagName('base')[0].href + setQuantityLink.value + '?quantity=' + this.value;
 				
 				new Ajax.Request(
 					url,
@@ -33,8 +36,8 @@ Behaviour.register({
 			this.disabled = false;
 		},
 		onchange : function() {
-			var url = document.location.href.replace(/(\?.*)$/,'');
-			url = url.replace(/\/$/,'');
+			// Improve the url checking
+			var url = document.location.href.replace(/\/$/,'');
 			url += '/setCountry/?country=' + this.value;
 			
 			new Ajax.Request(
