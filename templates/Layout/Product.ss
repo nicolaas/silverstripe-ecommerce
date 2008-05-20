@@ -25,20 +25,22 @@
 		<% if Price %><p class="price_display">$Price.Nice $Currency $TaxInfo.PriceSuffix</p><% end_if %>
 		<% if AllowPurchase %>
 			<% if IsInCart %>
-				<div class="quantityBox">
-					<span><% _t("QUANTITYCART","Quantity in cart") %>:</span>
-					<a class="ajaxQuantityLink" href="{$Link}remove/" title="<% sprintf(_t("REMOVEALL","Remove one of &quot;%s&quot; from your cart"),$Title) %>">
-						<img src="ecommerce/images/minus.gif" alt="-" />
-					</a>	
-					$AjaxQuantityField
-					<a class="ajaxQuantityLink" href="{$Link}add/" title="<% sprintf(_t("ADDONE","Add one more of &quot;%s&quot; to your cart"),$Title) %>">
-						<img src="ecommerce/images/plus.gif" alt="+" />
-					</a>
-					<ul class="productActions">
-						<li><a href="{$Link}removeall" title="<% sprintf(_t("REMOVE","Remove &quot;%s&quot; from your cart"),$Title) %>"><% _t("REMOVELINK","&raquo; Remove from cart") %></a></li>
-						<li><a href="$CheckoutLink" title="<% _t("GOTOCHECKOUT","Go to the checkout now") %>"><% _t("GOTOCHECKOUTLINK","&raquo; Go to the checkout") %></a></li>
-					</ul>
-				</div>
+				<% control Item %>
+					<div class="quantityBox">
+						<span><% _t("QUANTITYCART","Quantity in cart") %>:</span>
+						<a class="ajaxQuantityLink" href="$removeLink" title="<% sprintf(_t("REMOVEALL","Remove one of &quot;%s&quot; from your cart"),$Title) %>">
+							<img src="ecommerce/images/minus.gif" alt="-" />
+						</a>	
+						$AjaxQuantityField
+						<a class="ajaxQuantityLink" href="$addLink" title="<% sprintf(_t("ADDONE","Add one more of &quot;%s&quot; to your cart"),$Title) %>">
+							<img src="ecommerce/images/plus.gif" alt="+" />
+						</a>
+						<ul class="productActions">
+							<li><a href="$removeallLink" title="<% sprintf(_t("REMOVE","Remove &quot;%s&quot; from your cart"),$Title) %>"><% _t("REMOVELINK","&raquo; Remove from cart") %></a></li>
+							<li><a href="$CheckoutLink" title="<% _t("GOTOCHECKOUT","Go to the checkout now") %>"><% _t("GOTOCHECKOUTLINK","&raquo; Go to the checkout") %></a></li>
+						</ul>
+					</div>
+				<% end_control %>
 			<% else %>
 				<p class="quantityBox"><a href="{$Link}add" title="<% sprintf(_t("ADD","Add &quot;%s&quot; to your cart"),$Title) %>"><% _t("ADDLINK","Add this item to cart") %></a></p>
 			<% end_if %>
