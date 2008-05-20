@@ -10,6 +10,8 @@
  
 class OrderModifier extends DataObject {
 
+	protected $id;
+
 	static $db = array(
 		'Amount' => 'Currency',
 		'Type' => "Enum(array('Chargable','Deductable'))"
@@ -31,7 +33,7 @@ class OrderModifier extends DataObject {
 	 */
 	public static function init_for_order($className) {
 		$modifier = new $className();
-		ShoppingCart::add_modifier($modifier);
+		ShoppingCart::add_new_modifier($modifier);
 	}
 	
 	//1) Attributes Functions Access
@@ -78,7 +80,18 @@ class OrderModifier extends DataObject {
 		return ($this->IsChargable() ? 1 : -1) * $amount;
 	}
 	
-	function updateJavascript(array &$js) {
+	public function getId() {return $this->id;}
+	public function setId($id) {$this->id = $id;}
+	
+	function ClassForTable() {
+		$class = get_class($this);
+		$classes[] = strtolower($class);
+		while($class = get_parent_class($class) != 'OrderModifier') $classes[] = strtolower($class);
+		$classes[] = strtolower('OrderModifier');
+		return implode(' ', $classes);
+	}
+	
+	function updateForAjax(array &$js) {
 		$js[$this->ValueIdForCart()] = $this->ValueForCart();
 		$js[$this->ValueIdForTable()] = $this->ValueForTable();
 		$js[$this->TitleIdForTable()] = $this->TitleForTable();
