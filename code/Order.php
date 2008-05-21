@@ -49,6 +49,18 @@
 	// Static Values And Management
 	
 	/**
+	 * Order class used for creation
+	 */
+	protected static $order_class = 'Order';
+	
+	static function set_order_class($orderClass) {self::$order_class = $orderClass;}
+	
+	/**
+	 * Status which stand for complete
+	 */
+	static $complete_status = array('Paid', 'Sent', 'Complete');
+	
+	/**
 	 * Currency used in orders
 	 */
 	protected static $site_currency = 'USD';
@@ -214,10 +226,13 @@
 	 * Return the currency of this order.
 	 * Note: this is a fixed value across the entire site. 
 	 */
-	function Currency() {return self::site_currency();}
+	function Currency() {return self::$site_currency;}
 	
-	static function current_order() {return new Order();}
-	
+	static function current_order() {
+		$orderClass = self::$order_class; 
+		return new $orderClass();
+	}
+		
 	static function save_to_database() {
 		
 		//1) Order creation
@@ -256,26 +271,7 @@
 		$js[$this->SubTotalIDForCart()] = $this->_SubTotal();
 		$js[$this->TotalIDForCart()] = $this->_Total();
 	}
-		
-	static $factory_class = "Order";
-
-	/**
-	 * Items are added to this array when loaded in memory
-	 */
-	//protected $items = array();
 	
-	/**
-	 * This can be set to an object that handles data operations.
-	 * ShoppingCart is one such handler. 
-	 */
-	//protected $dataHandler = null;
-	
-	/**
-	 * All these status count as a "completed order"
-	 */
-	static $complete_status = array('Paid', 'Sent', 'Complete');
-
-
 	/**
 	 * Set the email of the administrator
 	 */
@@ -327,22 +323,7 @@
 		}
 		parent::onBeforeWrite();
 	}
-
-	/**
-	 * Turn this order object into a shopping cart
-	 */
-	/*function changeToShoppingCart() {	
-
-		$this->dataHandler = new ShoppingCart();
 		
-		// We load the order object's default 'DataObject stuff' with the cart contents.
-		// That way, if we ever need to save or access these values internally, the data is there.
-		$this->items = $this->dataHandler->items($this);
-		$this->record = $this->dataHandler->getRecord($this);
-		$this->modifiers = $this->dataHandler->modifiers($this);
-
-	}*/
-	
 	/**
 	 * Creates an order from the shopping cart
 	 * Saves the order to the database
@@ -449,10 +430,6 @@
 		return $order;
 	}*/
 	
-	static function makeFrom($className){
-		self::$factory_class = $className;
-	}
-
 	/**
 	 * Factory method for new order items.
 	 */ 
@@ -777,14 +754,6 @@
 		$sc->setID($orderID);
 		return $order;
 	}
-	 
-	/**
-	 * Return the member's email address
-	 */
-	public function MemberEmail(){
-		$member = DataObject::get_by_id("Member", $this->MemberID);
-		return $member->Email;
-	}
 	
 	function updatePrinted($printed){
 		$this->__set("Printed", $printed);
@@ -968,6 +937,7 @@
 	 */
 	function OrderContentIncomplete() {return DataObject::get_one('CheckoutPage')->PurchaseIncomplete;}
 	
+	function forTemplate() {return $this->renderWith(array('Order', 'Page'));}
 }
 
 /**
@@ -981,60 +951,18 @@ class Order_Controller extends Controller {
 	
 	function show() {
 		if($orderID = Director::urlParam('ID')) {
-			if($memberID = Member::currentUserID()) return DataObject::get_one('Order', "`Order`.`ID` = '$orderID' AND `MemberID` = '$memberID'");
+			if($memberID = Member::currentUserID()) {
+				if($order = DataObject::get_one('Order', "`Order`.`ID` = '$orderID' AND `MemberID` = '$memberID'")) return $order;
+				else return null;
+			}
 			else {
 				Session::setFormMessage('Login', 'You need to be logged in to view that page', 'warning');
 				Director::redirect('Security/login/');
 				return;
 			}
 		}
+		return null;
 	}
-	
-	function DisplayOrder() {
-		if($orderID = Director::urlParam('ID')) {
-			if($memberID = Member::currentUserID()) return DataObject::get_one('Order', "`Order`.`ID` = '$orderID' AND `MemberID` = '$memberID'");
-			else return null;
-		}
-		else return ShoppingCart::current_order();
-	}	
-	
-	/**
-	 * Return the order ID
-	 */
-	/*function orderID() {
-		$orderID = $this->urlParams["ID"];
-		if(!$orderID) $orderID = Session::get('Order.OrderID');
-		return $orderID;
-	}*/
-	
-	/**
-	 * Displays the order information  @where is this used ?
-	 */
-	function DisplayFinalisedOrder(){
-		/*if($orderID = $this->orderID()){
-			$member = Member();
-			if($orderID && $member){
-				$order = DataObject::get_one("Order", "`Order`.ID = $orderID && MemberID = $member->ID");
-				return $order;
-			}
-		}*/
-		if($orderID = Director::urlParam('ID') && $memberID = Member::currentUserID()) return DataObject::get_one('Order', "`Order`.`ID` = '$orderID' AND `MemberID` = '$memberID'");
-		else return null;
-	}
-	
-	/**
-	 * Check if the Member exists before displaying the order content,
-	 * redirect them back to the Security section if not
-	 */
-	function OrderSuccessful() {
-		if($member = Member::currentMember()) return array();
-		else {
-			Session::setFormMessage('Login', 'You need to be logged in to view that page', 'warning');
-			Director::redirect('Security/login/');
-			return;
-		}
-	}
-
 }
 
 /**
