@@ -635,20 +635,7 @@
 		  return false;
 		}
 	}
-		
-	function OrderContent(){
-		if($member = Member::currentUser()){
-			// If the order was successful, get the appropriate checkout text
-			if(Session::get('Order.PurchaseComplete') == 1){
-				$Checkout = DataObject::get("Checkout");
-				return $Checkout->PurchaseComplete;
-			}else{
-				return "Order Error";
-				//@todo find a more appropriate error message here.
-			}
-		}
-	}
-			
+				
 	/*
 	 * Returns a TaxModifier object that provides information about tax on this order.
 	 */
