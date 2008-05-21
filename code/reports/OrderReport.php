@@ -137,7 +137,7 @@ class OrderReport_Popup extends Controller {
 
 		if(is_numeric($id)){
 			$order = DataObject::get_by_id("Order", $id);
-			$payment = $order->OrderPayment();
+			$payment = $order->Payment();
 			$cheque = false;
 			if($payment->First()){
 				$record = $payment->First();

@@ -35,8 +35,7 @@
 	);
 	
 	static $has_many = array(
-		'Items' => 'OrderItem',
-		'Modifiers' => 'OrderModifier',
+		'Attributes' => 'Order_Attribute',
 		'OrderStatusLogs' => 'OrderStatusLog'
 	);
 	
@@ -205,6 +204,8 @@
 			return $total;
 		}
 	}
+	
+	function Payment() {return $this->ID ? DataObject::get('Payment', "`OrderID` = '$this->ID'") : null;}
 	
 	/**
 	 * Return the currency of this order.
@@ -406,19 +407,19 @@
 	 * Returns the value of a particular field.
 	 * This makes use of the dataHandler where necessary.
 	 */
-	function getField($fieldName) {
+	/*function getField($fieldName) {
 		if($this->dataHandler) return $this->dataHandler->getField($this, $fieldName);
 		else return parent::getField($fieldName);
-	}
+	}*/
 
 	/**
 	 * Sets the value of a particular field.
 	 * This makes use of the dataHandler where necessary.
 	 */
-	function setField($fieldName, $fieldValue) {	
+	/*function setField($fieldName, $fieldValue) {	
 		if($this->dataHandler) $this->dataHandler->setField($this, $fieldName, $fieldValue);
 		return parent::setField($fieldName, $fieldValue);
-	}
+	}*/
 	
 	/**
 	 * Factory method to create an Order.
@@ -648,12 +649,7 @@
 			}
 		}
 	}
-	
-	function OrderPayment(){
-		if($this->ID)
-			return DataObject::get("Payment", "OrderID = '$this->ID'");
-	}
-	
+		
 	function OrderCustomer(){
 		return $this->Member();
 	}
@@ -1121,6 +1117,41 @@ class Order_statusEmail extends Email_Template {
 
 	protected $ss_template = 'Order_statusEmail';
 
+}
+
+class Order_Attribute extends DataObject {
+	
+	protected $id;
+	
+	static $has_one = array(
+		'Order' => 'Order'
+	);
+	
+	public function __construct($object = null) {		
+		
+		// Case 1 : Constructed by the static function get of DataObject
+		
+		if(is_array($object)) parent::__construct($object);
+		
+		// Case 2 : Constructed in memory
+		
+		else parent::__construct();
+	}
+	
+	public function getId() {return $this->id;}
+	public function setId($id) {$this->id = $id;}
+	
+	function ClassForTable() {
+		$class = get_class($this);
+		$classes[] = strtolower($class);
+		while(get_parent_class($class) != 'DataObject' && $class = get_parent_class($class)) $classes[] = strtolower($class);
+		return implode(' ', $classes);
+	}
+	
+	protected function MainID() {return get_class($this) . '_' . ($this->ID ? $this->ID : $this->id);}
+	
+	function IDForTable() {return 'Table_' . $this->MainID();}
+	function IDForCart() {return 'Cart_' . $this->MainID();}
 }
 
 ?>
