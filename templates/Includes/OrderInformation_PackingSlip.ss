@@ -84,7 +84,7 @@
 											$ShippingCountry<br />
 										<% end_if %>
 									<% else %>
-										<% control OrderCustomer %>
+										<% control Customer %>
 											$CreditCardName<br />
 											$Address<br />
 											$AddressLine2<br />

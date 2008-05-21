@@ -205,7 +205,10 @@
 		}
 	}
 	
+	// Order attributes access functions
+	
 	function Payment() {return $this->ID ? DataObject::get('Payment', "`OrderID` = '$this->ID'") : null;}
+	function Customer() {return $this->Member();}
 	
 	/**
 	 * Return the currency of this order.
@@ -632,28 +635,7 @@
 		  return false;
 		}
 	}
-	
 		
-		
-
-	/**
-	 ** These functions change the title and order content based
-	 ** on the status message from the transaction.
-	 **/
-	function OrderTitle(){
-		if($member = Member::currentMember()){
-			if(Session::get('Order.PurchaseComplete') == 1){
-				return "Purchase Complete";
-			}else{
-				return "Order Error";
-			}
-		}
-	}
-		
-	function OrderCustomer(){
-		return $this->Member();
-	}
-	
 	function OrderContent(){
 		if($member = Member::currentUser()){
 			// If the order was successful, get the appropriate checkout text

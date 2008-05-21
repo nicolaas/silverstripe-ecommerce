@@ -7,7 +7,7 @@
 	</thead>
 	
 	<tbody>
-	<% control OrderCustomer %>
+	<% control Customer %>
 		<tr class="gap">
 			<th colspan="4" scope="row" class="left"><% _t("CUSTOMERDETAILS","Customer Details") %></th>
 		</tr>
