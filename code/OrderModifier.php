@@ -8,25 +8,15 @@
  * The OrderModifier class is a databound object for handling the additionale charges or deductions of an order.
  */
  
-class OrderModifier extends DataObject {
-
-	protected $id;
+class OrderModifier extends Order_Attribute {
 
 	static $db = array(
 		'Amount' => 'Currency',
 		'Type' => "Enum(array('Chargable','Deductable'))"
 	);
 	
-	static $has_one = array(
-		'Order' => 'Order'
-	);
-	
-	//protected $order;
-	
 	protected static $is_chargable = true;
-	
-	//function setOrder(Order $order) {$this->order = $order;}
-	
+		
 	/*
 	 * This function is called when the order inits its modifiers.
 	 * It is better than directly construct the modifier in the Order class because, the user may need to create several modifiers or customize it.
@@ -79,18 +69,7 @@ class OrderModifier extends DataObject {
 		$amount = $this->Amount();
 		return ($this->IsChargable() ? 1 : -1) * $amount;
 	}
-	
-	public function getId() {return $this->id;}
-	public function setId($id) {$this->id = $id;}
-	
-	function ClassForTable() {
-		$class = get_class($this);
-		$classes[] = strtolower($class);
-		while($class = get_parent_class($class) != 'OrderModifier') $classes[] = strtolower($class);
-		$classes[] = strtolower('OrderModifier');
-		return implode(' ', $classes);
-	}
-	
+		
 	function updateForAjax(array &$js) {
 		$js[$this->ValueIdForCart()] = $this->ValueForCart();
 		$js[$this->ValueIdForTable()] = $this->ValueForTable();
@@ -114,10 +93,10 @@ class OrderModifier extends DataObject {
 	
 	//4) Form Functions
 	
-	static function show_form(/*Order $order*/) {return false;}
+	static function show_form() {return false;}
 	
-	static function get_form(/*Order $order, */CheckoutPage $checkoutPage) {
-		return new OrderModifierForm(/*$order, */$checkoutPage, 'ModifierForm', new FieldSet(), new FieldSet());
+	static function get_form($controller) {
+		return new OrderModifierForm($controller, 'ModifierForm', new FieldSet(), new FieldSet());
 	}
 }
 
