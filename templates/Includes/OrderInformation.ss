@@ -36,7 +36,7 @@
 			<td class="right">$Total.Nice</td>
 		</tr>
 	
-	<% control OrderPayment %>
+	<% control Payment %>
 		<tr class="gap">
 			<td colspan="4" scope="row" class="left ordersummary"><h3><% _t("ORDERSUMMARY","Order Summary") %>:</h3></td>
 		</tr>
