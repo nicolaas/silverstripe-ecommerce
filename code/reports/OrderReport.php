@@ -85,7 +85,8 @@ HTML
 			return "<td class=\"$CSS_value\">$value</td>";
 		} else if($this->headFields[$fieldIndex] == "Customer Name") {
 			$value = htmlentities($value);
-			return "<td><a href=\"mailto:" . $record->MemberEmail(). "\">$value</a></td>";
+			$mail = $record->Customer()->Email;
+			return "<td><a href=\"mailto:$mail\">$value</a></td>";
 		} else if($field == "Order.ID") {
 			$url = "OrderReport_Popup/index/".$record->ID;
 			return <<<HTML
