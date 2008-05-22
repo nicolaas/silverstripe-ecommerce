@@ -15,7 +15,7 @@
 		<% if CompleteOrders %>
 			<% control CompleteOrders %>
 				<li>
-					<a href="checkout/OrderSuccessful/$ID" title="<% sprintf(_t("READMORE","Read more on Order #%s"),$ID) %>"><% _t("ORDER","Order #") %>{$ID}</a> ($Created.Nice)
+					<a href="$Link" title="<% sprintf(_t("READMORE","Read more on Order #%s"),$ID) %>"><% _t("ORDER","Order #") %>{$ID}</a> ($Created.Nice)
 				</li>
 			<% end_control %>
 		<% else %>
@@ -29,7 +29,7 @@
 		<% if IncompleteOrders %>
 			<% control IncompleteOrders %>
 				<li>
-					<a href="checkout/OrderIncomplete/$ID" title="<% sprintf(_t("READMORE","Read more on Order #%s"),$ID) %>"><% _t("ORDER","Order #") %>{$ID}</a> ($Created.Nice)
+					<a href="$Link" title="<% sprintf(_t("READMORE","Read more on Order #%s"),$ID) %>"><% _t("ORDER","Order #") %>{$ID}</a> ($Created.Nice)
 				</li>
 			<% end_control %>
 		<% else %>

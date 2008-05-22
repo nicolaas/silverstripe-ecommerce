@@ -52,7 +52,7 @@ class AccountPage_Controller extends Page_Controller {
 	 * Returns the orders from this member
 	 */
 	protected function MemberOrders($complete = true) {
-		$memberID = Member::currentUserID();		
+		$memberID = Member::currentUserID();
 		$statusFilter = "`Status` "  . ($complete ? '' : 'NOT') . " IN ('" . implode("','", Order::$complete_status) . "')";
 		return DataObject::get('Order', "`MemberID` = '$memberID' AND $statusFilter", "`Created` DESC");
 	}
