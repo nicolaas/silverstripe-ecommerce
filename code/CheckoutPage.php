@@ -64,13 +64,13 @@ class CheckoutPage_Controller extends Page_Controller {
 		
 		// include stylesheet for the checkout page
 		Requirements::themedCSS('CheckoutPage');
-		
+				
 		// init the virtual methods for the order modifiers
 		$this->initVirtualMethods();
-
+				
 		parent::init();
 	}
-	
+		
 	/*
 	 * Inits the virtual methods from the name of the modifier forms to redirect the action method to the form class
 	 */
@@ -92,21 +92,61 @@ class CheckoutPage_Controller extends Page_Controller {
 			}
 		}
 	}
-			
-	/**
-	 * Complete orders content
+	
+	function CanCheckout() {
+		if($orderID = Director::urlParam('ID')) {
+			if($memberID = Member::currentUserID()) {
+				if($order = DataObject::get_one('Order', "`Order`.`ID` = '$orderID' AND `MemberID` = '$memberID'")) return ! $order->IsComplete();
+				else return false;
+			}
+			else return false;
+		}
+		else return true;
+	}
+	
+	/*
+	 * Return either the current order from the shopping cart or
+	 * if there is an ID in the url the order which has this ID if and only if
+	 * the member logged has done this order and if this order is incomplete.
+	 * Precondition : the user can checkout
 	 */
-	/*function OrderContentSuccessful() {
-		return $this->PurchaseComplete;
-	}*/
+	function Order() {
+		if($orderID = Director::urlParam('ID')) return DataObject::get_by_id('Order', $orderID);
+		else return ShoppingCart::current_order();
+	}
 	
-	/**
-	 * Incomplete orders content
-	 */	
-	/*function OrderContentIncomplete() {
-		return $this->PurchaseIncomplete;
-	}*/
+	/*
+	 * Return a DataObjectSet which contains the forms to add some modifiers to update the OrderInformation table
+	 * Precondition : the user can checkout
+	 */
+	function ModifierForms() {return Order::get_modifier_forms($this);}
 	
+	/*
+	 * Return the OrderForm object
+	 * Precondition : the user can checkout
+	 */
+	function OrderForm() {return new OrderForm($this, 'OrderForm');}
+	
+	/*
+	 * Return the reason why the user has not been able to checkout
+	 * Precondition : the user can not checkout
+	 */
+	function Message() {
+		$orderID = Director::urlParam('ID');
+		if($memberID = Member::currentUserID()) {
+			if($order = DataObject::get_one('Order', "`Order`.`ID` = '$orderID' AND `MemberID` = '$memberID'")) return 'You can not checkout this order because it has been already successfully completed. Click <a href="' . $order->Link . '">here</a> to see its details, otherwise you can <a href="' . CheckoutPage::find_link() . '">checkout</a> your current order.';
+			else return 'You do not have any order corresponding to this ID, so you can not checkout. However you can <a href="' . CheckoutPage::find_link() . '">checkout</a> your current order.';
+		}
+		else {
+			$messages = array(
+				'default' => '<p class="message good">' . _t('Message', 'You\'ll need to login before you can checkout this order. If you are not registered, you can not checkout this order anyway, otherwise please enter your details below.') . '</p>',
+				'logInAgain' => 'You have been logged out. If you would like to log in again, please do so below.'
+			);
+			Security::permissionFailure($this, $messages);
+			return;
+		}
+	}
+			
 	/**
 	 * Return the order payment information
 	 * This function is not used
@@ -123,13 +163,7 @@ class CheckoutPage_Controller extends Page_Controller {
 		}
 	}*/
 		
-	function DisplayOrder() {
-		if($orderID = Director::urlParam('ID')) {
-			if($memberID = Member::currentUserID()) return DataObject::get_one('Order', "`Order`.`ID` = '$orderID' AND `MemberID` = '$memberID'");
-			else return null;
-		}
-		else return ShoppingCart::current_order();
-	}	
+		
 	
 	/**
 	 * Return the order ID
@@ -154,29 +188,6 @@ class CheckoutPage_Controller extends Page_Controller {
 		if($orderID = Director::urlParam('ID') && $memberID = Member::currentUserID()) return DataObject::get_one('Order', "`Order`.`ID` = '$orderID' AND `MemberID` = '$memberID'");
 		else return null;
 	}
-	
-	/**
-	 * Check if the Member exists before displaying the order content,
-	 * redirect them back to the Security section if not
-	 */
-	function OrderSuccessful() {
-		if($member = Member::currentMember()) return array();
-		else {
-			Session::setFormMessage('Login', 'You need to be logged in to view that page', 'warning');
-			Director::redirect('Security/login/');
-			return;
-		}
-	}
-	
-	/*
-	 * Return a DataObjectSet which contains the forms to add some modifiers to update the OrderInformation table
-	 */
-	function ModifierForms() {return Order::get_modifier_forms($this);}
-	
-	/**
-	 * Return the OrderForm object
-	 */
-	function OrderForm() {return new OrderForm($this, 'OrderForm');}
 		
 	function setCountry() {
 		if(isset($_REQUEST['country']) && $country = $_REQUEST['country']) {
