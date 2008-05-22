@@ -41,7 +41,7 @@ class PayPalPayment_Handler extends Controller {
 				
 			$order->sendReceipt();
 			$order->isComplete();
-			Director::redirect(CheckoutPage::find_link() . "OrderSuccessful/$order->ID");
+			Director::redirect($order->Link());
 		}else{
 			Director::redirect(CheckoutPage::find_link() . "ConfirmPayPal/$order->ID");
 		}

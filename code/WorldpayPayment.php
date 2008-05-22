@@ -138,7 +138,7 @@ class WorldpayPayment_Handler extends Controller {
 				// Check if the order ID is numeric, otherwise fail
 				$orderID = $_REQUEST['MC_orderID'];
 				if(is_numeric($orderID)) {
-					$order = DataObject::get_one("Order", "`Order`.ID = $orderID");
+					$order = DataObject::get_by_id('Order', $orderID);
 					if($order) {
 						$order->Status = 'Paid';
 						$order->write();
@@ -165,7 +165,7 @@ class WorldpayPayment_Handler extends Controller {
 						// for example, it finds the shipping country as the UK (and thus breaks shipping / tax logic in email)
 						//$order->sendReceipt();
 
-						$url = Director::absoluteBaseURL() . CheckoutPage::find_link(true) . "/OrderSuccessful/".$orderID;
+						$url = Director::absoluteBaseURL() . $order->Link();
 											
 					} else {
 						USER_ERROR("CheckoutPage::OrderConfirmed - Order cannot be found",E_USER_WARNING);
@@ -177,7 +177,17 @@ class WorldpayPayment_Handler extends Controller {
 				}	
 			} else {
 				$orderID = $_REQUEST['MC_orderID'];
-				$url = Director::absoluteBaseURL() . CheckoutPage::find_link(true) . "/OrderIncomplete/".$orderID;
+				if(is_numeric($orderID)) {
+					if($order = DataObject::get_by_id('Order', $orderID)) $url = Director::absoluteBaseURL() . $order->Link();
+					else {
+						USER_ERROR('CheckoutPage::OrderConfirmed - Order cannot be found', E_USER_WARNING);
+						return;
+					}
+				}
+				else {
+					USER_ERROR('CheckoutPage::OrderConfirmed - Order ID is NOT numeric', E_USER_WARNING);
+					return;
+				}
 			}
 		
 		} else {
