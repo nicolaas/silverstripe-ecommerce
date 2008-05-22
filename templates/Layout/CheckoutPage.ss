@@ -19,6 +19,6 @@
 		
 		$OrderForm
 	<% else %>
-		$Message
+		<p><strong>$Message</strong></p>
 	<% end_if %>
 </div>
