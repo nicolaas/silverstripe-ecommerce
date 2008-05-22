@@ -181,7 +181,7 @@ class OrderForm extends Form{
 				
 				ShoppingCart::clear();
 				
-				Director::redirect(CheckoutPage::find_link() . "OrderSuccessful/$order->ID");
+				Director::redirect($order->Link());
 				return;
 			}
 			// Longer payment process, such as Worldpay
