@@ -37,12 +37,10 @@ class CheckoutPage extends Page {
 
 	
 	/**
-	 * Returns a link to the checkout page on this site.
-	 * Will look for the first CheckoutPage object in the database.
-	 * Returns the link to it or just the URLSegment
-	 * @param - $urlSegment - returns a URLSegment only if set
+	 * Returns the link or the URLSegment to the first checkout page on this site
+	 * @param urlSegment : returns the URLSegment only if true
 	 */
-	static function find_link($urlSegment = null) {
+	static function find_link($urlSegment = false) {
 		if(! $page = DataObject::get_one('CheckoutPage')) user_error(_t('CheckoutPage.NOPAGE', 'No CheckoutPage on this site - please create one !'), E_USER_ERROR);
 		if($urlSegment) return $page->URLSegment;
 		else return $page->Link();
@@ -81,8 +79,8 @@ class CheckoutPage_Controller extends Page_Controller {
 	}
 	
 	/**
-	 * Returns the form which name is 'methodname'
-	 * @param methodname : name of the virtual method called
+	 * Returns the form which name is equal to the parameter
+	 * @param methodName : name of the virtual method called
 	 */
 	protected function getOrderModifierForm($methodName) {
 		// loops for all modifier forms, finds form named $methodName and returns it
@@ -141,12 +139,8 @@ class CheckoutPage_Controller extends Page_Controller {
 			else return 'You do not have any order corresponding to this ID, so you can not checkout. However you can <a href="' . CheckoutPage::find_link() . '">checkout</a> your current order.';
 		}
 		else {
-			$messages = array(
-				'default' => '<p class="message good">' . _t('Message', 'You\'ll need to login before you can checkout this order. If you are not registered, you can not checkout this order anyway, otherwise please enter your details below.') . '</p>',
-				'logInAgain' => 'You have been logged out. If you would like to log in again, please do so below.'
-			);
-			Security::permissionFailure($this, $messages);
-			return;
+			$redirectLink = CheckoutPage::find_link() . "/$orderID";
+			return 'You can not checkout this order because you are not logged. To do so, please <a href="Security/login?backURL=' . $redirectLink . '">login</a> first, otherwise you can <a href="' . CheckoutPage::find_link() . '">checkout</a> your current order.';
 		}
 	}
 }

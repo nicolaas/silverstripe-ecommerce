@@ -49,6 +49,7 @@ class AccountPage_Controller extends Page_Controller {
 	
 	/**
 	 * Returns the either complete or incomplete orders of this member
+	 * @param complete : order status for filter
 	 */
 	protected function MemberOrders($complete = true) {
 		$memberID = Member::currentUserID();
