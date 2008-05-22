@@ -8,7 +8,7 @@
 		<% end_if %>
 	</div>
 	
-	<% control DisplayOrder %>
+	<% control Order %>
 		<% include OrderInformation_Editable %>
 	<% end_control %>
 	
