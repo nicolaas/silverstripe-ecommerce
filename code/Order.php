@@ -217,6 +217,8 @@
 		}
 	}
 	
+	function Link() {return Order_Controller::show_link($this->ID);}
+	
 	// Order attributes access functions
 	
 	function Payment() {return $this->ID ? DataObject::get('Payment', "`OrderID` = '$this->ID'") : null;}
@@ -228,16 +230,18 @@
 	 */
 	function Currency() {return self::$site_currency;}
 	
-	static function current_order() {
+	static function create() {
 		$orderClass = self::$order_class; 
 		return new $orderClass();
 	}
-		
+	
+	static function current_order() {return self::create();}
+	
 	static function save_to_database() {
 		
 		//1) Order creation
 		
-		$order = new Order();
+		$order = self::current_order();
 		$order->write();
 				
 		//2) Items saving
@@ -270,6 +274,47 @@
 		$js[$this->TotalIDForTable()] = $this->_Total();
 		$js[$this->SubTotalIDForCart()] = $this->_SubTotal();
 		$js[$this->TotalIDForCart()] = $this->_Total();
+	}
+	
+	function forTemplate() {return $this->renderWith(array('Order', 'Page'));}
+	
+	function IsComplete() {return in_array($this->Status, self::$complete_status);}
+	
+	function Status() {return $this->IsComplete() ? _t('SUCCESSFULL', 'Order Successful') : _t('INCOMPLETE', 'Order Incomplete');}
+	
+	function CheckoutLink() {return CheckoutPage::find_link();}
+	
+	// Order Emails Sending Management 
+  	
+  	/*
+	 * Send the receipt of the order by mail
+	 * Precondition : The order payment has been successful
+	 */
+	function sendReceipt() {$this->sendEmail('Order_receiptEmail');}
+  	
+	/*
+	 * Send a mail of the order to the client (and another to the admin)
+	 * @param $emailClass - the class name of the email you wish to send
+	 * @param $copyToAdmin - true by default, whether it should send a copy to the admin
+	 */
+	protected function sendEmail($emailClass, $copyToAdmin = true) {
+ 		$to = $this->Member()->Email;
+ 		$from = self::$receiptEmail ? self::$receiptEmail : Email::getAdminEmail();
+		$subject = self::$receiptSubject ? self::$receiptSubject : "Shop Sale Information #$this->ID";
+ 		
+ 		$purchaseCompleteMessage = DataObject::get_one('CheckoutPage')->PurchaseComplete;
+ 		
+ 		$email = new $emailClass($to, $from, $subject);
+		if($copyToAdmin) $email->setBcc(Email::getAdminEmail());
+		
+		$email->populateTemplate(
+			array(
+				'PurchaseCompleteMessage' => $purchaseCompleteMessage,
+				'Order' => $this
+			)
+		);
+		
+		$email->send();
 	}
 	
 	/**
@@ -324,214 +369,6 @@
 		parent::onBeforeWrite();
 	}
 		
-	/**
-	 * Creates an order from the shopping cart
-	 * Saves the order to the database
-	 */
-	/*static function createOrderFromShoppingCart() {
-		$order = Order::create();
-		$order->changeToShoppingCart();
-		$order = $order->saveToDatabase();
-		return $order;
-	}*/
-
-	/**
-	 * Turn a 'data handled' order (such as a shopping cart) into a regular order
-	 */
-	/*function saveToDatabase(){
-		if(! $this->dataHandler) {
-			user_error('saveToDatabase called on a non-data-handled object, turning it into a ShoppingCart', E_USER_WARNING);
-			$this->changeToShoppingCart();
-		}
-				
-		// Store the items to this object for later saving. 
-		// Remove the datahandler
-		$this->items = $this->dataHandler->items($this);
-		$this->modifiers = $this->dataHandler->modifiers($this);
-		$this->dataHandler = null;
-		
-		// 23/7/2007 Sean says: This creates blank members? This is not working.
-		// @todo - find out why this was here.		
-		//$member = $this->Member();
-
-		$member = Member::currentUser();
-		
-		$this->MemberID = $member->ID;
-		$this->TotalOrderValue = $this->Total();
-		
-		// items and modifiers can't be added to the order or saved till the 
-		// order has an id
-		$items = $this->Items();
-		$modifiers = $this->Modifiers();
-		$this->write();
-			
-		// if there are any items, iterate through them, and write
-		// the order IDs	
-		if($items) {
-			foreach($items as $item){
-				$item->OrderID = $this->ID;
-				$item->write();
-			}
-		}
-		
-		// Problem : There is no any modifiers here, so there are not saved
-		
-		// if there are any modifiers, iterate through them
-		if($modifiers) {
-			foreach($modifiers as $modifier) {
-				$modifier->OrderID = $this->ID;
-				$modifier->write();
-			}
-		}
-		
-		return $this;
-	} */
-	
-	/**
-	 * Returns the value of a particular field.
-	 * This makes use of the dataHandler where necessary.
-	 */
-	/*function getField($fieldName) {
-		if($this->dataHandler) return $this->dataHandler->getField($this, $fieldName);
-		else return parent::getField($fieldName);
-	}*/
-
-	/**
-	 * Sets the value of a particular field.
-	 * This makes use of the dataHandler where necessary.
-	 */
-	/*function setField($fieldName, $fieldValue) {	
-		if($this->dataHandler) $this->dataHandler->setField($this, $fieldName, $fieldValue);
-		return parent::setField($fieldName, $fieldValue);
-	}*/
-	
-	/**
-	 * Factory method to create an Order.
-	 */
-	static function create($data = null){
-		$className = self::$factory_class;
-		if($className){
-			return new $className($data);
-		}else{
-			USER_ERROR("ORDER::createOrderItem() - Order class Not defined in _config.php ");
-		}
-	}
-	
-	/**
-	 * Creates the shopping cart object
-	 */
-	/*static function ShoppingCart() {
-		$order = Order::create();
-		if($order){
-			$order->changeToShoppingCart();
-		}else{
-			USER_ERROR("ORDER::ShoppingCart() - Could not create order from base class", E_USER_ERROR);
-		}
-		return $order;
-	}*/
-	
-	/**
-	 * Factory method for new order items.
-	 */ 
-	/*function createOrderItem($product, $quantity) {
-		$orderClassName = $this->stat('item_class');
-		return new $orderClassName($product, $quantity);
-	}*/
-	
-	/**
-	* Adds a product to this order. If there is an ID, it updates the DB.
-	* @param DataObject $product An instance of product you wish to add.
-	* @param int $quantity The quantity you wish to add, default is 1.
-	*/
-	/*function add($product, $quantity = 1) {
-		if(!isset($this->items[$product->ID])) $this->items[$product->ID] = 0;
-		$this->items[$product->ID] += $quantity;
-		if($this->dataHandler) {
-			$this->dataHandler->setQuantity($this, $product, $this->items[$product->ID]);	
-		} elseif($this->ID) {
-			$this->addToDatabase($product);
-		}
-  	}*/
-  	
-  	/*function removeByQuantity($product, $quantity = 1) {
-  		$this->items[$product->ID] -= $quantity;
-  		if($this->dataHandler) {
-  			$this->dataHandler->setQuantity($this, $product, $this->items[$product->ID]);
-  		} else if($this->ID) {
-  			$this->addToDatabase($product);
-  		}
-  	}*/
-  
-	/**
-	 * Saves the given product to the database as an orderItem
-	 */
-	/*function addToDatabase($product) {
-		$orderItem = $this->createOrderItem($product, $this->items[$product->ID]); 	
-		$orderItem->setCart($this);
-		$orderItem->OrderID = $this->ID;
-		$orderItem->write();
-	}*/
-	
-	/** 
-	* Reduces the quanity of a product in the order by one, 
-	* or if it is one, it removes it all together.
-	*/
-	/*function remove($product){
-		$id = $product->ID;
-   		$this->items[$id]--;
-   	
-		if($this->dataHandler){
-			$this->dataHandler->setQuantity($this, $product, $this->items[$product->ID]);	
-		}else if($this->ID){
-			$this->removeFromDatabase($product);
-		}
-		
-		if($this->items[$id] <= 0) {
-   			unset($this->items[$id]);
-   		}
-   		
-   		$this->updateModifiers();
-	}*/
-	
-	/**
-	 * Return the quantity of items of that ID in the cart
-	 */
-	/*function getQuantity($productID){
-		return $this->items[$productID];
-	}*/
-	
-	/*function removeall($product){
-		unset($this->items[$product->ID]);
-		if($this->dataHandler){
-			$this->dataHandler->setQuantity($this, $product, 0);
-		}else{
-			$this->removeFromDatabase($product);	
-		}
-		
-		$this->updateModifiers();
-	}*/
-	
-	/**
-	* Removes an item from the database (you need an ID to be stored on the order)
-	*/
-	/*function removeFromDatabase($product){
-		// We need to have an order ID to get the saved order items.
-		
-		// TODO: Should we have some data integrity here to say you can't remove 
-		// a product from the DB if it has a payment ?
-		if($this->ID){
-			$orderItem = DataObject::get_one("Order_item", "Product.ID = $product->ID AND Order.ID = $this->ID");
-			$orderItem->delete();
-		}		
-	}*/
-	
-	/*function Items() {
- 		// If we have an ID, assume that this is a database order
- 		if($this->ID) return $this->itemsFromDatabase();
- 		else if($products = ShoppingCart::get_products()) return $this->createOrderItems($products);
- 		else return null;
-	}*/
-	
 	function ContinueCountItems() {
 		if($items = $this->Items()) {
 			$i = 1;
@@ -539,80 +376,7 @@
 		}
 		return $items;
 	}
-		
-	/*protected function createOrderItems(array $products, $write = false) {
-		$orderItems = array();
-		$orderItemClass = $this->stat('item_class');
-		foreach($products as $productID => $quantity) {
-			if($quantity > 0) {
-				$product = DataObject::get_by_id('Product', $productID);
-				$orderItem = new $orderItemClass($product, $quantity);
-				if($write) {
-					$orderItem->OrderID = $this->ID;
-					$orderItem->write();
-				}
-				else array_push($orderItems, $orderItem);
-			}
-		}
-		return $write ? $this->itemsFromDatabase() : new DataObjectSet($orderItems);
-	}*/
-		
-	/*function addModifier(OrderModifier $modifier) {
-		if(! $this->modifiers) $this->modifiers = new DataObjectSet();
-		$this->modifiers->push($modifier);
-		if($this->dataHandler) $this->dataHandler->addModifier($this, $modifier);*/	
-		/*elseif($this->ID) {
-			$this->addToDatabase($product);
-		}*/
-	//}
-		
-   /** 
-	* Removes a modifier
-	* @param modifier : Modifier to remove
-	*/
-	/*function removeModifier($modifier){
-		if($modifiers = $this->modifiers) {
-   			$newModifiers = new DataObjectSet();
-   			foreach($modifiers as $oneModifier) {
-   				if($oneModifier !== $modifier) $newModifiers->push($oneModifier);
-   			}
-   			$this->modifiers = $newModifiers;
-   		}
-   		
-		if($this->dataHandler) $this->dataHandler->removeModifier($this, $modifier);	
-		else if($this->ID) $modifier->delete();
-				
-		if($this->modifiers->Count() == 0) $this->modifiers = null;
-	}*/
-		
-	/**
-	 * Attempts to process this orders payment.
-	 * Assummes the correct payment data, for each payement type is 
-	 * included in $paymentData. it also assumes the order has been written, before
-	 * payment can be made.
-	 */
-	  function attemptPurchase($paymentData) {
-		$this->write();
-		
-		// Process Payment (add subscription product info)
-		$paymentData['OrderID'] = $this->ID;
-
-		// NOTE: The reference to $_SESSION is bad.  We need to work out how the shopping cart in session can be linked to a saved order.  
-		Session::set('CartInfo.OrderID', $order->ID);
-
-		$payment = new Payment($paymentData);
-		$payment->OrderID = $this->ID;
-		$result = $payment->processPayment();
-				
-		if($result[Payment::$success]) {
-			// PURCHASE COMPLETE
-		  return true;
-		} else {
-			// PURCHASE FAILURE
-		  return false;
-		}
-	}
-				
+					
 	/*
 	 * Returns a TaxModifier object that provides information about tax on this order.
 	 */
@@ -623,60 +387,7 @@
 			}
 		}
 	}
-  	
-	/**
-	 * Sends an receipt to the client (and another to the admin)
-	 * ASSUMPTION : Member MUST be set for this order.
-	 * @param $emailClass - the class name of the email you wish to send
-	 * @param $copyToAdmin - true by default, whether it should send a copy to the admin
-	 */
-	protected function sendEmail($emailClass, $copyToAdmin = true) {
- 		// define the member and set_email() address of the admin
- 		$member = $this->Member();
- 		
- 		// if Order::$receiptEmail is set from the static Order::set_email() in _config.php then use that,
- 		// otherwise try and use the getAdminEmail() function from Email, otherwise just do nothing.
- 		if(self::$receiptEmail) {
- 			$adminEmail = self::$receiptEmail;
- 		} else {
- 			$adminEmail = Email::getAdminEmail();
- 		}
-
-		if(self::$receiptSubject) {
-			$subject = self::$receiptSubject;
-		}
- 		
- 		// send an email to the customer
- 		$e = new $emailClass($member->Email, $adminEmail);
-		$e->populateTemplate($this);
-		$e->populateTemplate(
-			array(
-				"Order" => $this,
-				"Member" => $member
-			)
-		);
-		if(isset($subject)) $e->setSubject($subject);
-		$e->send();
-		
-		// if copyToAdmin is true, send a copy to the admin AND if the admin email has been defined.
-		if($copyToAdmin && $adminEmail) {
-			$e2 = new $emailClass($adminEmail, $adminEmail, "User of the site has submitted an order");
-			$e2->populateTemplate($this);
-			$e2->populateTemplate(
-				array(
-					"Order" => $this,
-					"Member" => $member
-				)
-			);
-			if($subject) $e2->setSubject($subject);
-			$e2->send();			
-		}
-	}
-	
-	function sendReceipt() {
-		$this->sendEmail('Order_receiptEmail');
-	}
-	
+  			
 	/**
 	 * Send a message to the client containing the latest note of {@OrderStatusLog} and the current status.
 	 * Used in {@OrderReport}.
@@ -729,32 +440,7 @@
 		$totaloutstanding = $this->TotalOutstanding();
 		return ($totaloutstanding == 0 && (in_array($this->Status,$this->completeStati)));
 	}
-	
-	/**
-	* Overloaded from Shopping cart
-	*/
-	static function saveOrder(){
-		$sc =  Order::ShoppingCart();
-		$order = Object::create('Order');
-
-		$member = Member();
-		$order->MemberID = $member->ID;
-		$order->TotalOrderValue = $sc->Total();
-		$orderID = $order->write();
-			
-		// items can't be added to the order or saved till the order has an id
-		if($items = $sc->Items()){
-			foreach($items as $item){
-				$item->OrderID = $orderID;
-				$item->write();
-			}
-		}else{
-			user_error("Order: No Items in Order", E_USER_WARNING);
-		}
-		$sc->setID($orderID);
-		return $order;
-	}
-	
+		
 	function updatePrinted($printed){
 		$this->__set("Printed", $printed);
 		$this->write();
@@ -926,18 +612,6 @@
  			echo( "<div style=\"padding:5px; color:white; background-color:blue;\">The columns 'hasShippingCost', 'Shipping' and 'AddedTax' of the table 'Order' have been renamed successfully. Also, the columns have been renamed respectly to '_obsolete_hasShippingCost', '_obsolete_Shipping' and '_obsolete_AddedTax'.</div>" );
   		}
 	}
-
-	/**
-	 * Complete orders content from checkout object
-	 */
-	function OrderContentSuccessful() {return DataObject::get_one('CheckoutPage')->PurchaseComplete;}
-	
-	/**
-	 * Incomplete orders content from checkout object
-	 */
-	function OrderContentIncomplete() {return DataObject::get_one('CheckoutPage')->PurchaseIncomplete;}
-	
-	function forTemplate() {return $this->renderWith(array('Order', 'Page'));}
 }
 
 /**
@@ -947,7 +621,7 @@ class Order_Controller extends Controller {
 	
 	static $URLSegment = 'order';
 	
-	static function showLink($id) {return self::$URLSegment . '/show/' . $id;}
+	static function show_link($id) {return self::$URLSegment . '/show/' . $id;}
 	
 	function show() {
 		if($orderID = Director::urlParam('ID')) {
@@ -987,23 +661,12 @@ class Order_Item_Attribute extends Product_Attribute{
 
 /**
  * This class handles the receipt email which gets sent once an order is made.
- * You can call it by issuing Order::sendReceipt().
+ * You can call it by issuing sendReceipt() in the Order class.
  */  
-class Order_receiptEmail extends Email_Template {
+class Order_ReceiptEmail extends Email_Template {
 
-	protected $ss_template = 'Order_receiptEmail';
-	
-	public function __construct($to = null, $from = null, $subject = null) {
-		$this->to = $to ? $to : '$Member.Email';
-		$this->from = $from;
-		$this->subject = $subject ? $subject : 'Shop Sale Information (#$ID)';
-		
-		if(!isset($this->from, $this->subject)) {
-			user_error('From or subject for email have not been defined. You probably haven\'t called Order::set_email() in your _config.php file.', E_USER_ERROR);
-		}
-		
-		parent::__construct();
-	}
+	protected $ss_template = 'Order_ReceiptEmail';
+
 }
 
 /**
