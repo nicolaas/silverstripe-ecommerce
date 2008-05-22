@@ -5,8 +5,7 @@
  */
  
 /**
- * Account page to show order history and for the member
- * to edit their details
+ * Account page shows order history and a form to allow the member to edit its details
  */
 class AccountPage extends Page {
 	
@@ -17,8 +16,8 @@ class AccountPage extends Page {
 class AccountPage_Controller extends Page_Controller {
 
 	/**
-	 * Include account page requirements - the stylesheet for one and
-	 * Redirect to the login page if nobody is logged
+	 * Includes account page requirements - the stylesheet for one and
+	 * Redirects to the login page if nobody is logged
 	 */
 	function init() {
 		parent::init();
@@ -39,24 +38,23 @@ class AccountPage_Controller extends Page_Controller {
 	function MemberForm() {return new MemberForm($this, 'MemberForm');}
 	
 	/**
-	 * Returns all complete orders from this member
+	 * Returns all the complete orders of this member
 	 */
 	function CompleteOrders() {return $this->MemberOrders();}
 	
 	/**
-	 * Returns all incomplete orders from this member
+	 * Returns all the incomplete orders of this member
 	 */
 	function IncompleteOrders() {return $this->MemberOrders(false);}
 	
 	/**
-	 * Returns the orders from this member
+	 * Returns the either complete or incomplete orders of this member
 	 */
 	protected function MemberOrders($complete = true) {
 		$memberID = Member::currentUserID();
 		$statusFilter = "`Status` "  . ($complete ? '' : 'NOT') . " IN ('" . implode("','", Order::$complete_status) . "')";
 		return DataObject::get('Order', "`MemberID` = '$memberID' AND $statusFilter", "`Created` DESC");
 	}
-	
 }
 
 ?>
