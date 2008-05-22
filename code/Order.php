@@ -423,7 +423,9 @@
 		$e->setTo($member->Email);
 		$e->send();
 	}
-		
+	
+	// PayPalForm template functions
+	
 	function _SuccessfulPaymentLink(){
 		return Director::AbsoluteBaseURL(). CheckoutPage::find_link() . "paid";
 	}
@@ -436,10 +438,10 @@
 	/**
 	 * returns true or false based on the if a payment has been made.
 	 */
-	function isComplete(){
+	/*function isComplete(){
 		$totaloutstanding = $this->TotalOutstanding();
 		return ($totaloutstanding == 0 && (in_array($this->Status,$this->completeStati)));
-	}
+	}*/
 		
 	function updatePrinted($printed){
 		$this->__set("Printed", $printed);
