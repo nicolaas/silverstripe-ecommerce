@@ -8,12 +8,17 @@
 		<% end_if %>
 	</div>
 	
-	<% control Order %>
-		<% include OrderInformation_Editable %>
-	<% end_control %>
-	
-	<% control ModifierForms %>
-		$Me
-	<% end_control %>
-	$OrderForm	
+	<% if CanCheckout %>
+		<% control Order %>
+			<% include OrderInformation_Editable %>
+		<% end_control %>
+		
+		<% control ModifierForms %>
+			$Me
+		<% end_control %>
+		
+		$OrderForm
+	<% else %>
+		$Message
+	<% end_if %>
 </div>
