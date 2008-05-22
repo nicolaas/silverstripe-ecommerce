@@ -148,7 +148,7 @@ class ShoppingCart extends Object {
 		Session::set($serializedItemIndex, serialize($item));
 	}
 	
-	static function set_item_quantity($itemIndex, $quantity) {
+	static function set_quantity_item($itemIndex, $quantity) {
 		$serializedItemIndex = self::item_index($itemIndex);
 		$serializedItem = Session::get($serializedItemIndex);
 		$unserializedItem = unserialize($serializedItem);
@@ -271,12 +271,12 @@ class ShoppingCart_Controller extends Controller {
 	
 	static $URLSegment = 'shoppingcart';
 	
-	static function additemLink($id) {return self::$URLSegment . '/additem/' . $id;}
-	static function removeitemLink($id) {return self::$URLSegment . '/removeitem/' . $id;}
-	static function removeallitemLink($id) {return self::$URLSegment . '/removeallitem/' . $id;}
-	static function setquantityLink($id) {return self::$URLSegment . '/setquantity/' . $id;}
+	static function add_item_link($id) {return self::$URLSegment . '/additem/' . $id;}
+	static function remove_item_link($id) {return self::$URLSegment . '/removeitem/' . $id;}
+	static function remove_all_item_link($id) {return self::$URLSegment . '/removeallitem/' . $id;}
+	static function set_quantity_item_link($id) {return self::$URLSegment . '/setquantityitem/' . $id;}
 	
-	static function removemodifierLink($id) {return self::$URLSegment . '/removemodifier/' . $id;}
+	static function remove_modifier_link($id) {return self::$URLSegment . '/removemodifier/' . $id;}
 	
 	function additem() {
 		$itemId = $this->urlParams['ID'];
@@ -299,12 +299,12 @@ class ShoppingCart_Controller extends Controller {
 	/**
 	 * Ajax method to set an item quantity
 	 */
-	function setquantity() {
+	function setquantityitem() {
 		$itemId = $this->urlParams['ID'];
 		$quantity = $_REQUEST['quantity'];
 		if(is_numeric($quantity) && is_int($quantity + 0)) {
 			if($quantity > 0) {
-				ShoppingCart::set_item_quantity($itemId, $quantity);
+				ShoppingCart::set_quantity_item($itemId, $quantity);
 				$currentOrder = ShoppingCart::current_order();
 				
 				$js = array();
