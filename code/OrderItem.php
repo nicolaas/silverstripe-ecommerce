@@ -78,10 +78,10 @@ HTML;
 		$js[$this->QuantityIDForCart()] = $this->getQuantity();
 	}
 	
-	function addLink() {return ShoppingCart_Controller::additemLink($this->id);}
-	function removeLink() {return ShoppingCart_Controller::removeitemLink($this->id);}
-	function removeallLink() {return ShoppingCart_Controller::removeallitemLink($this->id);}
-	function setquantityLink() {return ShoppingCart_Controller::setquantityLink($this->id);}
+	function addLink() {return ShoppingCart_Controller::add_item_link($this->id);}
+	function removeLink() {return ShoppingCart_Controller::remove_item_link($this->id);}
+	function removeallLink() {return ShoppingCart_Controller::remove_all_item_link($this->id);}
+	function setquantityLink() {return ShoppingCart_Controller::set_quantity_item_link($this->id);}
 	
 	// Database Writing Methods
 	
