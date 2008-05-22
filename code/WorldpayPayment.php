@@ -40,14 +40,7 @@ class WorldpayPayment extends Payment {
 	function getPaymentFormRequirements() {
 		return null;
 	}
-	
-	/*
-	 * Returns the Cheque content from the CheckoutPage
-	 */
-	function ChequeContent() {
-		return DataObject::get_one('CheckoutPage')->ChequeMessage;
-	}
-	
+		
 	function processPayment($data, $form) {
 		$tmpPage = new Page();
 		$tmpPage->Title = "Make payment";
