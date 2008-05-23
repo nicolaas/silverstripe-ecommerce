@@ -8,7 +8,6 @@
 DataObject::add_extension('Member', 'EcommerceRole');
 
 Director::addRules(50, array(
-	Order_Controller::$URLSegment . '/$Action/$ID' => 'Order_Controller',
 	ShoppingCart_Controller::$URLSegment . '/$Action/$ID' => 'ShoppingCart_Controller'
 ));
 
