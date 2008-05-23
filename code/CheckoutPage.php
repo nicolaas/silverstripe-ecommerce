@@ -15,7 +15,27 @@ class CheckoutPage extends Page {
 	);
 	
 	static $add_action = 'a Checkout Page';
-		
+	
+	/**
+	 * Returns the link or the URLSegment to the first checkout page on this site
+	 * @param urlSegment : returns the URLSegment only if true
+	 */
+	static function find_link($urlSegment = false) {
+		if(! $page = DataObject::get_one('CheckoutPage')) user_error(_t('CheckoutPage.NOPAGE', 'No CheckoutPage on this site - please create one !'), E_USER_ERROR);
+		else return $urlSegment ? $page->URLSegment : $page->Link();
+	}
+	
+	/**
+	 * Returns the link or the URLSegment to the first checkout page on this site
+	 * to checkout the order which id is under the Action parameter
+	 * @param orderID : ID of the order
+	 * @param urlSegment : returns the URLSegment only if true
+	 */
+	static function get_checkout_order_link($orderID, $urlSegment = false) {
+		if(! $page = DataObject::get_one('CheckoutPage')) user_error(_t('CheckoutPage.NOPAGE', 'No CheckoutPage on this site - please create one !'), E_USER_ERROR);
+		else return ($urlSegment ? $page->URLSegment . '/' : $page->Link()) . $orderID; 
+	}
+	
 	/**
 	 * Creates the fields for the checkout page within the CMS
 	 */	
@@ -33,16 +53,6 @@ class CheckoutPage extends Page {
 		$fields->addFieldToTab('Root.Content.Messages', new HtmlEditorField('ChequeMessage', '', 5));
 
 		return $fields;
-	}
-
-	
-	/**
-	 * Returns the link or the URLSegment to the first checkout page on this site
-	 * @param urlSegment : returns the URLSegment only if true
-	 */
-	static function find_link($urlSegment = false) {
-		if(! $page = DataObject::get_one('CheckoutPage')) user_error(_t('CheckoutPage.NOPAGE', 'No CheckoutPage on this site - please create one !'), E_USER_ERROR);
-		else return $urlSegment ? $page->URLSegment : $page->Link();
 	}
 }
 
@@ -94,7 +104,7 @@ class CheckoutPage_Controller extends Page_Controller {
 	 * Checks if the user can checkout
 	 */
 	function CanCheckout() {
-		if($orderID = Director::urlParam('ID')) {
+		if($orderID = Director::urlParam('Action')) {
 			if($memberID = Member::currentUserID()) {
 				if($order = DataObject::get_one('Order', "`Order`.`ID` = '$orderID' AND `MemberID` = '$memberID'")) return ! $order->IsComplete();
 				else return false;
@@ -111,7 +121,7 @@ class CheckoutPage_Controller extends Page_Controller {
 	 * Precondition : the user can checkout
 	 */
 	function Order() {
-		if($orderID = Director::urlParam('ID')) return DataObject::get_by_id('Order', $orderID);
+		if($orderID = Director::urlParam('Action')) return DataObject::get_by_id('Order', $orderID);
 		else return ShoppingCart::current_order();
 	}
 	
@@ -132,14 +142,14 @@ class CheckoutPage_Controller extends Page_Controller {
 	 * Precondition : the user can not checkout
 	 */
 	function Message() {
-		$orderID = Director::urlParam('ID');
+		$orderID = Director::urlParam('Action');
 		if($memberID = Member::currentUserID()) {
-			if($order = DataObject::get_one('Order', "`Order`.`ID` = '$orderID' AND `MemberID` = '$memberID'")) return 'You can not checkout this order because it has been already successfully completed. Click <a href="' . $order->Link . '">here</a> to see its details, otherwise you can <a href="' . CheckoutPage::find_link() . '">checkout</a> your current order.';
-			else return 'You do not have any order corresponding to this ID, so you can not checkout. However you can <a href="' . CheckoutPage::find_link() . '">checkout</a> your current order.';
+			if($order = DataObject::get_one('Order', "`Order`.`ID` = '$orderID' AND `MemberID` = '$memberID'")) return 'You can not checkout this order because it has been already successfully completed. Click <a href="' . $order->Link() . '">here</a> to see its details, otherwise you can <a href="' . CheckoutPage::find_link() . '">checkout</a> your current order.';
+			else return 'You do not have any order corresponding to this ID, so you can not checkout this order. However you can <a href="' . CheckoutPage::find_link() . '">checkout</a> your current order.';
 		}
 		else {
-			$redirectLink = CheckoutPage::find_link() . "/$orderID";
-			return 'You can not checkout this order because you are not logged. To do so, please <a href="Security/login?backURL=' . $redirectLink . '">login</a> first, otherwise you can <a href="' . CheckoutPage::find_link() . '">checkout</a> your current order.';
+			$redirectLink = CheckoutPage::get_checkout_order_link($orderID);
+			return 'You can not checkout this order because you are not logged. To do so, please <a href="Security/login?BackURL=' . $redirectLink . '">login</a> first, otherwise you can <a href="' . CheckoutPage::find_link() . '">checkout</a> your current order.';
 		}
 	}
 }
