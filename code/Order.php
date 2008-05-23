@@ -217,7 +217,7 @@
 		}
 	}
 	
-	function Link() {return Order_Controller::show_link($this->ID);}
+	function Link() {return AccountPage::get_order_link($this->ID);}
 	
 	// Order attributes access functions
 	
@@ -275,12 +275,10 @@
 		$js[$this->SubTotalIDForCart()] = $this->_SubTotal();
 		$js[$this->TotalIDForCart()] = $this->_Total();
 	}
-	
-	function forTemplate() {return $this->renderWith(array('Order', 'Page'));}
-	
+		
 	function IsComplete() {return in_array($this->Status, self::$complete_status);}
 	
-	function Status() {return $this->IsComplete() ? _t('SUCCESSFULL', 'Order Successful') : _t('INCOMPLETE', 'Order Incomplete');}
+	function Status() {return $this->IsComplete() ? _t('Order.SUCCESSFULL', 'Order Successful') : _t('Order.INCOMPLETE', 'Order Incomplete');}
 	
 	function CheckoutLink() {return CheckoutPage::find_link();}
 	
@@ -613,31 +611,6 @@
  			DB::query("ALTER TABLE `Order` CHANGE COLUMN `AddedTax` `_obsolete_AddedTax` decimal(9,2)");
  			echo( "<div style=\"padding:5px; color:white; background-color:blue;\">The columns 'hasShippingCost', 'Shipping' and 'AddedTax' of the table 'Order' have been renamed successfully. Also, the columns have been renamed respectly to '_obsolete_hasShippingCost', '_obsolete_Shipping' and '_obsolete_AddedTax'.</div>" );
   		}
-	}
-}
-
-/**
- * Our controller points us to the correct order information
- */
-class Order_Controller extends Controller {
-	
-	static $URLSegment = 'order';
-	
-	static function show_link($id) {return self::$URLSegment . '/show/' . $id;}
-	
-	function show() {
-		if($orderID = Director::urlParam('ID')) {
-			if($memberID = Member::currentUserID()) {
-				if($order = DataObject::get_one('Order', "`Order`.`ID` = '$orderID' AND `MemberID` = '$memberID'")) return $order;
-				else return null;
-			}
-			else {
-				Session::setFormMessage('Login', 'You need to be logged in to view that page', 'warning');
-				Director::redirect('Security/login/');
-				return;
-			}
-		}
-		return null;
 	}
 }
 
