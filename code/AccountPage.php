@@ -13,6 +13,15 @@ class AccountPage extends Page {
 	
 	/**
 	 * Returns the link or the URLSegment to the first account page on this site
+	 * @param urlSegment : returns the URLSegment only if true
+	 */
+	static function find_link($urlSegment = false) {
+		if(! $page = DataObject::get_one('AccountPage')) user_error(_t('AccountPage.NOPAGE', 'No AccountPage on this site - please create one !'), E_USER_ERROR);
+		else return $urlSegment ? $page->URLSegment : $page->Link();
+	}
+	
+	/**
+	 * Returns the link or the URLSegment to the first account page on this site
 	 * to get the details of the order which id is in parameter
 	 * @param orderID : ID of the order
 	 * @param urlSegment : returns the URLSegment only if true
@@ -75,12 +84,20 @@ class AccountPage_Controller extends Page_Controller {
 		Requirements::themedCSS('CheckoutPage');
 		$memberID = Member::currentUserID();
 		if($orderID = Director::urlParam('ID')) {
-			if($order = DataObject::get_one('Order', "`Order`.`ID` = '$orderID' AND `MemberID` = '$memberID'")) return array('Order' => $order);//return $this->customise(array('Order' => $order));
-			else return null;
+			if($order = DataObject::get_one('Order', "`Order`.`ID` = '$orderID' AND `MemberID` = '$memberID'")) return array('Order' => $order);
+			else {
+				return array(
+					'Order' => false,
+					'Message' => 'You do not have any order corresponding to this ID, so you can not see it. However you can <a href="' . AccountPage::find_link() . '">see you details and orders</a>.'
+				);
+			}
 		}
 		else {
-			
-		} 
+			return array(
+				'Order' => false,
+				'Message' => 'There is no order ID specified, so you can not see this page. However you can <a href="' . AccountPage::find_link() . '">see you details and orders</a>.'
+			);
+		}
 	}
 }
 
