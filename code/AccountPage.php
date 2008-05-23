@@ -11,6 +11,16 @@ class AccountPage extends Page {
 	
 	static $add_action = 'an Account Page';
 	
+	/**
+	 * Returns the link or the URLSegment to the first account page on this site
+	 * to get the details of the order which id is in parameter
+	 * @param orderID : ID of the order
+	 * @param urlSegment : returns the URLSegment only if true
+	 */
+	static function get_order_link($orderID, $urlSegment = false) {
+		if(! $page = DataObject::get_one('AccountPage')) user_error(_t('AccountPage.NOPAGE', 'No AccountPage on this site - please create one !'), E_USER_ERROR);
+		else return ($urlSegment ? $page->URLSegment . '/' : $page->Link()) . 'order/' . $orderID; 
+	}
 }
 
 class AccountPage_Controller extends Page_Controller {
@@ -29,7 +39,7 @@ class AccountPage_Controller extends Page_Controller {
 			);
 			Security::permissionFailure($this, $messages);
 			return;
-		}	
+		}
 	}
 
 	/**
@@ -55,6 +65,22 @@ class AccountPage_Controller extends Page_Controller {
 		$memberID = Member::currentUserID();
 		$statusFilter = "`Status` "  . ($complete ? '' : 'NOT') . " IN ('" . implode("','", Order::$complete_status) . "')";
 		return DataObject::get('Order', "`MemberID` = '$memberID' AND $statusFilter", "`Created` DESC");
+	}
+	
+	/**
+	 * Returns the order details of the order which id is in the url
+	 * Precondition : a user is logged 
+	 */
+	function order() {
+		Requirements::themedCSS('CheckoutPage');
+		$memberID = Member::currentUserID();
+		if($orderID = Director::urlParam('ID')) {
+			if($order = DataObject::get_one('Order', "`Order`.`ID` = '$orderID' AND `MemberID` = '$memberID'")) return array('Order' => $order);//return $this->customise(array('Order' => $order));
+			else return null;
+		}
+		else {
+			
+		} 
 	}
 }
 
