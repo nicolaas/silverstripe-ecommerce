@@ -30,6 +30,7 @@ class ShoppingCart extends Object {
 	private static function items_table_name() {return self::$current_order . '.' . self::$items;}
 	private static function item_index($index) {return self::items_table_name() . '.' . $index;}
 	private static function modifiers_table_name() {return self::$current_order . '.' . self::$modifiers;}
+	private static function modifier_index($index) {return self::modifiers_table_name() . '.' . $index;}
 		
 	//3) Initialisation management
 	
@@ -80,48 +81,8 @@ class ShoppingCart extends Object {
 		return Session::get($usesDifferentShippingAddressIndex);
 	}
 	
-	//4) Product management
-	
-	/*static function add_product(Product $product) {
-		$productIndex = self::product_index($product);
-		$newQuantity = Session::get($productIndex) + 1;
-		Session::set($productIndex, $newQuantity);
-	}
-	
-	static function set_product_quantity(Product $product, $quantity) {
-		$productIndex = self::product_index($product);
-		Session::set($productIndex, $quantity);
-	}
-	
-	static function remove_product(Product $product) {
-		$productIndex = self::product_index($product);
-		$newQuantity = Session::get($productIndex) - 1;
-		if($newQuantity > 0)
-			Session::set($productIndex, $newQuantity);
-		else
-			Session::clear($productIndex);
-	}
-	
-	static function remove_all_product(Product $product) {
-		$productIndex = self::product_index($product);
-		Session::clear($productIndex);
-	}
-	
-	static function remove_all_products() {
-		$productTableIndex = self::product_table_name();
-		Session::clear($productTableIndex);
-	}
-	
-	static function has_products() {
-		$productTableIndex = self::product_table_name();
-		return Session::get($productTableIndex) != null;
-	}
+	//4) Items management
 		
-	static function get_products() {
-		$productTableIndex = self::product_table_name();
-		return Session::get($productTableIndex);
-	}*/
-	
 	static function add_new_item(OrderItem $item) {
 		$itemsTableIndex = self::items_table_name();
 		if($serializedItems = Session::get($itemsTableIndex)) {
@@ -139,20 +100,15 @@ class ShoppingCart extends Object {
 		$serializedItemIndex = self::item_index($itemIndex);
 		$serializedItem = Session::get($serializedItemIndex);
 		$unserializedItem = unserialize($serializedItem);
-		$unserializedItem->addQuantity($quantity);
+		$unserializedItem->addProtectedQuantity($quantity);
 		self::set_item($itemIndex, $unserializedItem);
 	}
-	
-	protected static function set_item($itemIndex, Order_item $item) {
-		$serializedItemIndex = self::item_index($itemIndex);
-		Session::set($serializedItemIndex, serialize($item));
-	}
-	
+		
 	static function set_quantity_item($itemIndex, $quantity) {
 		$serializedItemIndex = self::item_index($itemIndex);
 		$serializedItem = Session::get($serializedItemIndex);
 		$unserializedItem = unserialize($serializedItem);
-		$unserializedItem->setQuantity($quantity);
+		$unserializedItem->setProtectedQuantity($quantity);
 		self::set_item($itemIndex, $unserializedItem);
 	}
 	
@@ -162,7 +118,7 @@ class ShoppingCart extends Object {
 		$unserializedItem = unserialize($serializedItem);
 		$newQuantity = $unserializedItem->getQuantity() - $quantity;
 		if($newQuantity > 0) {
-			$unserializedItem->setQuantity($newQuantity);
+			$unserializedItem->setProtectedQuantity($newQuantity);
 			self::set_item($itemIndex, $unserializedItem);
 		}
 		else Session::clear($serializedItemIndex);
@@ -199,7 +155,12 @@ class ShoppingCart extends Object {
 		return null;
 	}
 	
-	//5) Modifier management
+	protected static function set_item($itemIndex, OrderItem $item) {
+		$serializedItemIndex = self::item_index($itemIndex);
+		Session::set($serializedItemIndex, serialize($item));
+	}
+	
+	//5) Modifiers management
 	
 	static function init_all_modifiers() {
 		Order::init_all_modifiers();
@@ -261,8 +222,8 @@ class ShoppingCart extends Object {
 	
 	//8) Database saving function
 	
-	static function save_current_order_to_database() {
-		return Order::save_to_database();
+	static function save_current_order() {
+		return Order::save_current_order();
   	}
   	
 }
@@ -319,38 +280,7 @@ class ShoppingCart_Controller extends Controller {
 				
 				$currentOrder->updateForAjax($js);
 				
-				/*$item_subtotal = 0;
-				$item_quantity = 0;
-				$subtotal = 0;
-				$grand_total = 0;
-				
-				if($items = $currentOrder->Items()) {
-					foreach($items as $item) {
-						if($item->ProductID == $this->ID) {
-							$item_subtotal = $item->SubTotal;
-							$item_quantity = $item->Quantity;
-						}
-					}
-				}
-								
-				// TODO Use glyphs instead of hard-coding to be the '$' glyph
-				$item_subtotal = '$' . number_format($item_subtotal, 2);
-				$subtotal = '$' . number_format($currentOrder->_Subtotal(), 2);
-				$grand_total = '$' . number_format($currentOrder->_Total(), 2) . " " . $currentOrder->Currency();
-				
-				$js = array();
-				
-				$js['Item' . $this->ID . '_Subtotal'] = $item_subtotal;
-				$js['Subtotal'] = $subtotal;
-				$js['GrandTotal'] = $grand_total;
-				$js['OrderForm_OrderForm_Amount'] = $grand_total;
-				
-				$js['Cart_Item' . $this->ID . '_Quantity'] = $item_quantity;
-				$js['Cart_Subtotal'] = $subtotal;
-				$js['Cart_GrandTotal'] = $grand_total;
-					*/			
-				return Product::javascript_for_new_values($js);
-				//return $js;
+				return json_encode($js);
 			}
 			else user_error("Bad data to Product->setQuantity: quantity=$quantity", E_USER_WARNING);
 		}
