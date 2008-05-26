@@ -237,13 +237,13 @@
 	
 	static function current_order() {return self::create();}
 	
-	static function save_to_database() {
+	static function save_current_order() {
 		
 		//1) Order creation
 		
 		$order = self::current_order();
 		$order->write();
-				
+		
 		//2) Items saving
 		
 		if($items = ShoppingCart::get_items()) $order->createItems($items, true);
@@ -270,17 +270,19 @@
 	function TotalIDForCart() {return 'Cart_Order_Total';}
 	
 	function updateForAjax(array &$js) {
-		$js[$this->SubTotalIDForTable()] = $this->_SubTotal();
-		$js[$this->TotalIDForTable()] = $this->_Total();
-		$js[$this->SubTotalIDForCart()] = $this->_SubTotal();
-		$js[$this->TotalIDForCart()] = $this->_Total();
+		$subTotal = DBField::create('Currency', $this->_SubTotal())->Nice();
+		$total = DBField::create('Currency', $this->_Total())->Nice() . ' ' . self::$site_currency;
+		$js[] = array('id' => $this->SubTotalIDForTable(), 'parameter' => 'innerHTML', 'value' => $subTotal);
+		$js[] = array('id' => $this->TotalIDForTable(), 'parameter' => 'innerHTML', 'value' => $total);
+		$js[] = array('id' => $this->SubTotalIDForCart(), 'parameter' => 'innerHTML', 'value' => $subTotal);
+		$js[] = array('id' => $this->TotalIDForCart(), 'parameter' => 'innerHTML', 'value' => $total);
 	}
 		
 	function IsComplete() {return in_array($this->Status, self::$complete_status);}
 	
 	function Status() {return $this->IsComplete() ? _t('Order.SUCCESSFULL', 'Order Successful') : _t('Order.INCOMPLETE', 'Order Incomplete');}
 	
-	function CheckoutLink() {return CheckoutPage::find_link();}
+	function checkoutLink() {return CheckoutPage::get_checkout_order_link($this->ID);}
 	
 	// Order Emails Sending Management 
   	
@@ -288,7 +290,7 @@
 	 * Send the receipt of the order by mail
 	 * Precondition : The order payment has been successful
 	 */
-	function sendReceipt() {$this->sendEmail('Order_receiptEmail');}
+	function sendReceipt() {$this->sendEmail('Order_ReceiptEmail');}
   	
 	/*
 	 * Send a mail of the order to the client (and another to the admin)
@@ -296,13 +298,16 @@
 	 * @param $copyToAdmin - true by default, whether it should send a copy to the admin
 	 */
 	protected function sendEmail($emailClass, $copyToAdmin = true) {
- 		$to = $this->Member()->Email;
  		$from = self::$receiptEmail ? self::$receiptEmail : Email::getAdminEmail();
+ 		$to = $this->Member()->Email;
 		$subject = self::$receiptSubject ? self::$receiptSubject : "Shop Sale Information #$this->ID";
  		
  		$purchaseCompleteMessage = DataObject::get_one('CheckoutPage')->PurchaseComplete;
  		
- 		$email = new $emailClass($to, $from, $subject);
+ 		$email = new $emailClass();
+ 		$email->setFrom($from);
+ 		$email->setTo($to);
+ 		$email->setSubject($subject);
 		if($copyToAdmin) $email->setBcc(Email::getAdminEmail());
 		
 		$email->populateTemplate(
@@ -428,7 +433,7 @@
 		return Director::AbsoluteBaseURL(). CheckoutPage::find_link() . "paid";
 	}
 	
-	public function _Logo(){
+	public function _Logo() {
 		global $projectLogo;
 		return Director::AbsoluteBaseURL() . $projectLogo;
 	}
@@ -661,18 +666,7 @@ class Order_Attribute extends DataObject {
 	static $has_one = array(
 		'Order' => 'Order'
 	);
-	
-	public function __construct($object = null) {		
 		
-		// Case 1 : Constructed by the static function get of DataObject
-		
-		if(is_array($object)) parent::__construct($object);
-		
-		// Case 2 : Constructed in memory
-		
-		else parent::__construct();
-	}
-	
 	public function getId() {return $this->id;}
 	public function setId($id) {$this->id = $id;}
 	
