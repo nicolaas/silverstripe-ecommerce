@@ -64,7 +64,7 @@ class OrderForm extends Form{
 		
 		$currentOrder = ShoppingCart::current_order();
 		$total = '$' . number_format($currentOrder->Total(), 2);
-		$paymentFields = Payment::combined_form_fields("$total " . $currentOrder->Currency(), $currentOrder->Subtotal());
+		$paymentFields = Payment::combined_form_fields("$total " . $currentOrder->Currency(), $currentOrder->Total());
 		foreach($paymentFields as $field) $rightFields->push($field);
 		
 		if($paymentRequiredFields = Payment::combined_form_requirements()) $requiredFields = array_merge($requiredFields, $paymentRequiredFields);
@@ -140,7 +140,7 @@ class OrderForm extends Form{
 		
 		// 1) Check to see if there are still items in the current order
 		
-		if(ShoppingCart::has_products()) {
+		if(ShoppingCart::has_items()) {
 			
 			// 2) Save the member details
 			
@@ -150,7 +150,7 @@ class OrderForm extends Form{
 			
 			// 3) Save the current order details (items and modifiers) (which are at the moment in the session) in the database
 			
-			$order = ShoppingCart::save_current_order_to_database();
+			$order = ShoppingCart::save_current_order();
 			
 			// 4) Save shipping address details
 			
@@ -163,7 +163,6 @@ class OrderForm extends Form{
 			$data['BillingId'] = $order->ID;
 			
 			// Save payment data from form and process payment
-						
 			$payment = Object::create($data['PaymentMethod']);
 			if(! $payment instanceof Payment) user_error(get_class($payment) . ' is not a Payment object !', E_USER_ERROR);
 			$form->saveInto($payment);
@@ -175,23 +174,24 @@ class OrderForm extends Form{
 			
 			$result = $payment->processPayment($data, $form);
 			
-			if($result[Payment::$success]) { // Successful payment
-				$order->sendReceipt();
+			if(/*$result[Payment::$success]*/$result->isSuccess()) { // Successful payment
 				$order->write();
+				$order->sendReceipt();
 				
 				ShoppingCart::clear();
-				
-				Director::redirect($order->Link());
-				return;
 			}
+			
 			// Longer payment process, such as Worldpay
-			else if($result['Processing']) return $result['ReturnValue'];
-	 		
-			else { // Failed payment
+			else if(/*$result['Processing']*/$result->isProcessing()) return $result['ReturnValue'];
+			
+			/*else { // Failed payment
 				$form->sessionMessage("Sorry, your payment was not accepted, please try again<br/><strong>$result[HelpText]:</strong> $result[MerchantHelpText]", 'bad');
 	 			Director::redirect(CheckoutPage::find_link() . $order->ID);
 	 			return;
-			}
+			}*/
+			
+			Director::redirect($order->Link());
+			return;
 		}
 		else { // There is no items in the current order
 			$form->sessionMessage('Please add some items to your cart', 'warning');
