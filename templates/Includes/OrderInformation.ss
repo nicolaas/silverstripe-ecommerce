@@ -1,45 +1,54 @@
-<table id="InformationTable" cellspacing="0" cellpadding="0" summary="<% _t("TABLESUMMARY","The contents of your cart are displayed in this form and summary of all fees associated with an order and a rundown of payments options.") %>">
+<table id="InformationTable" cellspacing="0" cellpadding="0">
 	<thead>
 		<tr>
-			<th scope="col"><% _t("PRODUCT","Product") %></th>
+			<th scope="col" class="left"><% _t("PRODUCT","Product") %></th>
 			<th scope="col" class="center"><% _t("QUANTITY", "Quantity") %></th>
 			<th scope="col" class="right"><% _t("PRICE","Price") %> ($Currency)</th>
-			<th scope="col" class="right corner"><% _t("TOTALPRICE","Total Price") %> ($Currency)</th>
+			<th scope="col" class="right"><% _t("TOTALPRICE","Total Price") %> ($Currency)</th>
 		</tr>
 	</thead>
 	<tbody>
 		<% control Items %>
-			<tr>
-				<td class="product" scope="row">$Title</td>
-				<td class="center">$Quantity</td>
-				<td class="right">$Price.Nice</td>
-				<td class="right">$SubTotal.Nice</td>
+			<tr id="$IDForTable" class="$ClassForTable">
+				<td class="product title" scope="row">
+					<% if Link %>
+						<a href="$Link" title="<% sprintf(_t("READMORE","Click here to read more on &quot;%s&quot;"),$Title) %>">$Title</a>
+					<% else %>
+						$Title
+					<% end_if %>
+				</td>
+				<td class="center quantity">$Quantity</td>
+				<td class="right unitprice">$UnitPrice.Nice</td>
+				<td class="right total" id="$TotalIDForTable">$Total.Nice</td>
 			</tr>
-		<% end_control %>			
+		<% end_control %>
+		
 		<tr class="gap summary">
-			<td colspan="3" scope="row"><% _t("SUBTOTAL","Sub-total") %></td>
-			<td class="right">$Subtotal.Nice</td>
+			<td colspan="2" scope="row"><% _t("SUBTOTAL","Sub-total") %></td>
+			<td>&nbsp;</td>
+			<td class="right" id="$SubTotalIDForTable">$SubTotal.Nice</td>
 		</tr>
 
 		<% control Modifiers %>
 			<% if ShowInOrderTable %>
-				<tr id="$ClassNameForTable" class="modifier">
+				<tr id="$IDForTable" class="$ClassForTable">
 					<td colspan="2" scope="row" id="$TitleIdForTable">$TitleForTable</td>
 					<td>&nbsp;</td>
 					<td class="right" id="$ValueIdForTable">$ValueForTable</td>
 				</tr>
 			<% end_if %>
 		<% end_control %>
-
+				
 		<tr class="gap Total">
-			<td colspan="3" scope="row"><% _t("TOTALl","Total") %></td>
-			<td class="right">$Total.Nice</td>
+			<td colspan="2" scope="row"><% _t("TOTAL","Total") %></td>
+			<td>&nbsp;</td>
+			<td class="right" id="$TotalIDForTable">$Total.Nice $Currency</td>
 		</tr>
-	
-	<% control Payment %>
-		<tr class="gap">
-			<td colspan="4" scope="row" class="left ordersummary"><h3><% _t("ORDERSUMMARY","Order Summary") %>:</h3></td>
-		</tr>
+		
+		<% control Payment %>
+			<tr class="gap">
+				<td colspan="4" scope="row" class="left ordersummary"><h3><% _t("ORDERSUMMARY","Order Summary") %>:</h3></td>
+			</tr>
 		<tr class="gap">
 			<th colspan="4" scope="row" class="left"><% _t("PAYMENTINFORMATION","Payment Information") %></th>
 		</tr>
