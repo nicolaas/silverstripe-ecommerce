@@ -71,9 +71,9 @@ class OrderModifier extends Order_Attribute {
 	}
 		
 	function updateForAjax(array &$js) {
-		$js[$this->ValueIdForCart()] = $this->ValueForCart();
-		$js[$this->ValueIdForTable()] = $this->ValueForTable();
-		$js[$this->TitleIdForTable()] = $this->TitleForTable();
+		$js[] = array('id' => $this->ValueIdForCart(), 'parameter' => 'innerHTML', 'value' => $this->ValueForCart());
+		$js[] = array('id' => $this->ValueIdForTable(), 'parameter' => 'innerHTML', 'value' => $this->ValueForTable());
+		$js[] = array('id' => $this->TitleIdForTable(), 'parameter' => 'innerHTML', 'value' => $this->TitleForTable());
 	}
 	
 	//3) Database Writing Functions
