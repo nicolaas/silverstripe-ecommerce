@@ -7,7 +7,7 @@
 				<% if IsComplete %>
 					<% _t("EMAILDETAILS","A copy of this has been sent to your email address confirming the order details.") %>
 				<% else %>
-					Your order details have been saved, however you need to <a href="$CheckoutLink" title="<% _t("BACKTOCHECKOUT","Click here to go to the checkout page") %>">complete your order</a>.
+					Your order details have been saved, however you need to <a href="$checkoutLink" title="<% _t("BACKTOCHECKOUT","Click here to go to the checkout page") %>">complete your order</a>.
 				<% end_if %>
 			</strong></p>
 			<% include OrderInformation %>
