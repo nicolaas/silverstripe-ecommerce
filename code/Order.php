@@ -661,14 +661,14 @@ class Order_statusEmail extends Email_Template {
 
 class Order_Attribute extends DataObject {
 	
-	protected $id;
+	protected $_id;
 	
 	static $has_one = array(
 		'Order' => 'Order'
 	);
 		
-	public function getId() {return $this->id;}
-	public function setId($id) {$this->id = $id;}
+	public function getIdAttribute() {return $this->_id;}
+	public function setIdAttribute($id) {$this->_id = $id;}
 	
 	function ClassForTable() {
 		$class = get_class($this);
@@ -677,7 +677,7 @@ class Order_Attribute extends DataObject {
 		return implode(' ', $classes);
 	}
 	
-	protected function MainID() {return get_class($this) . '_' . ($this->ID ? $this->ID : $this->id);}
+	protected function MainID() {return get_class($this) . '_' . ($this->ID ? $this->ID : $this->_id);}
 	
 	function IDForTable() {return 'Table_' . $this->MainID();}
 	function IDForCart() {return 'Cart_' . $this->MainID();}
