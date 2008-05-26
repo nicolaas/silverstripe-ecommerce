@@ -186,4 +186,24 @@ class Payment extends DataObject {
 	
 }
 
+class Payment_Result {
+	
+	protected $success;
+	protected $message;
+	protected $processing;
+	protected $value;
+	
+	function __construct($success, $message = null, $processing = false, $value = null) {
+		$this->success = $success;
+		$this->message = $message;
+		$this->processing = $processing;
+		$this->value = $value;
+	}
+	
+	function isSuccess() {return $this->success;}
+	function getMessage() {return $this->message;}
+	function isProcessing() {return $this->processing;}
+	function getValue() {return $this->value;}
+}
+
 ?>
