@@ -11,13 +11,13 @@
 class Product extends Page {
 	
 	static $add_action = 'a Product Page';
-
+	
 	static $casting = array();
-
+	
 	static $default_parent = 'ProductGroup';
-
+	
 	static $icon = 'cms/images/treeicons/book';
-
+	
 	static $db = array(
 		'Price' => 'Currency',
 		'Weight' => 'Decimal(9,2)',
@@ -26,7 +26,7 @@ class Product extends Page {
 		'AllowPurchase' => 'Boolean',
 		"InternalItemID" => "Varchar(30)",
 	);
-
+	
 	/**
 	 * Image Support 
 	 */
@@ -94,47 +94,6 @@ class Product extends Page {
 		}
 	}
 		
-	static function javascript_for_new_values(array $values) {
-		$result = array();
-		foreach($values as $id => $value) {
-			$result[] = <<<JS
-				if(\$("$id")) \$("$id").innerHTML = "$value";
-JS;
-		}
-		return implode('', $result);
-	}
-	
-	/**
-	 * Returns the quantity of the current product in your cart
-	 */
-	/*function Quantity() {
-		$currentOrder = ShoppingCart::current_order();
-		if($items = $currentOrder->Items()) {
-			foreach($items as $item) {
-				if($item->ProductID == $this->ID) return $item->Quantity;
-			}
-		}
-		else return false;
-	}*/	
-
-	/**
-	 * Returns the quantity field
-	 */
-	/*function QuantityField() {	
-		$sc = Order::ShoppingCart();
-		if($items = $sc->Items()) {
-			foreach($items as $item) {
-				if($item->ProductID == $this->ID) {
-					$setQuantity = $item->Quantity;
-				}
-			}
-		}
-		if(!$setQuantity) {
-			$setQuantity = 1;
-		}
-		return new TextField("Quantity", "Copies", $setQuantity, 3);	
-	}*/
-	
 	/*
 	 * Returns if the product is already in the shopping cart.
 	 * Note : This function is usable in the Product context because a
@@ -172,6 +131,7 @@ JS;
 		return $currentOrder->TaxInfo();
 	}
 	
+	function addLink() {return $this->Link() . 'add';}
 }
 
 class Product_Attribute extends DataObject {
@@ -195,7 +155,7 @@ class Product_Controller extends Page_Controller {
 
 		parent::init();
 	}
-	
+		
 	/**
 	 * This is used by the OrderForm to add more of this product to the current cart.
 	 */
@@ -207,85 +167,6 @@ class Product_Controller extends Page_Controller {
 		}
 		else return false;
 	}
-		
-	/**
-	 * Adds a product to your cart then redirects you to the checkout
-	 */
-	/*function buyNow($data) {
-		if($this->AllowPurchase && $this->Price) {
-			$order = Order::ShoppingCart();
-			$checkout = DataObject::get_one("CheckoutPage");
-			$quantity = (int) $_REQUEST['Quantity'];
-			if($quantity >= 1) {
-				$order->add($this->data(), $quantity);
-			} else {
-				$this->remove();
-			}
-			Director::redirect($checkout->Link());			
-		} else {
-			return false;
-		}
-	}*/
-
-	/**
-	 * Adds a product to the current shopping cart
-	 */
-	/*function addToCart() {
-		if($this->AllowPurchase && $this->Price) {
-			$order = Order::ShoppingCart();
-			$quantity = (int) $_REQUEST['Quantity'];
-			if($quantity >= 1) {
-				$order->add($this->data(), $quantity);
-			} else {
-				$this->remove();
-			}
-			Director::redirectBack();
-		} else {
-			if(!$this->Price) echo "<li>This product doesn't have a price";
-			if(!$this->AllowPurchase) echo "<li>This product doesn't have purchasing enabled";
-			return;
-		}
-	}*/
-	
-	/**
-	 * Remove product by ID
-	 */
-	/*function removeFromCart() {
-		//unset($_SESSION['cartContents'][$this->ID]);
-		
-		$order = Order::ShoppingCart();
-		$quantity = (int) $_REQUEST['Quantity'];
-		if($quantity >= 1) {
-			$order->removeByQuantity($this->data(), $quantity);
-		}
-	
-		Director::redirectBack();
-	}*/
-	
-	/**
-	 * This is used by the OrderForm to remove the item(s) from your cart.
-	 */
-	/*function remove(){
-		ShoppingCart::remove_product($this);
-		Director::redirectBack();
-	}*/
-		
-	/**
-	 * Remove all of the current product from the cart.
-	 */
-	/*function removeall() {
-		ShoppingCart::remove_all_product($this);
-		Director::redirectBack();
-	}*/
-		
-	/**
-	 * Uses the find_link() method on CheckoutPage to find
-	 * the link for the checkout page used on the site.
-	 */
-	function CheckoutLink() {
-		return CheckoutPage::find_link();
-	}
-	
 }
 
 /**
@@ -324,23 +205,28 @@ class Product_OrderItem extends OrderItem {
 	);
 	
 	public function __construct($product = null, $quantity = 1) {
-		if(is_array($product)) { // Constructed by the static function get of DataObject
-  			$this->ProductVersion = $product['ProductVersion'];
-  			if($dbProduct = DataObject::get_by_id('Product', $product['ProductID'])) {
-  				$this->ProductID = $product['ProductID'];
+				
+		// Case 1 : Constructed by the static function get of DataObject
+		
+		if(is_array($product)) {
+			if($dbProduct = DataObject::get_by_id('Product', $product['ProductID'])) {
+				$this->ProductVersion = $product['ProductVersion'];
+				$this->ProductID = $product['ProductID'];
 				$this->product = $dbProduct;
 				$this->failover = $dbProduct;
-  				parent::__construct($product, $quantity);
-  			}
+				parent::__construct($product, $quantity);
+			}
 			else user_error("Product #$product[ProductID] not found", E_USER_ERROR);
 		}
-		else if(is_object($product)) { // Constructed in memory
+		
+		// Case 2 : Constructed in memory
+		
+		else if(is_object($product)) {
 			parent::__construct($product, $quantity);
- 			$this->ProductVersion = $product->Version;
- 			$this->product = $product;
+			$this->product = $product;
  			$this->failover = $product;
- 			$this->ProductID = $product->ID;
 		}
+		
 		else parent::__construct();
 	}
 	
@@ -354,7 +240,7 @@ class Product_OrderItem extends OrderItem {
 	
 	function hasSameContent($orderItem) {
 		$equals = parent::hasSameContent($orderItem);
-		return $equals && $orderItem instanceof Product_OrderItem && $this->product == $orderItem->product;
+		return $equals && $orderItem instanceof Product_OrderItem && $this->product->ID == $orderItem->product->ID;
 	}
 	
 	function UnitPrice() {return $this->product->Price;}
