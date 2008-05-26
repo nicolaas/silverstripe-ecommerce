@@ -110,7 +110,7 @@ class Product extends Page {
 		$currentOrder = ShoppingCart::current_order();
 		if($items = $currentOrder->Items()) {
 			foreach($items as $item) {
-				if($item instanceof Product_OrderItem && $item->getProduct()->ID == $this->ID) return $item;
+				if($item instanceof Product_OrderItem && $item->getProductAttribute()->ID == $this->ID) return $item;
 			}
 		}
 		else return null;
@@ -234,7 +234,7 @@ class Product_OrderItem extends OrderItem {
 		return Versioned::get_version('Product', $this->ProductID, $this->ProductVersion);
 	}
 	
-	function getProduct() {return $this->product;}
+	function getProductAttribute() {return $this->product;}
 	
 	// Functions to overload
 	
