@@ -49,8 +49,8 @@ class OrderItem extends Order_Attribute {
 	// Functions not to overload
 	
 	public function getQuantity() {return $this->_quantity;}
-	public function setProtectedQuantity($quantity) {$this->_quantity = $quantity;}
-	public function addProtectedQuantity($quantity) {$this->_quantity += $quantity;}
+	public function setQuantityAttribute($quantity) {$this->_quantity = $quantity;}
+	public function addQuantityAttribute($quantity) {$this->_quantity += $quantity;}
 	function getCountID() {return $this->countID;}
 	function setCountID($countId) {$this->countID = $countId;}
 		
@@ -82,10 +82,10 @@ HTML;
 		$js[] = array('name' => $this->AjaxQuantityFieldName(), 'parameter' => 'value', 'value' => $this->getQuantity());
 	}
 	
-	function addLink() {return ShoppingCart_Controller::add_item_link($this->id);}
-	function removeLink() {return ShoppingCart_Controller::remove_item_link($this->id);}
-	function removeallLink() {return ShoppingCart_Controller::remove_all_item_link($this->id);}
-	function setquantityLink() {return ShoppingCart_Controller::set_quantity_item_link($this->id);}
+	function addLink() {return ShoppingCart_Controller::add_item_link($this->_id);}
+	function removeLink() {return ShoppingCart_Controller::remove_item_link($this->_id);}
+	function removeallLink() {return ShoppingCart_Controller::remove_all_item_link($this->_id);}
+	function setquantityLink() {return ShoppingCart_Controller::set_quantity_item_link($this->_id);}
 	function checkoutLink() {return CheckoutPage::find_link();}
 	
 	// Database Writing Methods
@@ -98,7 +98,7 @@ HTML;
 	// Debug Function
 	
 	public function debug() {
-		$id = $this->ID ? $this->ID : $this->id;
+		$id = $this->ID ? $this->ID : $this->_id;
 		$quantity = $this->ID ? $this->Quantity : $this->_quantity;
 		$orderID = $this->ID ? $this->OrderID : 'The order has not been saved yet, so there is no ID';
 		return <<<HTML
