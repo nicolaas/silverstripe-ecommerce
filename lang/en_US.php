@@ -133,14 +133,12 @@ $lang['en_US']['CheckoutPage_OrderIncomplete.ss']['PROCESS'] = 'Process';
 $lang['en_US']['CheckoutPage_OrderIncomplete.ss']['BACKTOCHECKOUT'] = 'Click here to go back to the Checkout';
 $lang['en_US']['CheckoutPage_OrderIncomplete.ss']['CHECKOUT'] = 'Checkout';
 $lang['en_US']['CheckoutPage_OrderIncomplete.ss']['ORDERSTATUS'] = 'Order Status';
-$lang['en_US']['CheckoutPage_OrderIncomplete.ss']['INCOMPLETE'] = 'Order Incomplete';
 $lang['en_US']['CheckoutPage_OrderIncomplete.ss']['CHEQUEINSTRUCTIONS'] = 'If you ordered by cheque you will receive an email with instructions.';
 $lang['en_US']['CheckoutPage_OrderIncomplete.ss']['DETAILSSUBMITTED'] = 'Here are the details you submitted';
 $lang['en_US']['CheckoutPage_OrderSuccessful.ss']['PROCESS'] = 'Process';
 $lang['en_US']['CheckoutPage_OrderSuccessful.ss']['BACKTOCHECKOUT'] = 'Click here to go back to the Checkout';
 $lang['en_US']['CheckoutPage_OrderSuccessful.ss']['CHECKOUT'] = 'Checkout';
 $lang['en_US']['CheckoutPage_OrderSuccessful.ss']['ORDERSTATUS'] = 'Order Status';
-$lang['en_US']['CheckoutPage_OrderSuccessful.ss']['SUCCESSFULl'] = 'Order Successful';
 $lang['en_US']['CheckoutPage_OrderSuccessful.ss']['EMAILDETAILS'] = 'A copy of this has been sent to your email address confirming the order details.';
 $lang['en_US']['Product.ss']['IMAGE'] = '%s image';
 $lang['en_US']['Product.ss']['NOIMAGE'] = 'Sorry, no product image for &quot;%s&quot;';
@@ -164,5 +162,10 @@ $lang['en_US']['Order_receiptEmail.ss']['HEADLINE'] = 'Shop Order Receipt';
 $lang['en_US']['Order_statusEmail.ss']['TITLE'] = 'Shop Status Change';
 $lang['en_US']['Order_statusEmail.ss']['HEADLINE'] = 'Shop Status Change';
 $lang['en_US']['Order_statusEmail.ss']['STATUSCHANGE'] = 'Status changed to \"%s\" for Order #';
+
+// Extra translations
+
+$lang['en_US']['Order']['SUCCESSFULL'] = 'Order Successful';
+$lang['en_US']['Order']['INCOMPLETE'] = 'Order Incomplete';
 
 ?>

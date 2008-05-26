@@ -45,13 +45,13 @@
 				<td colspan="4" scope="row" class="center"><% _t("NOITEMS","There are <strong>no</strong> items in your cart.") %></td>
 			</tr>
 		<% end_if %>
-						
+		
 		<tr class="gap summary">
 			<td colspan="2" scope="row"><% _t("SUBTOTAL","Sub-total") %></td>
 			<td>&nbsp;</td>
 			<td class="right" id="$SubTotalIDForTable">$SubTotal.Nice</td>
 		</tr>
-
+		
 		<% control Modifiers %>
 			<% if ShowInOrderTable %>
 				<tr id="$IDForTable" class="$ClassForTable">
@@ -61,7 +61,7 @@
 				</tr>
 			<% end_if %>
 		<% end_control %>
-				
+		
 		<tr class="gap Total">
 			<td colspan="2" scope="row"><% _t("TOTAL","Total") %></td>
 			<td>&nbsp;</td>
