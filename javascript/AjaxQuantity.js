@@ -4,16 +4,12 @@ Behaviour.register({
 			this.disabled = false;
 		},
 		onchange : function() {
-			//var matches = this.className.match(/product-([0-9]+)/);
-			var setQuantityLink = $(this.id + '_SetQuantityLink');
+			var setQuantityLink = document.getElementsByName(this.name + '_SetQuantityLink')[0];
 			
 			if(setQuantityLink) {
-				this.value = this.value.replace(/[^0-9]+/g,'');
-				if(!this.value) this.value = 0;
-				//var productID = matches[1];
-				//var URLSegment = $('Product-' + productID + '-URLSegment').value;
-				//var url = document.getElementsByTagName('base')[0].href + URLSegment + '/setQuantity?quantity=' + this.value;
-				
+				if(! this.value) this.value = 0;
+				else this.value = this.value.replace(/[^0-9]+/g, '');
+			
 				var url = document.getElementsByTagName('base')[0].href + setQuantityLink.value + '?quantity=' + this.value;
 				
 				new Ajax.Request(
@@ -24,7 +20,31 @@ Behaviour.register({
 							alert("There was an error updating your order information. Please try again.");
 						},
 						onComplete: function(response) {
-							eval(response.responseText);
+							var changes = response.responseText;
+							changes = eval('(' + changes + ')');
+							for(var i = 0; i < changes.length; i++) {
+								var change = changes[i];
+								if(change.parameter && change.value) {
+									var parameter = change.parameter;
+									var value = change.value;
+									if(change.id) {
+										var id = change.id;
+										if($(id)) {
+											var task = '$(\'' + id + '\').' + parameter + ' = \'' + escapeHTML(value) + '\';';
+											eval(task);
+										}
+									}
+									else if(change.name) {
+										var name = change.name;
+										var elements = document.getElementsByName(name);
+										for(var j = 0; j < elements.length; j++) {
+											var element = elements[j];
+											var task = 'element.' + parameter + ' = \'' + escapeHTML(value) + '\';';
+											eval(task);
+										}
+									}
+								}
+							}
 						}
 					}
 				);
@@ -55,3 +75,10 @@ Behaviour.register({
 		}
 	}
 });
+
+function escapeHTML(str) {
+   var div = document.createElement('div');
+   var text = document.createTextNode(str);
+   div.appendChild(text);
+   return div.innerHTML;
+}; 
