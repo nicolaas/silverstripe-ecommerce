@@ -100,7 +100,7 @@ class ShoppingCart extends Object {
 		$serializedItemIndex = self::item_index($itemIndex);
 		$serializedItem = Session::get($serializedItemIndex);
 		$unserializedItem = unserialize($serializedItem);
-		$unserializedItem->addProtectedQuantity($quantity);
+		$unserializedItem->addQuantityAttribute($quantity);
 		self::set_item($itemIndex, $unserializedItem);
 	}
 		
@@ -108,7 +108,7 @@ class ShoppingCart extends Object {
 		$serializedItemIndex = self::item_index($itemIndex);
 		$serializedItem = Session::get($serializedItemIndex);
 		$unserializedItem = unserialize($serializedItem);
-		$unserializedItem->setProtectedQuantity($quantity);
+		$unserializedItem->setQuantityAttribute($quantity);
 		self::set_item($itemIndex, $unserializedItem);
 	}
 	
@@ -118,7 +118,7 @@ class ShoppingCart extends Object {
 		$unserializedItem = unserialize($serializedItem);
 		$newQuantity = $unserializedItem->getQuantity() - $quantity;
 		if($newQuantity > 0) {
-			$unserializedItem->setProtectedQuantity($newQuantity);
+			$unserializedItem->setQuantityAttribute($newQuantity);
 			self::set_item($itemIndex, $unserializedItem);
 		}
 		else Session::clear($serializedItemIndex);
@@ -146,7 +146,7 @@ class ShoppingCart extends Object {
 			foreach($serializedItems as $itemIndex => $serializedItem) {
 				if($serializedItem != null) {
 					$unserializedItem = unserialize($serializedItem);
-					$unserializedItem->setId($itemIndex);
+					$unserializedItem->setIdAttribute($itemIndex);
 					array_push($items, $unserializedItem);
 				}
 			}
@@ -197,7 +197,7 @@ class ShoppingCart extends Object {
 			foreach($serializedModifiers as $modifierIndex => $serializedModifier) {
 				if($serializedModifier != null) {
 					$unserializedModifier = unserialize($serializedModifier);
-					$unserializedModifier->setId($modifierIndex);
+					$unserializedModifier->setIdAttribute($modifierIndex);
 					array_push($modifiers, $unserializedModifier);
 				}
 			}
