@@ -8,7 +8,7 @@
  */
 class OrderItem extends Order_Attribute {
 	
-	protected $quantity;
+	protected $_quantity;
 	protected $countID; // Not sure to keep it !
 
 	static $db = array(
@@ -25,7 +25,7 @@ class OrderItem extends Order_Attribute {
 		// Case 1 : Constructed by the static function get of DataObject
 		
 		if(is_array($object)) {
-			$this->quantity = $object['Quantity'];
+			$this->_quantity = $object['Quantity'];
 			parent::__construct($object);
 		}
 		
@@ -33,13 +33,13 @@ class OrderItem extends Order_Attribute {
 		
 		else {
 			parent::__construct();
-			$this->quantity = $quantity;
+			$this->_quantity = $quantity;
 		}
 	}
 			
 	// Functions to overload
 	
-	function hasSameContent($orderItem) {return $orderItem instanceof Order_Item;}
+	function hasSameContent($orderItem) {return $orderItem instanceof OrderItem;}
 	
 	function UnitPrice() {return 0;}
 	
@@ -48,24 +48,26 @@ class OrderItem extends Order_Attribute {
 			
 	// Functions not to overload
 	
-	public function getQuantity() {return $this->quantity;}
-	public function setQuantity($quantity) {$this->quantity = $quantity;}
-	public function addQuantity($quantity) {$this->quantity += $quantity;}
+	public function getQuantity() {return $this->_quantity;}
+	public function setProtectedQuantity($quantity) {$this->_quantity = $quantity;}
+	public function addProtectedQuantity($quantity) {$this->_quantity += $quantity;}
 	function getCountID() {return $this->countID;}
 	function setCountID($countId) {$this->countID = $countId;}
+		
+	protected function AjaxQuantityFieldName() {return $this->MainID() . '_Quantity';}
 	
 	function AjaxQuantityField() {
 		Requirements::javascript('ecommerce/javascript/AjaxQuantity.js');
-		$quantityID = $this->IDForTable() . '_Quantity';
-		$setQuantityLinkID = $quantityID . '_SetQuantityLink';
+		$quantityName = $this->AjaxQuantityFieldName();
+		$setQuantityLinkName = $quantityName . '_SetQuantityLink';
 		$setQuantityLink = $this->setquantityLink();
 		return <<<HTML
-			<input id="$quantityID" class="ajaxQuantityField" type="text" value="$this->quantity" size="3" maxlength="3" disabled="disabled"/>
-			<input id="$setQuantityLinkID" type="hidden" value="$setQuantityLink"/>
+			<input name="$quantityName" class="ajaxQuantityField" type="text" value="$this->_quantity" size="3" maxlength="3" disabled="disabled"/>
+			<input name="$setQuantityLinkName" type="hidden" value="$setQuantityLink"/>
 HTML;
 	}
 		
-	function Total() {return $this->UnitPrice() * $this->quantity;}
+	function Total() {return $this->UnitPrice() * $this->_quantity;}
 	
 	function TotalIDForTable() {return $this->IDForTable() . '_Total';}
 	
@@ -73,28 +75,31 @@ HTML;
 	function QuantityIDForCart() {return $this->IDForCart() . '_Quantity';}
 	
 	function updateForAjax(array &$js) {
-		$js[$this->TotalIDForTable()] = $this->Total();
-		$js[$this->TotalIDForCart()] = $this->Total();
-		$js[$this->QuantityIDForCart()] = $this->getQuantity();
+		$total = DBField::create('Currency', $this->Total())->Nice();
+		$js[] = array('id' => $this->TotalIDForTable(), 'parameter' => 'innerHTML', 'value' => $total);
+		$js[] = array('id' => $this->TotalIDForCart(), 'parameter' => 'innerHTML', 'value' => $total);
+		$js[] = array('id' => $this->QuantityIDForCart(), 'parameter' => 'innerHTML', 'value' => $this->getQuantity());
+		$js[] = array('name' => $this->AjaxQuantityFieldName(), 'parameter' => 'value', 'value' => $this->getQuantity());
 	}
 	
 	function addLink() {return ShoppingCart_Controller::add_item_link($this->id);}
 	function removeLink() {return ShoppingCart_Controller::remove_item_link($this->id);}
 	function removeallLink() {return ShoppingCart_Controller::remove_all_item_link($this->id);}
 	function setquantityLink() {return ShoppingCart_Controller::set_quantity_item_link($this->id);}
+	function checkoutLink() {return CheckoutPage::find_link();}
 	
 	// Database Writing Methods
 	
 	function onBeforeWrite() {
 		parent::onBeforeWrite();
-		$this->Quantity = $this->quantity;
+		$this->Quantity = $this->_quantity;
 	}
 	
 	// Debug Function
 	
 	public function debug() {
 		$id = $this->ID ? $this->ID : $this->id;
-		$quantity = $this->ID ? $this->Quantity : $this->quantity;
+		$quantity = $this->ID ? $this->Quantity : $this->_quantity;
 		$orderID = $this->ID ? $this->OrderID : 'The order has not been saved yet, so there is no ID';
 		return <<<HTML
 			<h2>$this->class</h2> 
