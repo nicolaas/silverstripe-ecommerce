@@ -1,0 +1,51 @@
+Page:
+    home:
+        Title: Home
+        URLSegment: home
+
+ProductGroup:
+    g1:
+        Title: Group 1
+        URLSegment: group-1
+    g2:
+        Title: Group 2
+        URLSegment: group-2
+
+Product:
+    p1a:
+        Title: Product 1a
+        Price: 500
+        Parent:=>ProductGroup.g1
+        URLSegment: product-1a
+    p1b:
+        Title: Product 1b
+        Price: 600
+        URLSegment: product-1b
+        Parent:=>ProductGroup.g1
+    p2a:
+        Title: Product 2a
+        Price: 800
+        Parent:=>ProductGroup.g2
+        URLSegment: product-2a
+    p2b:
+        Title: Product 2b
+        Price: 900
+        Parent:=>ProductGroup.g2
+        URLSegment: product-2b
+        
+CheckoutPage:
+    page:
+        Title: Checkout
+        URLSegment: checkout
+        
+AccountPage:
+    page:
+        Title: Account
+        URLSegment: account
+        
+Member:
+    member:
+        FirstName: Test
+        Surname: User
+        Email: test@example.com
+        Password: 23u90oijlJKsa

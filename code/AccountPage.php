@@ -43,7 +43,7 @@ class AccountPage_Controller extends Page_Controller {
 		Requirements::themedCSS('AccountPage');
 		if(! Member::currentUser()) {
 			$messages = array(
-				'default' => '<p class="message good">' . _t('Message', 'You\'ll need to login before you can access the account page. If you are not registered, you won\'t be able to access it until you\'ll make your first order, otherwise please enter your details below.') . '</p>',
+				'default' => '<p class="message good">' . _t('AccountPage.Message', 'You\'ll need to login before you can access the account page. If you are not registered, you won\'t be able to access it until you\'ll make your first order, otherwise please enter your details below.') . '</p>',
 				'logInAgain' => 'You have been logged out. If you would like to log in again, please do so below.'
 			);
 			Security::permissionFailure($this, $messages);
