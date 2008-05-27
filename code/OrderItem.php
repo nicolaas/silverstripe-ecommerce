@@ -57,7 +57,7 @@ class OrderItem extends Order_Attribute {
 	protected function AjaxQuantityFieldName() {return $this->MainID() . '_Quantity';}
 	
 	function AjaxQuantityField() {
-		Requirements::javascript('ecommerce/javascript/AjaxQuantity.js');
+		Requirements::javascript('ecommerce/javascript/Ajax.js');
 		$quantityName = $this->AjaxQuantityFieldName();
 		$setQuantityLinkName = $quantityName . '_SetQuantityLink';
 		$setQuantityLink = $this->setquantityLink();
@@ -66,7 +66,7 @@ class OrderItem extends Order_Attribute {
 			<input name="$setQuantityLinkName" type="hidden" value="$setQuantityLink"/>
 HTML;
 	}
-		
+	
 	function Total() {return $this->UnitPrice() * $this->_quantity;}
 	
 	function TotalIDForTable() {return $this->IDForTable() . '_Total';}
