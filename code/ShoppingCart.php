@@ -9,7 +9,7 @@
  * It turns the order into a shopping cart.
  */
 class ShoppingCart extends Object {
-	
+		
 	//1) Main data used to store the products and modifiers in the session
 	
 	static $current_order = 'current_order';
@@ -70,7 +70,7 @@ class ShoppingCart extends Object {
 		$countrySettingIndex = self::country_setting_index();
 		Session::clear($countrySettingIndex);
 	}
-	
+		
 	static function set_uses_different_shipping_address($usesDifferentAddress) {
 		$usesDifferentShippingAddressIndex = self::uses_different_shipping_address_index();
 		$usesDifferentAddress ? Session::set($usesDifferentShippingAddressIndex, true) : Session::clear($usesDifferentShippingAddressIndex);
@@ -238,6 +238,8 @@ class ShoppingCart_Controller extends Controller {
 	static function set_quantity_item_link($id) {return self::$URLSegment . '/setquantityitem/' . $id;}
 	
 	static function remove_modifier_link($id) {return self::$URLSegment . '/removemodifier/' . $id;}
+
+	static function set_country_link() {return self::$URLSegment . '/setcountry';}
 	
 	function additem() {
 		$itemId = $this->urlParams['ID'];
@@ -266,21 +268,7 @@ class ShoppingCart_Controller extends Controller {
 		if(is_numeric($quantity) && is_int($quantity + 0)) {
 			if($quantity > 0) {
 				ShoppingCart::set_quantity_item($itemId, $quantity);
-				$currentOrder = ShoppingCart::current_order();
-				
-				$js = array();
-				
-				if($items = $currentOrder->Items()) {
-					foreach($items as $item) $item->updateForAjax($js);
-				}
-				
-				if($modifiers = $currentOrder->Modifiers()) {
-					foreach($modifiers as $modifier) $modifier->updateForAjax($js);
-				}
-				
-				$currentOrder->updateForAjax($js);
-				
-				return json_encode($js);
+				return self::json_code();
 			}
 			else user_error("Bad data to Product->setQuantity: quantity=$quantity", E_USER_WARNING);
 		}
@@ -292,5 +280,34 @@ class ShoppingCart_Controller extends Controller {
 		ShoppingCart::remove_modifier($modifierId);
 		Director::redirectBack();
 	}
+	
+	/**
+	 * Ajax method to set a country
+	 */
+	function setcountry() {
+		$country = $this->urlParams['ID'];
+		if(isset($country)) {
+			ShoppingCart::set_country($country);
+			return self::json_code();
+		}
+		else user_error("Bad data to Product->setQuantity: quantity=$quantity", E_USER_WARNING);
+	}
+	
+	protected static function json_code() {
+		$currentOrder = ShoppingCart::current_order();
 		
+		$js = array();
+		
+		if($items = $currentOrder->Items()) {
+			foreach($items as $item) $item->updateForAjax($js);
+		}
+		
+		if($modifiers = $currentOrder->Modifiers()) {
+			foreach($modifiers as $modifier) $modifier->updateForAjax($js);
+		}
+		
+		$currentOrder->updateForAjax($js);
+		
+		return json_encode($js);
+	}
 }
