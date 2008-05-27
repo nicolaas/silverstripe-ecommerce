@@ -39,7 +39,7 @@ function setChanges(response) {
 	changes = eval('(' + changes + ')');
 	for(var i = 0; i < changes.length; i++) {
 		var change = changes[i];
-		if(change.parameter && change.value) {
+		if(typeof(change.parameter) != 'undefined' && typeof(change.value) != 'undefined') {
 			var parameter = change.parameter;
 			var value = change.value;
 			if(change.id) {
