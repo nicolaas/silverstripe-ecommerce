@@ -130,7 +130,7 @@
 		<% if Country %>
 		<tr class="summary">
 			<td colspan="3" scope="row" class="left"><% _t("COUNTRY","Country") %></td>
-			<td class="price">$Country</td>
+			<td class="price">$CountryTitle</td>
 		</tr>
 		<% end_if %>
 	<% end_control %>
@@ -140,12 +140,12 @@
 			<th colspan="4" scope="row" class="left"><% _t("SHIPPINGDETAILS","Shipping Details") %></th>
 		</tr>
 		<tr class="summary shippingDetails">
-			<td colspan="3" scope="row" class="left"><% _t("NAME") %></td>
+			<td colspan="3" scope="row" class="left"><% _t("NAME","Name") %></td>
 			<td class="price">$ShippingName</td>
 		</tr>
 		<% if ShippingAddress %>
 		<tr class="summary shippingDetails">
-			<td colspan="3" scope="row" class="left"><% _t("ADDRESS") %></td>
+			<td colspan="3" scope="row" class="left"><% _t("ADDRESS","Address") %></td>
 			<td class="price">$ShippingAddress</td>
 		</tr>
 		<% end_if %>
@@ -157,14 +157,14 @@
 		<% end_if %>
 		<% if ShippingCity %>
 		<tr class="summary shippingDetails">
-			<td colspan="3" scope="row" class="left"><% _t("CITY") %></td>
+			<td colspan="3" scope="row" class="left"><% _t("CITY","City") %></td>
 			<td class="price">$ShippingCity</td>
 		</tr>
 		<% end_if %>
 		<% if ShippingCountry %>
 		<tr class="summary shippingDetails">
-			<td colspan="3" scope="row" class="left"><% _t("COUNTRY") %></td>
-			<td class="price">$ShippingCountry</td>
+			<td colspan="3" scope="row" class="left"><% _t("COUNTRY","Country") %></td>
+			<td class="price">$findShippingCountry</td>
 		</tr>
 		<% end_if %>
 	<% end_if %>
