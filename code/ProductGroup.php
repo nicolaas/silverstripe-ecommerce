@@ -99,7 +99,6 @@ class ProductGroup_Controller extends Page_Controller {
 		Requirements::javascript('jsparty/prototype.js');
 		Requirements::javascript('jsparty/prototype_improvements.js');
 		Requirements::javascript('jsparty/behaviour.js');
-		Requirements::javascript('ecommerce/javascript/AjaxQuantity.js');
 
 		Requirements::themedCSS('ProductGroup');
 		Requirements::themedCSS('Cart');
