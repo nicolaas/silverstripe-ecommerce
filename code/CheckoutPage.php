@@ -66,7 +66,6 @@ class CheckoutPage_Controller extends Page_Controller {
 		// include extra js requirements for this page
 		Requirements::javascript('jsparty/behaviour.js');
 		Requirements::javascript('ecommerce/javascript/CheckoutPage.js');
-		Requirements::javascript('ecommerce/javascript/AjaxQuantity.js');
 		
 		// include stylesheet for the checkout page
 		Requirements::themedCSS('CheckoutPage');
