@@ -102,6 +102,8 @@ class EcommerceRole extends DataObjectDecorator {
 			'Country'
 		);
 	}
+	
+	function CountryTitle() {return self::findCountryTitle($this->owner->Country);}
 
 	/**
 	 * Create a new member from the given data or merge with the built-in fields.
