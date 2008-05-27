@@ -7,9 +7,10 @@
  /**
   * Order form for the checkout object
   */
-class OrderForm extends Form{
+class OrderForm extends Form {
 	
 	function __construct($controller, $name) {
+		Requirements::javascript('ecommerce/javascript/Ajax.js');
 		
 		// 1) Member and shipping fields
 		
@@ -44,6 +45,10 @@ class OrderForm extends Form{
 		
 		$countryField->addExtraClass('ajaxCountryField');
 		
+		$setCountryLinkID = $countryField->id() . '_SetCountryLink';
+		$setContryLink = ShoppingCart_Controller::set_country_link();
+		$memberFields->push(new HiddenField($setCountryLinkID, '', $setContryLink));
+				
 		$leftFields = new CompositeField($memberFields, $shippingFields);
 		$leftFields->setID('LeftOrder');
 				
