@@ -277,7 +277,7 @@
 		$js[] = array('id' => $this->SubTotalIDForCart(), 'parameter' => 'innerHTML', 'value' => $subTotal);
 		$js[] = array('id' => $this->TotalIDForCart(), 'parameter' => 'innerHTML', 'value' => $total);
 	}
-		
+	
 	function IsComplete() {return in_array($this->Status, self::$complete_status);}
 	
 	function Status() {return $this->IsComplete() ? _t('Order.SUCCESSFULL', 'Order Successful') : _t('Order.INCOMPLETE', 'Order Incomplete');}
@@ -437,15 +437,7 @@
 		global $projectLogo;
 		return Director::AbsoluteBaseURL() . $projectLogo;
 	}
-
-	/**
-	 * returns true or false based on the if a payment has been made.
-	 */
-	/*function isComplete(){
-		$totaloutstanding = $this->TotalOutstanding();
-		return ($totaloutstanding == 0 && (in_array($this->Status,$this->completeStati)));
-	}*/
-		
+			
 	function updatePrinted($printed){
 		$this->__set("Printed", $printed);
 		$this->write();
@@ -669,6 +661,8 @@ class Order_Attribute extends DataObject {
 		
 	public function getIdAttribute() {return $this->_id;}
 	public function setIdAttribute($id) {$this->_id = $id;}
+	
+	
 	
 	function ClassForTable() {
 		$class = get_class($this);
