@@ -248,15 +248,15 @@ class Report_ProductPopularity extends Report {
 			null,
 			"SELECT `SiteTree`.`Title` AS 'Name', " .
 			"	`Product`.`InternalItemID` AS 'InternalItemID', " .
-			"	`Order_Item`.`Quantity` AS 'NumberOfOrders', " .
+			"	`OrderItem`.`Quantity` AS 'NumberOfOrders', " .
 			"	`Product`.`Price` AS 'CurrentUnitPrice', " .
-			"	( `Order_Item`.`Quantity` * `Order_Item`.`UnitPrice` ) AS 'TotalOrderValue', " .
+			"	( `OrderItem`.`Quantity` * `OrderItem`.`UnitPrice` ) AS 'TotalOrderValue', " .
 			"	MAX( `Order`.`Created` ) AS 'LastOrdered' " .
 			"FROM `Product` " .
 			"	LEFT JOIN `SiteTree` USING (`ID`) " .
-			"	LEFT JOIN `Order_Item` ON `Order_Item`.`ProductID` =`Product`.`ID`" .
+			"	LEFT JOIN `OrderItem` ON `OrderItem`.`ProductID` =`Product`.`ID`" .
 			"	LEFT JOIN `Order` ON `Order`.`ID`=`OrderID`" .
-			"WHERE `Order_Item`.`Quantity` > 0 " .
+			"WHERE `OrderItem`.`Quantity` > 0 " .
 			"GROUP BY `Product`.`InternalItemID`" .
 			"ORDER BY TotalOrderValue DESC , `SiteTree`.`Title` ASC"
 		);
