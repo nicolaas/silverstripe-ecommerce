@@ -371,15 +371,7 @@
 		}
 		parent::onBeforeWrite();
 	}
-		
-	function ContinueCountItems() {
-		if($items = $this->Items()) {
-			$i = 1;
-			foreach($items as $item) $item->setCountID($i++);
-		}
-		return $items;
-	}
-					
+						
 	/*
 	 * Returns a TaxModifier object that provides information about tax on this order.
 	 */
@@ -426,18 +418,7 @@
 		$e->setTo($member->Email);
 		$e->send();
 	}
-	
-	// PayPalForm template functions
-	
-	function _SuccessfulPaymentLink(){
-		return Director::AbsoluteBaseURL(). CheckoutPage::find_link() . "paid";
-	}
-	
-	public function _Logo() {
-		global $projectLogo;
-		return Director::AbsoluteBaseURL() . $projectLogo;
-	}
-			
+				
 	function updatePrinted($printed){
 		$this->__set("Printed", $printed);
 		$this->write();
@@ -611,24 +592,30 @@
 	}
 }
 
-/**
- * This class stores extra information about the order item,
- * such as colour, size, or type as defined in the Product
- * Attribute class
- */
-class Order_Item_Attribute extends Product_Attribute{
-	static $db = array(
-		"AttributeTitle" => "Varchar(50)",
-		"Type" => "Enum (array('Size','Colour','Subscription'),'Size')",
-		"Quantity" => "Int",
-		"UnitPrice" => "Currency",
-		"OrderID" => "Int",
-		"ProductID" => "Int",
-	);
+class Order_Attribute extends DataObject {
+	
+	protected $_id;
+	
 	static $has_one = array(
-		"Order_Item" => "Order_Item", // Internal field becomes OrderID, not Order
-		"Product_Atrribute" => "Product_Atrribute",
+		'Order' => 'Order'
 	);
+		
+	public function getIdAttribute() {return $this->_id;}
+	public function setIdAttribute($id) {$this->_id = $id;}
+	
+	
+	
+	function ClassForTable() {
+		$class = get_class($this);
+		$classes[] = strtolower($class);
+		while(get_parent_class($class) != 'DataObject' && $class = get_parent_class($class)) $classes[] = strtolower($class);
+		return implode(' ', $classes);
+	}
+	
+	function MainID() {return get_class($this) . '_' . ($this->ID ? $this->ID : $this->_id);}
+	
+	function IDForTable() {return 'Table_' . $this->MainID();}
+	function IDForCart() {return 'Cart_' . $this->MainID();}
 }
 
 /**
@@ -651,30 +638,24 @@ class Order_statusEmail extends Email_Template {
 
 }
 
-class Order_Attribute extends DataObject {
-	
-	protected $_id;
-	
-	static $has_one = array(
-		'Order' => 'Order'
+/**
+ * This class stores extra information about the order item,
+ * such as colour, size, or type as defined in the Product
+ * Attribute class
+ */
+class Order_Item_Attribute extends Product_Attribute{
+	static $db = array(
+		"AttributeTitle" => "Varchar(50)",
+		"Type" => "Enum (array('Size','Colour','Subscription'),'Size')",
+		"Quantity" => "Int",
+		"UnitPrice" => "Currency",
+		"OrderID" => "Int",
+		"ProductID" => "Int",
 	);
-		
-	public function getIdAttribute() {return $this->_id;}
-	public function setIdAttribute($id) {$this->_id = $id;}
-	
-	
-	
-	function ClassForTable() {
-		$class = get_class($this);
-		$classes[] = strtolower($class);
-		while(get_parent_class($class) != 'DataObject' && $class = get_parent_class($class)) $classes[] = strtolower($class);
-		return implode(' ', $classes);
-	}
-	
-	protected function MainID() {return get_class($this) . '_' . ($this->ID ? $this->ID : $this->_id);}
-	
-	function IDForTable() {return 'Table_' . $this->MainID();}
-	function IDForCart() {return 'Cart_' . $this->MainID();}
+	static $has_one = array(
+		"Order_Item" => "Order_Item", // Internal field becomes OrderID, not Order
+		"Product_Atrribute" => "Product_Atrribute",
+	);
 }
 
 ?>
