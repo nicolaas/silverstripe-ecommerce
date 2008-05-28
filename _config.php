@@ -8,7 +8,8 @@
 DataObject::add_extension('Member', 'EcommerceRole');
 
 Director::addRules(50, array(
-	ShoppingCart_Controller::$URLSegment . '/$Action/$ID' => 'ShoppingCart_Controller'
+	ShoppingCart_Controller::$URLSegment . '/$Action/$ID' => 'ShoppingCart_Controller',
+	PayPalPayment_Handler::$URLSegment . '/$Action/$ID' => 'PayPalPayment_Handler'
 ));
 
 // This is the default shipping method class - SimpleShippingModifier.
