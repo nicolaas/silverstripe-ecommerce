@@ -11,6 +11,7 @@ class OrderForm extends Form {
 	
 	function __construct($controller, $name) {
 		Requirements::javascript('ecommerce/javascript/Ajax.js');
+		Requirements::themedCSS('OrderForm');
 		
 		// 1) Member and shipping fields
 		
@@ -164,39 +165,32 @@ class OrderForm extends Form {
 			$order->write();
 			
 			// 5) Proceed to payment
-			
-			$data['BillingId'] = $order->ID;
-			
+						
 			// Save payment data from form and process payment
 			$payment = Object::create($data['PaymentMethod']);
 			if(! $payment instanceof Payment) user_error(get_class($payment) . ' is not a Payment object !', E_USER_ERROR);
 			$form->saveInto($payment);
 			$payment->OrderID = $order->ID;
 			$payment->Amount = $order->Total();
-			
-			// Worldpay doesn't have a payment object so we write one here
-			if($data['PaymentMethod'] == 'WorldpayPayment')	$payment->write();
+			$payment->write();
 			
 			$result = $payment->processPayment($data, $form);
 			
-			if(/*$result[Payment::$success]*/$result->isSuccess()) { // Successful payment
-				$order->write();
-				$order->sendReceipt();
-				
-				ShoppingCart::clear();
-			}
+			// a) Long payment process redirected to another website (PayPal, Worldpay)
+			if($result->isProcessing()) return $result->getValue();
 			
-			// Longer payment process, such as Worldpay
-			else if(/*$result['Processing']*/$result->isProcessing()) return $result['ReturnValue'];
+			// b) Successful payment
+			else if($result->isSuccess()) $order->sendReceipt();
 			
+			ShoppingCart::clear();
+			
+			Director::redirect($order->Link());
+			return;		
 			/*else { // Failed payment
 				$form->sessionMessage("Sorry, your payment was not accepted, please try again<br/><strong>$result[HelpText]:</strong> $result[MerchantHelpText]", 'bad');
 	 			Director::redirect(CheckoutPage::find_link() . $order->ID);
 	 			return;
 			}*/
-			
-			Director::redirect($order->Link());
-			return;
 		}
 		else { // There is no items in the current order
 			$form->sessionMessage('Please add some items to your cart', 'warning');
