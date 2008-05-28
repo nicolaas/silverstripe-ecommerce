@@ -37,25 +37,31 @@ class WorldpayPayment extends Payment {
 			new LiteralField("CCblurb","<div id=\"Payment\"><a href=\"http://www.worldpay.com/\" target=\"_blank\" title=\"Click here to visit WorldPay\"><img src=\"https://www.worldpay.com/cgenerator/logos/poweredByWorldPay.gif\" alt=\"Credit card payments powered by WorldPay\" /></a><br /><img src=\"https://www.worldpay.com/cgenerator/logos/VISA.gif\" alt=\"VISA\" />&nbsp;<img src=\"https://www.worldpay.com/cgenerator/logos/VISD.gif\" alt=\"VISA Delta\" />&nbsp;<img src=\"https://www.worldpay.com/cgenerator/logos/MSCD.gif\" alt=\"MasterCard\" /></div>")
 		);	
 	}
-	function getPaymentFormRequirements() {
-		return null;
-	}
+	
+	/*function getPaymentFormFields() {
+		return new FieldSet(
+			new LiteralField('PayPalInfo', '<a href="https://www.paypal.com/us/cgi-bin/webscr?cmd=p/gen/ua/policy_privacy-outside" title="Read PayPal\'s privacy policy" target="_blank"><img src="http://farm2.static.flickr.com/1317/1365689127_5567060b2d.jpg" alt="Payments powered by PayPal"/></a>')
+		);
+	}*/
+	
+	function getPaymentFormRequirements() {return null;}
 		
 	function processPayment($data, $form) {
-		$tmpPage = new Page();
-		$tmpPage->Title = "Make payment";
-		$tmpPage->Content = $this->StartWorldpayForm();
-		$tmpPage->URLSegment = "payment";
+		$page = new Page();
+		
+		$page->URLSegment = 'worldpay';
+		$page->Title = 'Redirection to WorldPay...';
+		$page->Logo = '<img src="http://ourworld.compuserve.com/homepages/sbrillanti/worldpay.gif" alt="Payments powered by WorldPay"/>';
+		$page->Form = $this->WorldPayForm();
 
-		$controller = new Page_Controller($tmpPage);
-		//Controller::pushCurrent();
+		$controller = new Page_Controller($page);
 		
-		$form = $controller->renderWith("Page");
+		$form = $controller->renderWith('PaymentProcessingPage');
 		
-		return array('Processing' => true, 'ReturnValue' => $form);
+		return new Payment_Processing($form);
 	}
 	
-	function StartWorldpayForm() {
+	function WorldPayForm() {
 		$m = $this->Member();
 		$o = DataObject::get_by_id("Order", $this->OrderID);
 
@@ -104,11 +110,11 @@ class WorldpayPayment extends Payment {
 				<p id="Submitting" style="display: none">We are now redirecting you to worldpay...</p>
 			</form>
 			
-			<script>
+			<!-- script>
 				$('Submit').style.display = 'none';
 				$('Submitting').style.display = '';
 				$('PaymentForm').submit();
-			</script>		
+			</script -->		
 
 HTML;
 	}
