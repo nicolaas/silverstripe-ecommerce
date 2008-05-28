@@ -105,7 +105,7 @@ class Payment extends DataObject {
 	static function findPaymentMethod($method) {
 		return self::$supported_methods[$method];
 	}
-	
+		
 	/**
 	 * Returns the Payment method used. It just resolves the classname
 	 * to the 'nice' title as defined in Payment::set_supported_methods().
@@ -136,6 +136,7 @@ class Payment extends DataObject {
 		foreach(self::$supported_methods as $method => $methodTitle) {
 			$composite = new CompositeField(singleton($method)->getPaymentFormFields());
 			$composite->setID("MethodFields_$method");
+			$composite->addExtraClass('paymentfields');
 			$fields->push($composite);
 		}
 		
@@ -186,24 +187,37 @@ class Payment extends DataObject {
 	
 }
 
-class Payment_Result {
+abstract class Payment_Result {
 	
-	protected $success;
-	protected $message;
-	protected $processing;
 	protected $value;
 	
-	function __construct($success, $message = null, $processing = false, $value = null) {
-		$this->success = $success;
-		$this->message = $message;
-		$this->processing = $processing;
-		$this->value = $value;
-	}
+	function __construct($value = null) {$this->value = $value;}
 	
-	function isSuccess() {return $this->success;}
-	function getMessage() {return $this->message;}
-	function isProcessing() {return $this->processing;}
 	function getValue() {return $this->value;}
+	
+	abstract function isSuccess();
+	abstract function isProcessing();
+	
+}
+
+class Payment_Success extends Payment_Result {
+		
+	function isSuccess() {return true;}
+	function isProcessing() {return false;}
+}
+
+class Payment_Processing extends Payment_Result {
+	
+	function __construct($form) {parent::__construct($form);}
+	
+	function isSuccess() {return false;}
+	function isProcessing() {return true;}
+}
+
+class Payment_Failure extends Payment_Result {
+		
+	function isSuccess() {return false;}
+	function isProcessing() {return false;}
 }
 
 ?>
