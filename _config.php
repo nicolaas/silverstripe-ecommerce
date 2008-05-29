@@ -16,7 +16,7 @@ Director::addRules(50, array(
 // To use your own one, copy this line, with the second argument as your
 // custom shipping class into mysite/_config.php - this will override
 // SimpleShippingModifier
-Order::set_modifiers(array('SimpleShippingModifier'));
+//Order::set_modifiers(array('SimpleShippingModifier'));
 
 // Add additional fields to the MemberTableField in the CMS for e-commerce.
 MemberTableField::addPermissions(array('show', 'export'));
