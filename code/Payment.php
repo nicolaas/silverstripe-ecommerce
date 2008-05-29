@@ -14,10 +14,16 @@ class Payment extends DataObject {
 		"Amount" => "Currency",
 		"LastEdited" => "Datetime"
 	);
-	 
+	
+	/**
+ 	 * Incomplete(Default) : Payment created but no successful yet or the process has been stop instantly
+ 	 * Success : Payment successful
+ 	 * Failure : Payment failed during process or (if Cheque, non received or not well formated) 
+ 	 * Pending : For cheque Only
+ 	 */
 	static $db = array(
 		"Message" => "Text",
-		"Status" =>"Enum(array('Success', 'Failure', 'Incomplete', 'Pending'), 'Incomplete')",
+		"Status" => "Enum(array('Incomplete','Success','Failure','Pending'), 'Incomplete')",
 		"Amount" => "Decimal",
 		"Currency" =>"Varchar(3)",
 		"TxnRef" => "Text",
@@ -32,9 +38,7 @@ class Payment extends DataObject {
 		"Member" => "Member",
 		"Order" => "Order"
 	);
-	
-	static $success = 'success';
-	
+		
 	/**
 	 * Process this payment, and set the status message in the session.
 	 * Returns true on a successful payment, false on an error (such as CC declined).
@@ -185,7 +189,31 @@ class Payment extends DataObject {
 		user_error("Please implement getPaymentFormRequirements() on $this->class", E_USER_ERROR);
 	}
 	
+	/**
+	 * Function which automatically changes the status of the order to paid if successful
+	 * Precondition : Order status is unpaid
+	 */
+	function onBeforeWrite() {
+		parent::onBeforeWrite();
+		if($this->Status == 'Success') {
+			$order = $this->Order();
+			$order->Status = 'Paid';
+			$order->write();
+			$order->sendReceipt();
+		}
+	}
+	
+	function redirectToOrder() {
+		$order = $this->Order();
+		Director::redirect($order->Link());
+		return;
+	}
 }
+
+/**
+ * Interface for offline payments like Cheque or Bank Transfer
+ */
+interface Payment_OffLineInterface {}
 
 abstract class Payment_Result {
 	
