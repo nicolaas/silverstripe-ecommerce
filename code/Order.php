@@ -18,6 +18,15 @@
  
  class Order extends DataObject {
  	
+ 	/**
+ 	 * Unpaid(Default) : Order created but no successful payment yet
+ 	 * Paid : Order successfully paid
+ 	 * Query : 
+ 	 * Processing : Order already paid and the package is  currently processed
+ 	 * Sent : Order already paid and now sent
+ 	 * Complete : 
+ 	 * Cancelled : Order cancelled by the member
+ 	 */
 	static $db = array(
 		"Status" => "Enum('Unpaid,Paid,Query,Processing,Sent,Complete,Cancelled','Unpaid')",
 		"Country" => "Text",
@@ -36,7 +45,8 @@
 	
 	static $has_many = array(
 		'Attributes' => 'Order_Attribute',
-		'OrderStatusLogs' => 'OrderStatusLog'
+		'OrderStatusLogs' => 'OrderStatusLog',
+		'Payments' => 'Payment'
 	);
 	
 	static $casting = array(
@@ -56,9 +66,9 @@
 	static function set_order_class($orderClass) {self::$order_class = $orderClass;}
 	
 	/**
-	 * Status which stand for complete
+	 * Status which stand for already paid because the order has a payment successful
 	 */
-	static $complete_status = array('Paid', 'Sent', 'Complete');
+	static $paid_status = array('Paid', 'Processing', 'Sent', 'Complete');
 	
 	/**
 	 * Currency used in orders
@@ -193,28 +203,13 @@
 	 * ASSUMPTION : Only one payment per order
 	 */
 	function _TotalOutstanding(){
-		// TODO Total is returning a casted object which you can't do addition too.... DUM
 		$total = $this->_Total();
-		if($this->ID) {
-			$payment = Object::create("Payment");
-			$payment = DataObject::get_one(get_class($payment),"Payment.OrderID = $this->ID");
-
-			// revised rounding from Hayden
-			// we HAVE to do this, because we use $Title.Nice on the front end which is inconsistent
-			// with the calculation in php
-			
-			// TODO - find a better way to do this. Sean and Hayden @ SS had a crack at it, but couldn't
-			// get anywhere but do this
-			$difference = (round($total * 100) - round($payment->Amount * 100)) / 100;
-			
-			if($payment->Status == 'Success') {
-				return $difference;
-			} else {
-				return $total;
+		if($this->ID && $payments = $this->Payments) {
+			foreach($payments as $payment) {
+				if($payment->Status == 'Success') $total -= $payment->Amount;
 			}
-		} else {
-			return $total;
 		}
+		return $total;
 	}
 	
 	function Link() {return AccountPage::get_order_link($this->ID);}
@@ -278,9 +273,9 @@
 		$js[] = array('id' => $this->TotalIDForCart(), 'parameter' => 'innerHTML', 'value' => $total);
 	}
 	
-	function IsComplete() {return in_array($this->Status, self::$complete_status);}
+	function IsPaid() {return in_array($this->Status, self::$paid_status);}
 	
-	function Status() {return $this->IsComplete() ? _t('Order.SUCCESSFULL', 'Order Successful') : _t('Order.INCOMPLETE', 'Order Incomplete');}
+	function Status() {return $this->IsPaid() ? _t('Order.SUCCESSFULL', 'Order Successful') : _t('Order.INCOMPLETE', 'Order Incomplete');}
 	
 	function checkoutLink() {return CheckoutPage::get_checkout_order_link($this->ID);}
 	
@@ -348,30 +343,7 @@
 		else if(! $this->UseShippingAddress || ! $country = $this->ShippingCountry)	$country = EcommerceRole::findCountry();
 		return $codeOnly ? $country : EcommerceRole::findCountryTitle($country);
 	}
-	
-	/**
-	 * If a Order is manually set to paid, update
-	 * the appropriate Payment. Also log the change of the Status automatically.
-	 */
-	function onBeforeWrite() {
-		if($this->Status == 'Paid' && !$this->original['Status'] != 'Paid') {
-			// if the status was set to paid for the first time, update a payment-object
-			$payment = DataObject::get_one('Payment', "OrderID = {$this->ID}");
-			if($payment) {
-				$payment->Status = 'Success';
-				$payment->write();
-			}
-		} else if($this->Status == 'Unpaid') {
-			// if the status was set to set unpaid for the first time, update a payment-object
-			$payment = DataObject::get_one('Payment', "OrderID = {$this->ID}");
-			if($payment) {
-				$payment->Status = "Pending";
-				$payment->write();
-			}
-		}
-		parent::onBeforeWrite();
-	}
-						
+							
 	/*
 	 * Returns a TaxModifier object that provides information about tax on this order.
 	 */
@@ -590,6 +562,18 @@
  			echo( "<div style=\"padding:5px; color:white; background-color:blue;\">The columns 'hasShippingCost', 'Shipping' and 'AddedTax' of the table 'Order' have been renamed successfully. Also, the columns have been renamed respectly to '_obsolete_hasShippingCost', '_obsolete_Shipping' and '_obsolete_AddedTax'.</div>" );
   		}
 	}
+	
+	
+	/**
+	 * Creates the OrderStatusLog objects and sends the order status mails
+	 * if and only if the oder status has changed 
+	 */
+	function onBeforeWrite() {
+		parent::onBeforeWrite();
+		if($this->Status != $this->original['Status']) {
+			
+		}
+	}
 }
 
 class Order_Attribute extends DataObject {
@@ -632,9 +616,9 @@ class Order_ReceiptEmail extends Email_Template {
  * This class handles the status email which is sent after changing the attributes
  * in the report (eg. status changed to 'Shipped').
  */ 
-class Order_statusEmail extends Email_Template {
+class Order_StatusEmail extends Email_Template {
 
-	protected $ss_template = 'Order_statusEmail';
+	protected $ss_template = 'Order_StatusEmail';
 
 }
 
