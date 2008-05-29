@@ -5,12 +5,13 @@
  */
  
 /**
- * Object to keep the status for an order
+ * Class which implement a log object to keep a history of the status changes
+ * of an order
  */
 class OrderStatusLog extends DataObject {
 	
 	static $db = array(
-		"Status" => "Varchar(255)",
+		'Status' => 'Varchar(255)',
 		"Note" => "Text",
 		"SentToCustomer" => "Boolean"
 	);
