@@ -105,7 +105,7 @@ class CheckoutPage_Controller extends Page_Controller {
 	function CanCheckout() {
 		if($orderID = Director::urlParam('Action')) {
 			if($memberID = Member::currentUserID()) {
-				if($order = DataObject::get_one('Order', "`Order`.`ID` = '$orderID' AND `MemberID` = '$memberID'")) return ! $order->IsComplete();
+				if($order = DataObject::get_one('Order', "`Order`.`ID` = '$orderID' AND `MemberID` = '$memberID'")) return ! $order->IsPaid();
 				else return false;
 			}
 			else return false;
