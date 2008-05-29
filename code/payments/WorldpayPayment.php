@@ -19,6 +19,9 @@
  */
 class WorldpayPayment extends Payment {
 	
+	protected static $privacy_link = 'http://www.worldpay.com/about_us/index.php?page=privacy';
+	protected static $logo = 'ecommerce/images/payments/worldpay.gif';
+	
 	protected static $installation_id;	
 	static function set_installation_id($id) {
 		self::$installation_id = $id;
@@ -33,25 +36,28 @@ class WorldpayPayment extends Payment {
 	}
 	
 	function getPaymentFormFields() {
+		$logo = '<img src="' . self::$logo . '" alt="Credit card payments powered by WorldPay"/>';
+		$privacyLink = '<a href="' . self::$privacy_link . '" target="_blank" title="Read WorldPay\'s privacy policy">' . $logo . '</a><br/>';
 		return new FieldSet(
-			new LiteralField("CCblurb","<div id=\"Payment\"><a href=\"http://www.worldpay.com/\" target=\"_blank\" title=\"Click here to visit WorldPay\"><img src=\"https://www.worldpay.com/cgenerator/logos/poweredByWorldPay.gif\" alt=\"Credit card payments powered by WorldPay\" /></a><br /><img src=\"https://www.worldpay.com/cgenerator/logos/VISA.gif\" alt=\"VISA\" />&nbsp;<img src=\"https://www.worldpay.com/cgenerator/logos/VISD.gif\" alt=\"VISA Delta\" />&nbsp;<img src=\"https://www.worldpay.com/cgenerator/logos/MSCD.gif\" alt=\"MasterCard\" /></div>")
-		);	
-	}
-	
-	/*function getPaymentFormFields() {
-		return new FieldSet(
-			new LiteralField('PayPalInfo', '<a href="https://www.paypal.com/us/cgi-bin/webscr?cmd=p/gen/ua/policy_privacy-outside" title="Read PayPal\'s privacy policy" target="_blank"><img src="http://farm2.static.flickr.com/1317/1365689127_5567060b2d.jpg" alt="Payments powered by PayPal"/></a>')
+			new LiteralField('WorldPayInfo', $privacyLink),
+			new LiteralField(
+				'WorldPayPaymentsList',
+				'<img src="ecommerce/images/payments/methods/visa.jpg" alt="Visa"/>' .
+				'<img src="ecommerce/images/payments/methods/mastercard.jpg" alt="MasterCard"/>' .
+				'<img src="ecommerce/images/payments/methods/american-express.gif" alt="American Express"/>' .
+				'<img src="ecommerce/images/payments/methods/dinners-club.jpg" alt="Dinners Club"/>' .
+				'<img src="ecommerce/images/payments/methods/jcb.jpg" alt="JCB"/>'
+			)
 		);
-	}*/
-	
+	}
+		
 	function getPaymentFormRequirements() {return null;}
 		
 	function processPayment($data, $form) {
 		$page = new Page();
 		
-		$page->URLSegment = 'worldpay';
 		$page->Title = 'Redirection to WorldPay...';
-		$page->Logo = '<img src="http://ourworld.compuserve.com/homepages/sbrillanti/worldpay.gif" alt="Payments powered by WorldPay"/>';
+		$page->Logo = '<img src="' . self::$logo . '" alt="Payments powered by WorldPay"/>';
 		$page->Form = $this->WorldPayForm();
 
 		$controller = new Page_Controller($page);
@@ -88,7 +94,7 @@ class WorldpayPayment extends Payment {
 			"tel" => $m->HomePhone,
 			"fax" => $m->Fax,
 			"fixContact" => 1, // ???
-			"MC_orderID" => $this->OrderID,
+			"MC_paymentID" => $this->ID,
 			"MC_callback" => $callbackURL // absolute base URL, without the HTTP://
 		);
 		
@@ -110,12 +116,11 @@ class WorldpayPayment extends Payment {
 				<p id="Submitting" style="display: none">We are now redirecting you to worldpay...</p>
 			</form>
 			
-			<!-- script>
+			<script>
 				$('Submit').style.display = 'none';
 				$('Submitting').style.display = '';
 				$('PaymentForm').submit();
-			</script -->		
-
+			</script>
 HTML;
 	}
 	
@@ -134,6 +139,25 @@ class WorldpayPayment_Handler extends Controller {
 	 * that it was received. Finally, send a receipt to the buyer to show these details.
 	 */		
 	function paid() {
+		// Check if callback password is the same, otherwise fail
+		if($_REQUEST['callbackPW'] == WorldpayPayment::$callback_password) {
+			$paymentID = $_REQUEST['MC_paymentID'];
+			if(is_numeric($paymentID)) {
+				if($payment = DataObject::get_by_id('WorldpayPayment', $paymentID)) {
+					if($_REQUEST['transStatus'] == "Y")	$payment->Status = 'Success';
+					else $payment->Status = 'Failure';
+					$payment->write();
+					$payment->redirectToOrder();
+				}
+				else USER_ERROR("CheckoutPage::OrderConfirmed - There is no Payment object for this order object (Order ID ".$orderID.")", E_USER_WARNING);
+			}	
+			else USER_ERROR('CheckoutPage::OrderConfirmed - Order ID is NOT numeric', E_USER_WARNING);
+		}
+		else USER_ERROR("CheckoutPage::OrderConfirmed - Order error - password failed" ,E_USER_WARNING);
+		return;
+	}
+	
+	/*function paid() {
 		global $project;
 	
 		// Check if callback password is the same, otherwise fail
@@ -143,6 +167,7 @@ class WorldpayPayment_Handler extends Controller {
 				// The transaction was successful, so mark the order as complete
 				// Check if the order ID is numeric, otherwise fail
 				$orderID = $_REQUEST['MC_orderID'];
+				
 				if(is_numeric($orderID)) {
 					$order = DataObject::get_by_id('Order', $orderID);
 					if($order) {
@@ -204,7 +229,7 @@ class WorldpayPayment_Handler extends Controller {
 		// In the absence of an error, go to the Order complete/incomplete page.
 		// WorldPay does not permit HTTP Header redirects, so we use a META REFRESH one instead
 		echo "<html><head><meta http-equiv=\"Refresh\" content=\"0;url=$url\"></head><body>Redirecting to <a href=\"$url\">$url</a></body></html>";
-	}
+	}*/
 }
 
 ?>
