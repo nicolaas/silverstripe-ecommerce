@@ -19,17 +19,51 @@
  */
 class WorldpayPayment extends Payment {
 	
+	// WorldPay Informations
+	
 	protected static $privacy_link = 'http://www.worldpay.com/about_us/index.php?page=privacy';
 	protected static $logo = 'ecommerce/images/payments/worldpay.gif';
 	
-	protected static $installation_id;	
-	static function set_installation_id($id) {
-		self::$installation_id = $id;
+	// URL
+
+	protected static $url = 'https://select.worldpay.com/wcc/purchase';
+	protected static $test_url = 'https://select-test.worldpay.com/wcc/purchase';
+	
+	// Test Mode
+
+	protected static $test_mode = false;
+	protected static $test_mode_name;
+	protected static function set_test_mode($name) {
+		self::$test_mode = '100';
+		self::$test_mode_name = $name;
 	}
-	protected static $worldpay_testmode;	
-	static function set_testmode($testmode) {
-		self::$worldpay_testmode = $testmode;
-	}
+	static function set_test_mode_refused_transaction() {self::set_test_mode('REFUSED');}
+	static function set_test_mode_authorised_transaction() {self::set_test_mode('AUTHORISED');}
+	static function set_test_mode_error_transaction() {self::set_test_mode('ERROR');}
+	static function set_test_mode_captured_transaction() {self::set_test_mode('CAPTURED');}
+		
+	// Payment Informations
+	
+	protected static $installation_id;
+	static function set_installation_id($installation_id) {self::$installation_id = $installation_id;}
+	
+	protected static $result_file;
+	static function set_result_file($result_file) {self::$result_file = $result_file;}
+	
+	protected static $merchant_code;
+	static function set_merchant_code($merchant_code) {self::$merchant_code = $merchant_code;}
+	
+	protected static $authorisation_mode;
+	static function set_authorisation_mode_full() {self::$authorisation_mode = 'A';}
+	static function set_authorisation_mode_pre() {self::$authorisation_mode = 'E';}
+	static function set_authorisation_mode_post() {self::$authorisation_mode = 'O';}
+	
+	protected static $authorisation_valid_from;
+	static function set_authorisation_valid_from($authorisation_valid_from) {self::$authorisation_valid_from = $authorisation_valid_from;}
+	
+	protected static $authorisation_valid_to;
+	static function set_authorisation_valid_to($authorisation_valid_to) {self::$authorisation_valid_to = $authorisation_valid_to;}
+		
 	static $callback_password;
 		static function set_callback_password($pass) {
 		self::$callback_password = $pass;
@@ -50,9 +84,9 @@ class WorldpayPayment extends Payment {
 			)
 		);
 	}
-		
+	
 	function getPaymentFormRequirements() {return null;}
-		
+	
 	function processPayment($data, $form) {
 		$page = new Page();
 		
@@ -68,64 +102,74 @@ class WorldpayPayment extends Payment {
 	}
 	
 	function WorldPayForm() {
-		$m = $this->Member();
-		$o = DataObject::get_by_id("Order", $this->OrderID);
+		
+		// 1) Main Informations
 
-		$callbackURL = ereg_replace('^[a-zA-Z]+://','', Director::absoluteBaseURL(). 'WorldpayPayment_Handler/paid/' . $this->ID);
+		$order = $this->Order();
+		$items = $order->Items();
+		$member = $this->Member();
 		
-		/*
-		 * A quick start guide to setting up Worldpay can be found here:
-		 * http://support.worldpay.com/kb/integration_guides/junior/quickstep/help/quickstep_guide.html
-		 */
+		// 2) Mandatory Settings
 		
-		$info = array(
-			"DestObject" => "Order $this->OrderID",
-			"instId" => self::$installation_id,
-			"currency" => Order::site_currency(),
-			"desc" => "Order #$this->OrderID",
-			"cartId" => "Order #$this->OrderID",
-			"testMode" => self::$worldpay_testmode,
-			"amount" => $this->Amount,
-			"name" => "$m->FirstName $m->Surname",
-			"address" => $m->Address . "\n" . $m->AddressLine2 . "\n" . $m->City,
-			"country" => $m->Country,
-			"email" => $m->Email,
-			"postcode" => $m->Postcode,
-			"tel" => $m->HomePhone,
-			"fax" => $m->Fax,
-			"fixContact" => 1, // ???
-			"MC_paymentID" => $this->ID,
-			"MC_callback" => $callbackURL // absolute base URL, without the HTTP://
-		);
+		$inputs['instId'] = self::$installation_id;
+		$inputs['cartId'] = $order->ID;
+		$inputs['amount'] = $order->Total();
+		$inputs['currency'] = $this->Currency;
 		
-		foreach($info as $k => $v) {
-			$fields .= "<input type=\"hidden\" name=\"" . Convert::raw2att($k) . "\" value=\"" . Convert::raw2att($v) . "\" />\n";
+		// 3) Payment And Items Informations
+		
+		$inputs['MC_paymentID'] = $this->ID;
+		$inputs['desc'] = 'Order made on ' . DBField::create('Datetime', $order->Created)->Long() . ' by ' . $member->FirstName . ' ' . $member->Surname;
+		
+		// 4) Test Mode And Customer Name Settings
+		
+		if (self::$test_mode) {
+			$url = self::$test_url;
+			$inputs['testMode'] = self::$test_mode;
+			$inputs['name'] = self::$test_mode_name;
 		}
-		$installation_id = self::$installation_id;
+		else {
+			$url = self::$url;
+			$inputs['name'] = $member->FirstName . ' ' . $member->Surname;
+		}
+		
+		// 5) Redirection Informations
+		
+		$inputs['MC_callback'] = Director::absoluteBaseURL() . WorldpayPayment_Handler::complete_link();
+		
+		// 6) Optional Payments And Authorisation Settings
+		
+		if(self::$result_file) $inputs['resultFile'] = self::$result_file;
+		if(self::$merchant_code) $inputs['accId'] = self::$merchant_code; // Not sure about its exact syntax
+		if(self::$authorisation_mode) $inputs['authMode'] = self::$authorisation_mode;
+		if(self::$authorisation_valid_from) $inputs['authValidFrom'] = self::$authorisation_valid_from;
+		if(self::$authorisation_valid_to) $inputs['authValidTo'] = self::$authorisation_valid_to;
+		
+		// 7) Prepopulating Customer Informations
+		
+		$inputs['address'] = $member->Address . '&#10;' . $member->AddressLine2 . '&#10;' . $member->City;
+		$inputs['country'] = $member->Country;
+		$inputs['email'] = $member->Email;
+		
+		if ($member->hasMethod('getPostCode')) $inputs['postcode'] = $member->getPostCode();
+		if ($member->hasMethod('getFax')) $inputs['fax'] = $member->getFax();
+		//$inputs['tel'] = $member->HomePhone;
+		
+		// 8) Form Creation
+
+		foreach ($inputs as $name => $value) $fields .= '<input type="hidden" name="' . $name . '" value="' . $value . '"/>';
+		
 		return <<<HTML
-			<form id="PaymentForm" method="post" action="https://select.worldpay.com/wcc/purchase">
-				<h2>Now forwarding you to WorldPay...</h2>
+			<form id="PaymentForm" method="post" action="$url">
 				$fields
-			
-				<div id="WorldPayInfo">
-					<script src="https://www.worldpay.com/cgenerator/cgenerator.php?instId=$installation_id" type="text/javascript"></script>
-				</div>
-				<p class="Actions" id="Submit">
-				   <input type="submit" value="Make Payment" />
-				</p>
-				<p id="Submitting" style="display: none">We are now redirecting you to worldpay...</p>
 			</form>
-			
-			<script>
-				$('Submit').style.display = 'none';
-				$('Submitting').style.display = '';
-				$('PaymentForm').submit();
-			</script>
+			<script type="text/javascript">$('PaymentForm').submit();</script>
+			<!-- script type="text/javascript">
+				jQuery(document).ready(
+					function() {jQuery('#PaymentForm').submit();}
+				);
+			</script -->
 HTML;
-	}
-	
-	function getPaymentFormRequiredFields() {
-		return array();
 	}
 }
 
@@ -133,6 +177,11 @@ HTML;
  * Handler for responses from the WorldPay site
  */
 class WorldpayPayment_Handler extends Controller {
+	
+	static $URLSegment = 'worldpay';
+	
+	static function complete_link() {return self::$URLSegment . '/complete';}
+	
 	/**
 	 * Get the Order object to modify, check security that it's the object you want to modify based
 	 * off Worldpay confirmation, update the Order object to show complete and Payment object to show
@@ -155,6 +204,18 @@ class WorldpayPayment_Handler extends Controller {
 		}
 		else USER_ERROR("CheckoutPage::OrderConfirmed - Order error - password failed" ,E_USER_WARNING);
 		return;
+	}
+	
+	function complete() {
+		$paymentID = $_REQUEST['MC_paymentID'];
+		$payment = DataObject::get_by_id('WorldpayPayment', $paymentID);
+		$payment->TxnRef = $_REQUEST['transId'];
+		$transactionStatus = $_REQUEST['transStatus'];
+		if($transactionStatus == 'Y') $payment->Status = 'Success'; // Successful
+		else $payment->Status = 'Failure'; // Cancelled
+		$payment->Message = $_REQUEST['rawAuthMessage'];
+		$payment->write();
+		$payment->redirectToOrder();
 	}
 	
 	/*function paid() {
