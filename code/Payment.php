@@ -7,7 +7,7 @@
  */
 
 class Payment extends DataObject {
-
+	
 	public static $testCredentials, $liveCredentials;
 
 	static $casting = array(
@@ -210,11 +210,6 @@ class Payment extends DataObject {
 	}
 }
 
-/**
- * Interface for offline payments like Cheque or Bank Transfer
- */
-interface Payment_OffLineInterface {}
-
 abstract class Payment_Result {
 	
 	protected $value;
@@ -246,6 +241,6 @@ class Payment_Failure extends Payment_Result {
 		
 	function isSuccess() {return false;}
 	function isProcessing() {return false;}
-}
+}	
 
 ?>
