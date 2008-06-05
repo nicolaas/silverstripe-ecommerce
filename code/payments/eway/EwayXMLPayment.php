@@ -77,9 +77,9 @@ JS;
 				var ewayCreditCardType = document.getElementsByName('Eway_CreditCardType')[0];
 				if(ewayCreditCardType.value == 'VISA' || ewayCreditCardType.value == 'MASTERCARD' || ewayCreditCardType.value == 'AMEX') require('Eway_CreditCardCVN');
 JS;
-			$phpCode .= '
+			/*$phpCode .= '
 				if(in_array($data["Eway_CreditCardType"], array("VISA", "MASTERCARD", "AMEX")) $this->requireField("Eway_CreditCardCVN", $data);
-			';
+			';*/
 		}
 		return array('js' => $jsCode, 'php' => $phpCode);
 	}
