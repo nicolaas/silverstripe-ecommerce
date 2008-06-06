@@ -117,7 +117,9 @@ class PayPalPayment extends Payment {
 		$page->Form = $this->PayPalForm();
 
 		$controller = new Page_Controller($page);
-
+		
+		Requirements::javascript('ecommerce/javascript/jquery.js');
+		
 		$form = $controller->renderWith('PaymentProcessingPage');
 
 		return new Payment_Processing($form);
@@ -192,7 +194,9 @@ class PayPalPayment extends Payment {
 
 		return<<<HTML
 			<form id="PaymentForm" method="post" action="$url">$fields</form>
-			<script type="text/javascript">$('PaymentForm').submit();</script>
+			<script type="text/javascript">
+				jQuery(document).ready(function() {jQuery('#PaymentForm').submit();});
+			</script>
 HTML;
 	}
 }
