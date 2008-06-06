@@ -30,6 +30,9 @@
  * 	FJD 	Fiji Dollar
  */	
 
+// To do : fix the validation problem on the credit card number and date expiry
+// js validation
+
 class DPSPayment extends Payment {
 	
 	// DPS Informations
