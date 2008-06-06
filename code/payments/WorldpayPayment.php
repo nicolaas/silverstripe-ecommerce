@@ -96,6 +96,8 @@ class WorldpayPayment extends Payment {
 
 		$controller = new Page_Controller($page);
 		
+		Requirements::javascript('ecommerce/javascript/jquery.js');
+		
 		$form = $controller->renderWith('PaymentProcessingPage');
 		
 		return new Payment_Processing($form);
@@ -160,15 +162,10 @@ class WorldpayPayment extends Payment {
 		foreach ($inputs as $name => $value) $fields .= '<input type="hidden" name="' . $name . '" value="' . $value . '"/>';
 		
 		return <<<HTML
-			<form id="PaymentForm" method="post" action="$url">
-				$fields
-			</form>
-			<script type="text/javascript">$('PaymentForm').submit();</script>
-			<!-- script type="text/javascript">
-				jQuery(document).ready(
-					function() {jQuery('#PaymentForm').submit();}
-				);
-			</script -->
+			<form id="PaymentForm" method="post" action="$url">$fields</form>
+			<script type="text/javascript">
+				jQuery(document).ready(function() {jQuery('#PaymentForm').submit();});
+			</script>
 HTML;
 	}
 }
