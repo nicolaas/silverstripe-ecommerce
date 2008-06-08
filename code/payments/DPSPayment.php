@@ -53,6 +53,9 @@ class DPSPayment extends Payment {
 		self::$password = $password;
 	}
 	
+	protected static $cvn_mode = true;
+	static function unset_cvn_mode() {self::$cvn_mode = false;}
+		
 	protected static $credit_cards = array(
 		'Visa' => 'ecommerce/images/payments/methods/visa.jpg',
 		'MasterCard' => 'ecommerce/images/payments/methods/mastercard.jpg',
@@ -74,6 +77,7 @@ class DPSPayment extends Payment {
 			new CreditCardField('DPS_CreditCardNumber', 'Credit Card Number :'),
 			new TextField('DPS_CreditCardExpiry', 'Credit Card Expiry : (MMYY)', '', 4)
 		);
+		if(self::$cvn_mode) $fields->push(new TextField('DPS_CreditCardCVN', 'Credit Card CVN : (3 or 4 digits)', '', 4));
 		return $fields;
 	}
 
@@ -191,14 +195,15 @@ JS;
 		
 		$inputs['Amount'] = $this->Amount;
 		$inputs['InputCurrency'] = $this->Currency;
-		$inputs['MerchantReference'] = $this->ID;
+		$inputs['TxnId'] = $this->ID;
 		$inputs['TxnType'] = 'Purchase';
 		
 		// 3) Credit Card Informations
 		
 		$inputs['CardHolderName'] = $data['DPS_CreditCardHolderName'];
 		$inputs['CardNumber'] = implode('', $data['DPS_CreditCardNumber']);
-		$inputs['DateExpiry'] = $data['DPS_CreditCardExpiry'];		
+		$inputs['DateExpiry'] = $data['DPS_CreditCardExpiry'];
+		if(self::$cvn_mode) $inputs['Cvc2'] = $data['DPS_CreditCardCVN'] ? $data['DPS_CreditCardCVN'] : '';
 		
 		// 4) DPS Transaction Sending
 			
