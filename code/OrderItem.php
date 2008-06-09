@@ -9,7 +9,6 @@
 class OrderItem extends Order_Attribute {
 	
 	protected $_quantity;
-	protected $countID; // Not sure to keep it !
 
 	static $db = array(
 		'Quantity' => 'Int'
@@ -51,9 +50,7 @@ class OrderItem extends Order_Attribute {
 	public function getQuantity() {return $this->_quantity;}
 	public function setQuantityAttribute($quantity) {$this->_quantity = $quantity;}
 	public function addQuantityAttribute($quantity) {$this->_quantity += $quantity;}
-	function getCountID() {return $this->countID;}
-	function setCountID($countId) {$this->countID = $countId;}
-		
+	
 	protected function AjaxQuantityFieldName() {return $this->MainID() . '_Quantity';}
 	
 	function AjaxQuantityField() {
