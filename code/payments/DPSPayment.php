@@ -207,11 +207,11 @@ JS;
 		
 		// 4) DPS Transaction Sending
 			
-  		$dpsResponseFields = $this->doPayment($inputs);
+  		$responseFields = $this->doPayment($inputs);
 		
 		// 5) DPS Response Management
 		
-		if($dpsResponseFields[/*'Status'*/'SUCCESS']) {
+		if($responseFields['SUCCESS']) {
 			$this->Status = 'Success';
 			$result = new Payment_Success();
 		}
@@ -220,16 +220,10 @@ JS;
 			$result = new Payment_Failure();
 		}
 		
-		if($dpsTransactionRef = $dpsResponseFields['DPSTXNREF']) $this->TxnRef = $dpsTransactionRef;
+		if($transactionRef = $responseFields['DPSTXNREF']) $this->TxnRef = $transactionRef;
 		
-		/*$message = '';
-		if($dpsResponseText = $dpsResponseFields['CARDHOLDERRESPONSETEXT']) $message .= $dpsResponseText;
-		if($dpsResponseDescription = $dpsResponseFields['CARDHOLDERRESPONSEDESCRIPTION']) $message .= $dpsResponseDescription;
-		if($dpsMerchantResponseText = $dpsResponseFields['MERCHANTRESPONSETEXT']) $message .= $dpsMerchantResponseText;
-		$this->Message = $message;*/
-		
-		if($dpsHelpText = $dpsResponseFields['HELPTEXT']) $this->Message = $dpsHelpText;
-		else if($dpsResponseText = $dpsResponseFields['RESPONSETEXT']) $this->Message = $dpsResponseText;
+		if($helpText = $responseFields['HELPTEXT']) $this->Message = $helpText;
+		else if($responseText = $responseFields['RESPONSETEXT']) $this->Message = $responseText;
 		
 		$this->write();
 		return $result;
@@ -242,7 +236,7 @@ JS;
 		$transaction = '<Txn>';
 		foreach($inputs as $name => $value) $transaction .= "<$name>$value</$name>"; 
 		$transaction .= '</Txn>';
-		//Debug::show($transaction);
+		
 		// 2) CURL Creation
 		
 		$clientURL = curl_init(); 
@@ -285,12 +279,7 @@ JS;
 				eval($phpArray);
 			}
 		}
-		//Debug::show($resultPhp);die;
-		// 7) Result Array Creation
 		
-		/*$resultStatus = $resultPhp['TXN']['SUCCESS'];
-		$result = $resultPhp['TXN'][$resultStatus];
-		$result['Status'] = $resultStatus;*/
 		$result = $resultPhp['TXN'];
 		
 		return $result;
