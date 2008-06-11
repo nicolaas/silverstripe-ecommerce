@@ -411,35 +411,33 @@
  					$hasShippingCost = DB::query("SELECT `hasShippingCost` FROM `Order` WHERE `ID` = '$id'")->value();
  					$shipping = DB::query("SELECT `Shipping` FROM `Order` WHERE `ID` = '$id'")->value();
  					$addedTax = DB::query("SELECT `AddedTax` FROM `Order` WHERE `ID` = '$id'")->value();
-					$countryCode = $order->findShippingCountry(true);
-					$country = Geoip::countryCode2name($countryCode);
+					$country = $order->findShippingCountry(true);
  					if($hasShippingCost == '1' && $shipping != null) {
- 						$simpleShippingModifier = new SimpleShippingModifier();
- 						$simpleShippingModifier->Amount = $shipping < 0 ? abs($shipping) : $shipping;
- 						$simpleShippingModifier->Type = 'Chargable';
- 						$simpleShippingModifier->OrderID = $id;
- 						$simpleShippingModifier->Country = $country;
- 						$simpleShippingModifier->CountryCode = $countryCode;
- 						$simpleShippingModifier->ShippingChargeType = 'Default';
- 						$simpleShippingModifier->writeForStructureChanges();
+ 						$modifier1 = new SimpleShippingModifier();
+ 						$modifier1->Amount = $shipping < 0 ? abs($shipping) : $shipping;
+ 						$modifier1->Type = 'Chargable';
+ 						$modifier1->OrderID = $id;
+ 						$modifier1->Country = $country;
+ 						$modifier1->ShippingChargeType = 'Default';
+ 						$modifier1->write();
  					}
  					if($addedTax != null) {
- 						$taxModifier = new TaxModifier();
- 						$taxModifier->Amount = $addedTax < 0 ? abs($addedTax) : $addedTax;
- 						$taxModifier->Type = 'Chargable';
- 						$taxModifier->OrderID = $id;
- 						$taxModifier->Country = $country;
- 						$taxModifier->Name = 'Undefined After Ecommerce Upgrade';
- 						$taxModifier->TaxType = 'Exclusive';
- 						$taxModifier->writeForStructureChanges();
+ 						$modifier2 = new TaxModifier();
+ 						$modifier2->Amount = $addedTax < 0 ? abs($addedTax) : $addedTax;
+ 						$modifier2->Type = 'Chargable';
+ 						$modifier2->OrderID = $id;
+ 						$modifier2->Country = $country;
+ 						$modifier2->Name = 'Undefined After Ecommerce Upgrade';
+ 						$modifier2->TaxType = 'Exclusive';
+ 						$modifier2->write();
  					}
  				}
- 				echo( "<div style=\"padding:5px; color:white; background-color:blue;\">The 'SimpleShippingModifier' and 'TaxModifier' objects have been successfully created and linked to the appropriate orders present in the 'Order' table.</div>" );	
+ 				Database::alteration_message('The \'SimpleShippingModifier\' and \'TaxModifier\' objects have been successfully created and linked to the appropriate orders present in the \'Order\' table', 'created');	
  			}
  			DB::query("ALTER TABLE `Order` CHANGE COLUMN `hasShippingCost` `_obsolete_hasShippingCost` tinyint(1)");
  			DB::query("ALTER TABLE `Order` CHANGE COLUMN `Shipping` `_obsolete_Shipping` decimal(9,2)");
  			DB::query("ALTER TABLE `Order` CHANGE COLUMN `AddedTax` `_obsolete_AddedTax` decimal(9,2)");
- 			echo( "<div style=\"padding:5px; color:white; background-color:blue;\">The columns 'hasShippingCost', 'Shipping' and 'AddedTax' of the table 'Order' have been renamed successfully. Also, the columns have been renamed respectly to '_obsolete_hasShippingCost', '_obsolete_Shipping' and '_obsolete_AddedTax'.</div>" );
+ 			Database::alteration_message('The columns \'hasShippingCost\', \'Shipping\' and \'AddedTax\' of the table \'Order\' have been renamed successfully. Also, the columns have been renamed respectly to \'_obsolete_hasShippingCost\', \'_obsolete_Shipping\' and \'_obsolete_AddedTax\'', 'obsolete');
   		}
 	}
 	
@@ -490,7 +488,7 @@ class Order_Attribute extends DataObject {
 	function CartID() {return 'Cart_' . $this->MainID();}
 	
 	function ShowInTable() {return true;}
-	function ShowInCart() {return true;}
+	function ShowInCart() {return $this->ShowInTable();}
 	
 	function TableTitleID() {return $this->TableID() . '_Title';}
 	function CartTitleID() {return $this->CartID() . '_Title';}
