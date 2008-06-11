@@ -157,7 +157,7 @@
 		$total = 0;
 		if($modifiers = $this->Modifiers()) {
 			foreach($modifiers as $modifier) {
-				if(! $modifiersNameExcluded || ! is_array($modifiersNameExcluded) || ! in_array(self::$modifiersName, get_class($modifier))) $total += $modifier->getValue();
+				if(! $modifiersNameExcluded || ! is_array($modifiersNameExcluded) || ! in_array(self::$modifiersName, get_class($modifier))) $total += $modifier->Total();
 			}
 		}
 		return $total;
@@ -258,19 +258,19 @@
 	
 	// Order Template Management
 	
-	function SubTotalIDForTable() {return 'Table_Order_SubTotal';}
-	function TotalIDForTable() {return 'Table_Order_Total';}
+	function TableSubTotalID() {return 'Table_Order_SubTotal';}
+	function TableTotalID() {return 'Table_Order_Total';}
 	
-	function SubTotalIDForCart() {return 'Cart_Order_SubTotal';}
-	function TotalIDForCart() {return 'Cart_Order_Total';}
+	function CartSubTotalID() {return 'Cart_Order_SubTotal';}
+	function CartTotalID() {return 'Cart_Order_Total';}
 	
 	function updateForAjax(array &$js) {
 		$subTotal = DBField::create('Currency', $this->_SubTotal())->Nice();
 		$total = DBField::create('Currency', $this->_Total())->Nice() . ' ' . self::$site_currency;
-		$js[] = array('id' => $this->SubTotalIDForTable(), 'parameter' => 'innerHTML', 'value' => $subTotal);
-		$js[] = array('id' => $this->TotalIDForTable(), 'parameter' => 'innerHTML', 'value' => $total);
-		$js[] = array('id' => $this->SubTotalIDForCart(), 'parameter' => 'innerHTML', 'value' => $subTotal);
-		$js[] = array('id' => $this->TotalIDForCart(), 'parameter' => 'innerHTML', 'value' => $total);
+		$js[] = array('id' => $this->TableSubTotalID(), 'parameter' => 'innerHTML', 'value' => $subTotal);
+		$js[] = array('id' => $this->TableTotalID(), 'parameter' => 'innerHTML', 'value' => $total);
+		$js[] = array('id' => $this->CartSubTotalID(), 'parameter' => 'innerHTML', 'value' => $subTotal);
+		$js[] = array('id' => $this->CartTotalID(), 'parameter' => 'innerHTML', 'value' => $total);
 	}
 	
 	function IsPaid() {return in_array($this->Status, self::$paid_status);}
@@ -397,130 +397,10 @@
 	}
 
 	/**
-	 * Once the module is created, create some dummy pages to show developers what the
-	 * structure of the ProductGroup and Products is in the SiteTree. These are a good
-	 * starting point for anyone new to the e-commerce module.
+	 * Updates the database structure of the Order table
 	 */
 	function requireDefaultRecords() {
 		parent::requireDefaultRecords();
-
-		// Check if there are any Product pages in the system before attempting this
-		if(!DataObject::get_one('Product')) {
-			// Create a ProductGroup page - it will be the top most level (ParentID is 0)		
-			if(!DataObject::get_one('ProductGroup', 'ParentID = 0')) {
-				$productgroupPageLvl1 = new ProductGroup();
-				$productgroupPageLvl1->Title = 'Products';
-				$productgroupPageLvl1->Content = "<p>This is the top level products page, it uses the <em>product group</em> page type, and it allows you to show your products checked as 'featured' on it. It also allows you to nest <em>product group</em> pages inside it.</p>
-						<p>For example, you have a product group called 'DVDs', and inside you have more product groups like 'sci-fi', 'horrors' or 'action'.</p>
-						<p>In this example we have setup a main product group (this page), with a nested product group containing 2 example products.</p>";	
-				$productgroupPageLvl1->URLSegment = 'products';
-				$productgroupPageLvl1->ParentID = 0;
-				$productgroupPageLvl1->Status = 'Published';
-				$productgroupPageLvl1->write();
-				$productgroupPageLvl1->publish('Stage', 'Live');
-				Database::alteration_message("ProductGroup (ParentID = 0) page created.","created");
-				
-			}
-			
-			// check if there is already a ProductGroup of ParentID 0 in the database
-			if(DataObject::get_one('ProductGroup', 'ParentID = 0')) {
-				$topLevelProductGroup = DataObject::get_one('ProductGroup', 'ParentID = 0');
-			}
-			
-			// check if not there is already a ProductGroup of not ParentID 0 in the database
-			if(!DataObject::get_one('ProductGroup', 'ParentID != 0')) {
-			// Create a nested ProductGroup inside the top level (ParentID is the top level ProductGroup ID)
-				$productgroupPageLvl2 = new ProductGroup();
-				$productgroupPageLvl2->Title = 'Example product group';
-				$productgroupPageLvl2->Content = '<p>This is a nested <em>product group</em> within the main <em>product group</em> page. You can add a paragraph here to describe what this product group is about, and what sort of products you can expect to find in it.</p>';
-				$productgroupPageLvl2->URLSegment = 'example-product-group';
-				if($topLevelProductGroup) {
-					$productgroupPageLvl2->ParentID = $topLevelProductGroup->ID;
-				} else {
-					$productgroupPageLvl2->ParentID = $productgroupPageLvl1->ID;
-				}
-				$productgroupPageLvl2->Status = 'Published';
-				$productgroupPageLvl2->write();
-				$productgroupPageLvl2->publish('Stage', 'Live');
-				
-				Database::alteration_message("ProductGroup (ID = {$productgroupPageLvl2->ID}) page created.","created");
-
-				// Create a child Product of our ProductGroup page nested inside another ProductGroup page
-				// Create it as a featured product as an example of how the feature works
-				$productPage = new Product();
-				$productPage->Title = 'Example product';
-				$productPage->Content = '<p>This is a <em>product</em>. It\'s description goes into the Content field as a standard SilverStripe page would have it\'s content. This is an ideal place to describe your product.</p>
-												<p>You may also notice that we have checked it as a featured product and it will display on the main Products page.</p>';
-				$productPage->URLSegment = 'example-product';
-				$productPage->ParentID = $productgroupPageLvl2->ID;
-				$productPage->Weight = '0.50';
-				$productPage->Model = 'Joe Bloggs';
-				$productPage->Price = '15.00';
-				$productPage->AllowPurchase = 1;
-				$productPage->FeaturedProduct = 1;
-				$productPage->Status = 'Published';
-				$productPage->write();
-				$productPage->publish('Stage', 'Live');
-				Database::alteration_message("Product (ID = {$productPage->ID}, ParentID = {$productgroupPageLvl2->ID}) page created.","created");
-				
-				// Create a child Product of our ProductGroup page nested inside another ProductGroup page
-				$productPage2 = new Product();
-				$productPage2->Title = 'Example product 2';
-				$productPage2->Content = '<p>This is a <em>product</em>. It\'s description goes into the Content field as a standard SilverStripe page would have it\'s content. This is an ideal place to describe your product.</p>';
-				$productPage2->URLSegment = 'example-product-2';
-				$productPage2->ParentID = $productgroupPageLvl2->ID;
-				$productPage2->Weight = '1.2';
-				$productPage2->Model = 'Jane Bloggs';
-				$productPage2->Price = '25.00';
-				$productPage2->AllowPurchase = 1;
-				$productPage2->Status = 'Published';
-				$productPage2->write();
-				$productPage2->publish('Stage', 'Live');
-				Database::alteration_message("Product (ID = {$productPage2->ID}, ParentID = {$productgroupPageLvl2->ID}) page created.","created");		
-			}			
-		}		
-		
-		// Create a CheckoutPage page
-		if(!DataObject::get_one('CheckoutPage')) {
-			$checkoutPage = new CheckoutPage();
-			$checkoutPage->Title = 'Checkout';
-			$checkoutPage->Content = '<p>This is the checkout page. The order summary and order form appear below this content.</p>';
-			$checkoutPage->PurchaseComplete = '<p>Your purchase is complete.</p>';
-			$checkoutPage->ChequeMessage = '<p>Please note: Your goods will not be dispatched until we receive your payment.</p>';
-			$checkoutPage->URLSegment = 'checkout';
-			$checkoutPage->ShowInMenus = 0;
-			$checkoutPage->Status = 'Published';
-			$checkoutPage->write();
-			$checkoutPage->publish('Stage', 'Live');
-			Database::alteration_message("Checkout page created","created");
-		}
-
-		// Create an AccountPage page
-		if(!DataObject::get_one('AccountPage')) {
-			$accountPage = new AccountPage();
-			$accountPage->Title = 'Account';
-			$accountPage->Content = '<p>This is the account page. It is used for shop users to login and change their member details if they have an account.</p>';
-			$accountPage->URLSegment = 'account';
-			$accountPage->ShowInMenus = 0;
-			$accountPage->Status = 'Published';
-			$accountPage->write();
-			$accountPage->publish('Stage', 'Live');
-			Database::alteration_message("Account page created.","created");
-		}
-		
-		// Create a shop terms and conditions page
-		if(!DataObject::get_one('EcommerceTermsPage')) {
-			$termsPage = new EcommerceTermsPage();
-			$termsPage->Title = 'Terms and Conditions';
-			$termsPage->Content = '<p>You can place your shop\'s terms and conditions here, if this page exists a checkbox will appear on the order form on' .
-				' the checkout page, so a user has to confirm they agree to these terms and conditions here.</p>';
-			$termsPage->URLSegment = 'terms-and-conditions';
-			$termsPage->ShowInMenus = 0;
-			$termsPage->Status = 'Published';
-			$termsPage->write();
-			$termsPage->publish('Stage', 'Live');
-			Database::alteration_message("Terms and conditions page created.","created");
-		}
 		
 		// If some orders with the old structure exist (hasShippingCost, Shipping and AddedTax columns presents in Order table), create the Order Modifiers SimpleShippingModifier and TaxModifier and associate them to the order
 		$exist = DB::query("SHOW COLUMNS FROM `Order` LIKE 'Shipping'")->numRecords();
@@ -563,7 +443,6 @@
   		}
 	}
 	
-	
 	/**
 	 * Creates the OrderStatusLog objects and sends the order status mails
 	 * if and only if the oder status has changed 
@@ -583,13 +462,22 @@ class Order_Attribute extends DataObject {
 	static $has_one = array(
 		'Order' => 'Order'
 	);
-		
+	
+	// Local ID Attribute Management
+	
 	public function getIdAttribute() {return $this->_id;}
 	public function setIdAttribute($id) {$this->_id = $id;}
 	
+	// Order Function Access
 	
+	function Order() {
+		if($this->ID) return DataObject::get_by_id('Order', $this->OrderID);
+		else return ShoppingCart::current_order();
+	}
 	
-	function ClassForTable() {
+	// Display Functions
+	
+	function Classes() {
 		$class = get_class($this);
 		$classes[] = strtolower($class);
 		while(get_parent_class($class) != 'DataObject' && $class = get_parent_class($class)) $classes[] = strtolower($class);
@@ -598,8 +486,20 @@ class Order_Attribute extends DataObject {
 	
 	function MainID() {return get_class($this) . '_' . ($this->ID ? $this->ID : $this->_id);}
 	
-	function IDForTable() {return 'Table_' . $this->MainID();}
-	function IDForCart() {return 'Cart_' . $this->MainID();}
+	function TableID() {return 'Table_' . $this->MainID();}
+	function CartID() {return 'Cart_' . $this->MainID();}
+	
+	function ShowInTable() {return true;}
+	function ShowInCart() {return true;}
+	
+	function TableTitleID() {return $this->TableID() . '_Title';}
+	function CartTitleID() {return $this->CartID() . '_Title';}
+	
+	function TableTitle() {return 'Attribute';}
+	function CartTitle() {return $this->TableTitle();}
+	
+	function TableTotalID() {return $this->TableID() . '_Total';}
+	function CartTotalID() {return $this->CartID() . '_Total';}
 }
 
 /**
