@@ -13,17 +13,13 @@ class SimpleShippingModifier extends OrderModifier {
 	
 	static $db = array(
 		'Country' => 'Text',
-		'CountryCode' => 'Text',
 		'ShippingChargeType' => "Enum(array('Default','ForCountry'))"
 	);
-	
+		
 	static $default_charge = 0;
-	static $charges_by_country = array();
-
-	static function set_charges($charge) {
-		self::$default_charge = $charge;
-	}
+	static function set_default_charge($defaultCharge) {self::$default_charge = $defaultCharge;}
 	
+	static $charges_by_country = array();
 	/**
 	 * Set shipping charges on a country by country basis. 
 	 * For example, SimpleShippingModifier::set_charges_for_countries(array(
@@ -36,48 +32,41 @@ class SimpleShippingModifier extends OrderModifier {
 		self::$charges_by_country = array_merge(self::$charges_by_country, $countryMap);
 	}
 	
-	//1) Attributes Functions Access
+	// Attributes Functions
 	
 	function Country() {return $this->ID ? $this->Country : $this->LiveCountry();}
-	function CountryCode() {return $this->ID ? $this->CountryCode : $this->LiveCountryCode();}
 	function IsDefaultCharge() {return $this->ID ? $this->ShippingChargeType == 'Default' : $this->LiveIsDefaultCharge();}
 	
-	function LiveCountry($code = false) {
-		$order = $this->Order();
-		return $order->findShippingCountry($code);
+	protected function LiveCountry() {
+		$order = ShoppingCart::current_order();
+		return $order->findShippingCountry(true);
 	}
-	function LiveCountryCode() {return $this->LiveCountry(true);}
-	function LiveIsDefaultCharge() {return ! ($this->LiveCountryCode() && array_key_exists($this->LiveCountryCode(), self::$charges_by_country));}
+	
+	protected function LiveIsDefaultCharge() {return ! array_key_exists($this->LiveCountry(), self::$charges_by_country);}
 	
 	/**
 	 * Find the amount for the shipping on the shipping country for the order.
 	 */
-	function LiveAmount() {return $this->LiveIsDefaultCharge() ? self::$default_charge : self::$charges_by_country[$this->LiveCountryCode()];}
+	function LiveAmount() {return $this->LiveIsDefaultCharge() ? self::$default_charge : self::$charges_by_country[$this->LiveCountry()];}
 	
-	//2) Display Functions
+	// Display Functions
 	
-	// Functions called from the Cart
-	function ShowInCart() {return $this->getValue() > 0;}
-	function TitleForCart() {return 'Shipping';}
+	function ShowInCart() {return $this->Total() > 0;}
 	
-	// Functions called from the Order table
-	function TitleForTable() {
-		if($shippingCountry = $this->Country()) return "Shipping to $shippingCountry";
-		else return 'Shipping';
+	function TableTitle() {
+		$country = Geoip::countryCode2name($this->Country());
+		return "Shipping to $country";
 	}
-	function ValueIdForTable() {return 'ShippingCost';}
-	function ValueForTable() {
-		$val = new Currency('currency');
-		$val->setValue($this->getValue());
-		return $val->Nice();
-	}
+	function CartTitle() {return 'Shipping';}
+		
+	// Database Writing Function
 	
-	//3) Database Writing Function
-	
-	public function onBeforeWrite() {
-		$this->Country = $this->Country();
-		$this->CountryCode = $this->CountryCode();
-		$this->ShippingChargeType = $this->IsDefaultCharge() ? 'Default' : 'ForCountry';
+	/*
+	 * Precondition : The order item is not saved in the database yet
+	 */
+	function onBeforeWrite() {
 		parent::onBeforeWrite();
+		$this->Country = $this->LiveCountry();
+		$this->ShippingChargeType = $this->LiveIsDefaultCharge() ? 'Default' : 'ForCountry';
 	}
 }
