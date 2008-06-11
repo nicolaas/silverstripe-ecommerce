@@ -16,7 +16,7 @@ class OrderModifier extends Order_Attribute {
 	);
 	
 	protected static $is_chargable = true;
-		
+	
 	/*
 	 * This function is called when the order inits its modifiers.
 	 * It is better than directly construct the modifier in the Order class because, the user may need to create several modifiers or customize it.
@@ -35,68 +35,70 @@ class OrderModifier extends Order_Attribute {
 	function Amount() {return $this->ID ? $this->Amount : $this->LiveAmount();}
 	
 	/*
-	 * This function returns the amount of the modifier based on the live order and its items.
+	 * This function returns the amount of the modifier based on the current order and its items.
 	 */
-	function LiveAmount() {return 0;}
+	protected function LiveAmount() {return 0;}
 	
 	function IsChargable() {return $this->ID ? $this->Type == 'Chargable' : $this->stat('is_chargable');}
+		
+	// Display Functions
 	
-	/*
-	 * This function must be called all the time we want to access the order because it checks if the order already exists in the DB or not
-	 */
-	function Order() {
-		if($this->ID) return DataObject::get_by_id('Order', $this->OrderID);
-		else return ShoppingCart::current_order();
+	function TableTitle() {return 'Modifier';}
+	
+	function TotalNice() {
+		$amount = DBField::create('Currency', $this->Amount())->Nice();
+		return ($this->IsChargable() ? '' : '- ') . $amount;
 	}
 	
-	//2) Display Functions
-		
-	// Functions called from the Cart
-	function ShowInCart() {return true;}
-	function TitleForCart() {return $this->TitleForTable();}
-	function ValueIdForCart() {return 'Cart_' . $this->ValueIdForTable();}
-	function ValueForCart() {return $this->ValueForTable();}
+	// Functions not to overload
 	
-	// Functions called from the Order table
-	function ShowInOrderTable() {return true;}
-	function ClassNameForTable() {return $this->ID ? $this->ClassName : get_class($this);}
-	function TitleIdForTable() {return $this->ValueIdForTable() . '_Title';}
-	function TitleForTable() {return 'Modifier';}
-	function ValueIdForTable() {return 'Cost';}
-	function ValueForTable() {return $this->getValue();}
-	
-	final function getValue() {
+	function Total() {
 		$amount = $this->Amount();
 		return ($this->IsChargable() ? 1 : -1) * $amount;
 	}
-		
+	
 	function updateForAjax(array &$js) {
 		$js[] = array('id' => $this->ValueIdForCart(), 'parameter' => 'innerHTML', 'value' => $this->ValueForCart());
 		$js[] = array('id' => $this->ValueIdForTable(), 'parameter' => 'innerHTML', 'value' => $this->ValueForTable());
-		$js[] = array('id' => $this->TitleIdForTable(), 'parameter' => 'innerHTML', 'value' => $this->TitleForTable());
+		$js[] = array('id' => $this->TableTitleID(), 'parameter' => 'innerHTML', 'value' => $this->TitleForTable());
 	}
 	
-	//3) Database Writing Functions
-	
-	function update() {}
-	
-	public function onBeforeWrite() {
-		$this->Amount = $this->Amount();
-		$this->Type = $this->IsChargable() ? 'Chargable' : 'Deductable';
-		/*$this->OrderID = $this->Order()->ID;*/
-		parent::onBeforeWrite();
-	}
-	
-	public function writeForStructureChanges() {
-		parent::write();
-	}
-	
-	//4) Form Functions
+	// Form Functions
 	
 	static function show_form() {return false;}
 	
 	static function get_form($controller) {
 		return new OrderModifierForm($controller, 'ModifierForm', new FieldSet(), new FieldSet());
+	}
+	
+	// Database Writing Function
+		
+	/*
+	 * Precondition : The order item is not saved in the database yet
+	 */
+	function onBeforeWrite() {
+		parent::onBeforeWrite();
+		$this->Amount = $this->Amount();
+		$this->Type = $this->stat('is_chargable') ? 'Chargable' : 'Deductable';
+	}
+	
+	// Debug Function
+	
+	public function debug() {
+		$id = $this->ID ? $this->ID : $this->_id;
+		$amount = $this->Amount();
+		$type = $this->IsChargable() ? 'Chargable' : 'Deductable';
+		$orderID = $this->ID ? $this->OrderID : 'The order has not been saved yet, so there is no ID';
+		return <<<HTML
+			<h2>$this->class</h2> 
+			<h3>OrderModifier class details</h3>
+			<p>
+				<b>ID : </b>$id<br/>
+				<b>Amount : </b>$amount<br/>
+				<b>Type : </b>$type<br/>
+				<b>Order ID : </b>$orderID
+			</p>
+HTML;
 	}
 }
 
