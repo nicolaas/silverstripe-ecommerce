@@ -30,6 +30,25 @@ class AccountPage extends Page {
 		if(! $page = DataObject::get_one('AccountPage')) user_error(_t('AccountPage.NOPAGE', 'No AccountPage on this site - please create one !'), E_USER_ERROR);
 		else return ($urlSegment ? $page->URLSegment . '/' : $page->Link()) . 'order/' . $orderID; 
 	}
+	
+	/**
+	 * Creates automatically an account page when the ecommerce module is
+	 * added to a project
+	 */
+	function requireDefaultRecords() {
+		parent::requireDefaultRecords();
+		
+		if(! DataObject::get_one('AccountPage')) {
+			$page = new AccountPage();
+			$page->Title = 'Account';
+			$page->Content = '<p>This is the account page. It is used for shop users to login and change their member details if they have an account.</p>';
+			$page->URLSegment = 'account';
+			$page->ShowInMenus = 0;
+			$page->writeToStage('Stage');
+			$page->publish('Stage', 'Live');
+			Database::alteration_message('Account page \'Account\' created', 'created');
+		}
+	}
 }
 
 class AccountPage_Controller extends Page_Controller {
