@@ -14,6 +14,10 @@ class CheckoutPage extends Page {
 		'ChequeMessage' => 'HTMLText'
 	);
 	
+	static $has_one = array(
+		'TermsPage' => 'Page'
+	);
+	
 	static $add_action = 'a Checkout Page';
 	
 	/**
@@ -42,10 +46,12 @@ class CheckoutPage extends Page {
 	function getCMSFields() {
 		$fields = parent::getCMSFields();
 		
+		$fields->addFieldToTab('Root.Content.Main', new TreeDropdownField('TermsPageID', 'Terms And Conditions Page', 'SiteTree'));
+		
 		// Information about the messages		
 		$shopMessageComplete = '<p>This message is shown, along with order information after they submit the checkout :<p>';
 		$shopChequeMessage = '<p>This message is shown when a user selects cheque as a payment option on the checkout :</p>';
-
+		
 		$fields->addFieldToTab('Root.Content.Messages', new HeaderField('Checkout Messages', 2));
 		$fields->addFieldToTab('Root.Content.Messages', new LiteralField('ShopMessageComplete', $shopMessageComplete));
 		$fields->addFieldToTab('Root.Content.Messages', new HtmlEditorField('PurchaseComplete', ''));
@@ -54,6 +60,34 @@ class CheckoutPage extends Page {
 
 		return $fields;
 	}
+	
+	/**
+	 * Creates automatically a checkout page when the ecommerce module is
+	 * added to a project and transfers the EcommerceTermsPage table to Page
+	 */
+	function requireDefaultRecords() {
+		parent::requireDefaultRecords();
+		
+		if(! $page = DataObject::get_one('CheckoutPage')) {
+			$page = new CheckoutPage();
+			$page->Title = 'Checkout';
+			$page->Content = '<p>This is the checkout page. The order summary and order form appear below this content.</p>';
+			$page->PurchaseComplete = '<p>Your purchase is complete.</p>';
+			$page->ChequeMessage = '<p>Please note: Your goods will not be dispatched until we receive your payment.</p>';
+			$page->URLSegment = 'checkout';
+			$page->ShowInMenus = 0;
+			$page->writeToStage('Stage');
+			$page->publish('Stage', 'Live');
+			Database::alteration_message('Checkout page \'Checkout\' created', 'created');
+		}
+		
+		if($page->TermsPageID == 0 && $termsPage = DataObject::get_one('Page', "`URLSegment` = 'terms-and-conditions'")) {
+			$page->TermsPageID = $termsPage->ID;
+			$page->writeToStage('Stage');
+			$page->publish('Stage', 'Live');
+			Database::alteration_message("Page '{$termsPage->Title}' linked to the Checkout page '{$page->Title}'", 'changed');
+		}
+ 	}
 }
 
 class CheckoutPage_Controller extends Page_Controller {
@@ -72,7 +106,7 @@ class CheckoutPage_Controller extends Page_Controller {
 				
 		// init the virtual methods for the order modifiers
 		$this->initVirtualMethods();
-				
+		
 		parent::init();
 	}
 		
