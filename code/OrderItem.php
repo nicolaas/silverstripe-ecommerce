@@ -9,7 +9,7 @@
 class OrderItem extends Order_Attribute {
 	
 	protected $_quantity;
-
+	
 	static $db = array(
 		'Quantity' => 'Int'
 	);
@@ -48,7 +48,15 @@ class OrderItem extends Order_Attribute {
 	// Functions not to overload
 	
 	public function getQuantity() {return $this->_quantity;}
+	
+	/*
+	 * Precondition : The order item is not saved in the database yet
+	 */
 	public function setQuantityAttribute($quantity) {$this->_quantity = $quantity;}
+	
+	/*
+	 * Precondition : The order item is not saved in the database yet
+	 */
 	public function addQuantityAttribute($quantity) {$this->_quantity += $quantity;}
 	
 	protected function AjaxQuantityFieldName() {return $this->MainID() . '_Quantity';}
@@ -64,18 +72,17 @@ class OrderItem extends Order_Attribute {
 HTML;
 	}
 	
+	// Display Functions
+	
 	function Total() {return $this->UnitPrice() * $this->_quantity;}
 	
-	function TotalIDForTable() {return $this->IDForTable() . '_Total';}
-	
-	function TotalIDForCart() {return $this->IDForCart() . '_Total';}
-	function QuantityIDForCart() {return $this->IDForCart() . '_Quantity';}
+	function CartQuantityID() {return $this->CartID() . '_Quantity';}
 	
 	function updateForAjax(array &$js) {
 		$total = DBField::create('Currency', $this->Total())->Nice();
-		$js[] = array('id' => $this->TotalIDForTable(), 'parameter' => 'innerHTML', 'value' => $total);
-		$js[] = array('id' => $this->TotalIDForCart(), 'parameter' => 'innerHTML', 'value' => $total);
-		$js[] = array('id' => $this->QuantityIDForCart(), 'parameter' => 'innerHTML', 'value' => $this->getQuantity());
+		$js[] = array('id' => $this->TableTotalID(), 'parameter' => 'innerHTML', 'value' => $total);
+		$js[] = array('id' => $this->CartTotalID(), 'parameter' => 'innerHTML', 'value' => $total);
+		$js[] = array('id' => $this->CartQuantityID(), 'parameter' => 'innerHTML', 'value' => $this->getQuantity());
 		$js[] = array('name' => $this->AjaxQuantityFieldName(), 'parameter' => 'value', 'value' => $this->getQuantity());
 	}
 	
@@ -85,8 +92,11 @@ HTML;
 	function setquantityLink() {return ShoppingCart_Controller::set_quantity_item_link($this->_id);}
 	function checkoutLink() {return CheckoutPage::find_link();}
 	
-	// Database Writing Methods
+	// Database Writing Function
 	
+	/*
+	 * Precondition : The order item is not saved in the database yet
+	 */
 	function onBeforeWrite() {
 		parent::onBeforeWrite();
 		$this->Quantity = $this->_quantity;
@@ -96,7 +106,7 @@ HTML;
 	
 	public function debug() {
 		$id = $this->ID ? $this->ID : $this->_id;
-		$quantity = $this->ID ? $this->Quantity : $this->_quantity;
+		$quantity = $this->_quantity;
 		$orderID = $this->ID ? $this->OrderID : 'The order has not been saved yet, so there is no ID';
 		return <<<HTML
 			<h2>$this->class</h2> 
