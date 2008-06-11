@@ -26,7 +26,7 @@ class OrderModifier extends Order_Attribute {
 		ShoppingCart::add_new_modifier($modifier);
 	}
 	
-	//1) Attributes Functions Access
+	// Attributes Functions
 	
 	/*
 	 * This function must be called all the time we want the amount value because it checks if the order modifier already exists in the DB. In That case, it returns the Amount value.
@@ -58,9 +58,9 @@ class OrderModifier extends Order_Attribute {
 	}
 	
 	function updateForAjax(array &$js) {
-		$js[] = array('id' => $this->ValueIdForCart(), 'parameter' => 'innerHTML', 'value' => $this->ValueForCart());
-		$js[] = array('id' => $this->ValueIdForTable(), 'parameter' => 'innerHTML', 'value' => $this->ValueForTable());
-		$js[] = array('id' => $this->TableTitleID(), 'parameter' => 'innerHTML', 'value' => $this->TitleForTable());
+		$js[] = array('id' => $this->CartTotalID(), 'parameter' => 'innerHTML', 'value' => $this->TotalNice());
+		$js[] = array('id' => $this->TableTotalID(), 'parameter' => 'innerHTML', 'value' => $this->TotalNice());
+		$js[] = array('id' => $this->TableTitleID(), 'parameter' => 'innerHTML', 'value' => $this->TableTitle());
 	}
 	
 	// Form Functions
