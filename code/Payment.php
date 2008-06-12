@@ -45,18 +45,13 @@ class Payment extends DataObject {
 	 */	 
 	function __construct($data = null) {
 		parent::__construct($data);
-	 	
-		// Check if we have a Member table, otherwise it breaks db/build
-	 	if(ClassInfo::hasTable('Member') && Member::currentUser()) {
-	 		$this->MemberID = Member::currentUser()->ID;
-	 	}
 	}
 	
 	function populateDefaults() {
 		parent::populateDefaults();
 		$this->Currency = Order::site_currency();
 		$this->setClientIP();
-	}
+ 	}
 
 	function setAmount($val){
 		$this->setField('Amount', number_format(ereg_replace("[^0-9.]", "", $val), 2, ".", ""));
@@ -200,6 +195,9 @@ class Payment extends DataObject {
 			$order->Status = 'Paid';
 			$order->write();
 			$order->sendReceipt();
+		}
+		if(!$this->MemberID) {
+			$this->MemberID = Member::currentUserID();
 		}
 	}
 	
