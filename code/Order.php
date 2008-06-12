@@ -447,9 +447,9 @@
 	 */
 	function onBeforeWrite() {
 		parent::onBeforeWrite();
-		if($this->Status != $this->original['Status']) {
+		/*if($this->Status != $this->original['Status']) {
 			
-		}
+		}*/
 	}
 }
 
