@@ -308,6 +308,10 @@ class ShoppingCart_Controller extends Controller {
 		
 		$currentOrder->updateForAjax($js);
 		
-		return json_encode($js);
+		if(function_exists('json_encode')) {
+			return json_encode($js);
+		} else {
+			Convert::array2json($js);
+		}
 	}
 }
