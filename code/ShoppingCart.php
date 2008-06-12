@@ -311,7 +311,7 @@ class ShoppingCart_Controller extends Controller {
 		if(function_exists('json_encode')) {
 			return json_encode($js);
 		} else {
-			Convert::array2json($js);
+			return Convert::array2json($js);
 		}
 	}
 }
