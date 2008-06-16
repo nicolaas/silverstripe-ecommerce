@@ -244,7 +244,7 @@ class Product_OrderItem extends OrderItem {
 	);
 	
 	public function __construct($product = null, $quantity = 1) {
-				
+		
 		// Case 1 : Constructed by the static function get of DataObject
 		
 		if(is_array($product)) {
@@ -284,32 +284,9 @@ class Product_OrderItem extends OrderItem {
 	
 	function UnitPrice() {return $this->product->Price;}
 	
-	function Title() {return $this->product->Title;}
+	function TableTitle() {return $this->product->Title;}
 	function Link() {return $this->product->Link();}
-	
-	/*
-	public function AjaxQuantityField() {
-		if($this->failover->hasMethod('AjaxQuantityField'))	return $this->failover->AjaxQuantityField();
-		else return null;
-	}
-	
-	public function addToCart($items = 1) {
-   	$this->quantity += $items;
-	}
-		
-	protected $cart;
-		
-	function ThumbnailLink(){
-		$image = $this->product->Image();
-
-		return Director::AbsoluteBaseURL().$image->Filename;
-	}
-
-	//-----------------------------------------------------------------------------------------//
-	function getTotal() {
-		return $this->__get("UnitPrice") * $this->__get("Quantity");
-	} */
-			
+				
 	// Database Writing Methods
 	
 	function onBeforeWrite() {
