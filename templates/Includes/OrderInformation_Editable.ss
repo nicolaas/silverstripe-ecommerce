@@ -57,7 +57,13 @@
 		<% control Modifiers %>
 			<% if ShowInTable %>
 				<tr id="$TableID" class="$Classes">
-					<td id="$TableTitleID" colspan="2" scope="row">$TableTitle</td>
+					<td<% if Link %><% else %> id="$TableTitleID"<% end_if %> colspan="2" scope="row">
+						<% if Link %>
+							<a id="$TableTitleID" href="$Link" title="<% sprintf(_t("READMORE","Click here to read more on &quot;%s&quot;"),$TableTitle) %>">$TableTitle</a>
+						<% else %>
+							$TableTitle
+						<% end_if %>
+					</td>
 					<td>&nbsp;</td>
 					<td class="right" id="$TableTotalID">$TotalNice</td>
 				</tr>
