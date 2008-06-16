@@ -6,6 +6,7 @@
 			<th scope="col" class="center"><% _t("QUANTITY", "Quantity") %></th>
 			<th scope="col" class="right"><% _t("PRICE","Price") %> ($Currency)</th>
 			<th scope="col" class="right"><% _t("TOTALPRICE","Total Price") %> ($Currency)</th>
+			<th scope="col" class="right"></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -39,12 +40,19 @@
 						</td>
 						<td class="right unitprice">$UnitPrice.Nice</td>
 						<td class="right total" id="$TableTotalID">$Total.Nice</td>
+						<td class="right remove">
+							<strong>
+								<a class="ajaxQuantityLink" href="$removeallLink" title="<% sprintf(_t("REMOVEALL","Remove all of &quot;%s&quot; from your cart"),$Title) %>">
+									<img src="ecommerce/images/remove.gif" alt="x"/>
+								</a>
+							</strong>
+						</td>
 					</tr>
 				<% end_if %>
 			<% end_control %>
 		<% else %>
 			<tr>
-				<td colspan="4" scope="row" class="center"><% _t("NOITEMS","There are <strong>no</strong> items in your cart.") %></td>
+				<td colspan="5" scope="row" class="center"><% _t("NOITEMS","There are <strong>no</strong> items in your cart.") %></td>
 			</tr>
 		<% end_if %>
 		
@@ -52,6 +60,7 @@
 			<td colspan="2" scope="row"><% _t("SUBTOTAL","Sub-total") %></td>
 			<td>&nbsp;</td>
 			<td class="right" id="$TableSubTotalID">$SubTotal.Nice</td>
+			<td>&nbsp;</td>
 		</tr>
 		
 		<% control Modifiers %>
@@ -66,6 +75,7 @@
 					</td>
 					<td>&nbsp;</td>
 					<td class="right" id="$TableTotalID">$TotalNice</td>
+					<td>&nbsp;</td>
 				</tr>
 			<% end_if %>
 		<% end_control %>
@@ -74,6 +84,7 @@
 			<td colspan="2" scope="row"><% _t("TOTAL","Total") %></td>
 			<td>&nbsp;</td>
 			<td class="right" id="$TableTotalID">$Total.Nice $Currency</td>
+			<td>&nbsp;</td>
 		</tr>
 	</tbody>
 </table>
