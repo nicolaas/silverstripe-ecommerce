@@ -35,16 +35,15 @@ class OrderItem extends Order_Attribute {
 			$this->_quantity = $quantity;
 		}
 	}
-			
+	
 	// Functions to overload
 	
 	function hasSameContent($orderItem) {return $orderItem instanceof OrderItem;}
 	
 	function UnitPrice() {return 0;}
 	
-	function Title() {return 'Product';}
-	function Link() {return null;}
-			
+	function TableTitle() {return 'Product';}
+	
 	// Functions not to overload
 	
 	public function getQuantity() {return $this->_quantity;}
