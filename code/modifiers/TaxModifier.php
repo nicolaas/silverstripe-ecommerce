@@ -25,7 +25,7 @@ class TaxModifier extends OrderModifier {
 	static $names_by_country;
 	static $rates_by_country;
 	static $excl_by_country;
-			
+	
 	/**
 	 * Set the tax information for a particular country.  By default, no tax is charged.
 	 * @param $country String The two-letter country code

@@ -11,34 +11,36 @@
 	<tbody>
 		<% if Items %>
 			<% control Items %>
-				<tr id="$IDForTable" class="$ClassForTable">
-					<td class="product title" scope="row">
-						<% if Link %>
-							<a href="$Link" title="<% sprintf(_t("READMORE","Click here to read more on &quot;%s&quot;"),$Title) %>">$Title</a>
-						<% else %>
-							$Title
-						<% end_if %>
-					</td>
-					<td class="center quantity">
-						<strong>
-							<a class="ajaxQuantityLink" href="$removeLink" title="<% sprintf(_t("REMOVEONE","Remove one of &quot;%s&quot; from your cart"),$Title) %>">
-								<img src="ecommerce/images/minus.gif" alt="-"/>
-							</a>
-						</strong> 
-						<% if AjaxQuantityField %>
-							$AjaxQuantityField
-						<% else %>
-							$Quantity
-						<% end_if %>
-						<strong>
-							<a class="ajaxQuantityLink" href="$addLink" title="<% sprintf(_t("ADDONE","Add one more of &quot;%s&quot; to your cart"),$Title) %>">
-								<img src="ecommerce/images/plus.gif" alt="+"/>
-							</a>
-						</strong>
-					</td>
-					<td class="right unitprice">$UnitPrice.Nice</td>
-					<td class="right total" id="$TotalIDForTable">$Total.Nice</td>
-				</tr>
+				<% if ShowInTable %>
+					<tr id="$TableID" class="$Classes">
+						<td<% if Link %><% else %> id="$TableTitleID"<% end_if %> class="product title" scope="row">
+							<% if Link %>
+								<a id="$TableTitleID" href="$Link" title="<% sprintf(_t("READMORE","Click here to read more on &quot;%s&quot;"),$TableTitle) %>">$TableTitle</a>
+							<% else %>
+								$TableTitle
+							<% end_if %>
+						</td>
+						<td class="center quantity">
+							<strong>
+								<a class="ajaxQuantityLink" href="$removeLink" title="<% sprintf(_t("REMOVEONE","Remove one of &quot;%s&quot; from your cart"),$Title) %>">
+									<img src="ecommerce/images/minus.gif" alt="-"/>
+								</a>
+							</strong> 
+							<% if AjaxQuantityField %>
+								$AjaxQuantityField
+							<% else %>
+								$Quantity
+							<% end_if %>
+							<strong>
+								<a class="ajaxQuantityLink" href="$addLink" title="<% sprintf(_t("ADDONE","Add one more of &quot;%s&quot; to your cart"),$Title) %>">
+									<img src="ecommerce/images/plus.gif" alt="+"/>
+								</a>
+							</strong>
+						</td>
+						<td class="right unitprice">$UnitPrice.Nice</td>
+						<td class="right total" id="$TableTotalID">$Total.Nice</td>
+					</tr>
+				<% end_if %>
 			<% end_control %>
 		<% else %>
 			<tr>
@@ -49,15 +51,15 @@
 		<tr class="gap summary">
 			<td colspan="2" scope="row"><% _t("SUBTOTAL","Sub-total") %></td>
 			<td>&nbsp;</td>
-			<td class="right" id="$SubTotalIDForTable">$SubTotal.Nice</td>
+			<td class="right" id="$TableSubTotalID">$SubTotal.Nice</td>
 		</tr>
 		
 		<% control Modifiers %>
-			<% if ShowInOrderTable %>
-				<tr id="$IDForTable" class="$ClassForTable">
-					<td colspan="2" scope="row" id="$TitleIdForTable">$TitleForTable</td>
+			<% if ShowInTable %>
+				<tr id="$TableID" class="$Classes">
+					<td id="$TableTitleID" colspan="2" scope="row">$TableTitle</td>
 					<td>&nbsp;</td>
-					<td class="right" id="$ValueIdForTable">$ValueForTable</td>
+					<td class="right" id="$TableTotalID">$TotalNice</td>
 				</tr>
 			<% end_if %>
 		<% end_control %>
@@ -65,7 +67,7 @@
 		<tr class="gap Total">
 			<td colspan="2" scope="row"><% _t("TOTAL","Total") %></td>
 			<td>&nbsp;</td>
-			<td class="right" id="$TotalIDForTable">$Total.Nice $Currency</td>
+			<td class="right" id="$TableTotalID">$Total.Nice $Currency</td>
 		</tr>
 	</tbody>
 </table>
