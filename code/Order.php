@@ -496,6 +496,8 @@ class Order_Attribute extends DataObject {
 	function TableTitle() {return 'Attribute';}
 	function CartTitle() {return $this->TableTitle();}
 	
+	function Link() {return null;}
+	
 	function TableTotalID() {return $this->TableID() . '_Total';}
 	function CartTotalID() {return $this->CartID() . '_Total';}
 }
