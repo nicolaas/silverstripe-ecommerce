@@ -143,7 +143,7 @@ class PayPalPayment extends Payment {
 		
 		$cpt = 0;
 		foreach ($items as $item) {
-			$inputs['item_name_' . ++ $cpt] = $item->Title();
+			$inputs['item_name_' . ++$cpt] = $item->TableTitle();
 			// item_number is unnecessary
 			$inputs['amount_' . $cpt] = $item->UnitPrice();
 			$inputs['quantity_' . $cpt] = $item->Quantity;
