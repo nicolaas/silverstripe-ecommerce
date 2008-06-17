@@ -277,7 +277,7 @@
 	
 	function Status() {return $this->IsPaid() ? _t('Order.SUCCESSFULL', 'Order Successful') : _t('Order.INCOMPLETE', 'Order Incomplete');}
 	
-	function checkoutLink() {return CheckoutPage::get_checkout_order_link($this->ID);}
+	function checkoutLink() {return $this->ID ? CheckoutPage::get_checkout_order_link($this->ID) : CheckoutPage::find_link();}
 	
 	// Order Emails Sending Management 
   	
