@@ -23,7 +23,7 @@
 						</td>
 						<td class="center quantity">
 							<strong>
-								<a class="ajaxQuantityLink" href="$removeLink" title="<% sprintf(_t("REMOVEONE","Remove one of &quot;%s&quot; from your cart"),$Title) %>">
+								<a class="ajaxQuantityLink" href="$removeLink" title="<% sprintf(_t("REMOVEONE","Remove one of &quot;%s&quot; from your cart"),$TableTitle) %>">
 									<img src="ecommerce/images/minus.gif" alt="-"/>
 								</a>
 							</strong> 
@@ -33,7 +33,7 @@
 								$Quantity
 							<% end_if %>
 							<strong>
-								<a class="ajaxQuantityLink" href="$addLink" title="<% sprintf(_t("ADDONE","Add one more of &quot;%s&quot; to your cart"),$Title) %>">
+								<a class="ajaxQuantityLink" href="$addLink" title="<% sprintf(_t("ADDONE","Add one more of &quot;%s&quot; to your cart"),$TableTitle) %>">
 									<img src="ecommerce/images/plus.gif" alt="+"/>
 								</a>
 							</strong>
@@ -42,7 +42,7 @@
 						<td class="right total" id="$TableTotalID">$Total.Nice</td>
 						<td class="right remove">
 							<strong>
-								<a class="ajaxQuantityLink" href="$removeallLink" title="<% sprintf(_t("REMOVEALL","Remove all of &quot;%s&quot; from your cart"),$Title) %>">
+								<a class="ajaxQuantityLink" href="$removeallLink" title="<% sprintf(_t("REMOVEALL","Remove all of &quot;%s&quot; from your cart"),$TableTitle) %>">
 									<img src="ecommerce/images/remove.gif" alt="x"/>
 								</a>
 							</strong>
