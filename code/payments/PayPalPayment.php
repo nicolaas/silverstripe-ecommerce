@@ -152,7 +152,7 @@ class PayPalPayment extends Payment {
 		// 4) Payment Informations
 
 		$inputs['business'] = self::$test_mode ? self::$test_account_email : self::$account_email;
-		$inputs['custom'] = $this->ID;
+		$inputs['custom'] = $this->ID . '-' . Convert::raw2xml(spl_object_hash($this));
 		// Add Here The Shipping And/Or Taxes
 		$inputs['currency_code'] = $this->Currency;
 
@@ -194,9 +194,9 @@ class PayPalPayment extends Payment {
 
 		return<<<HTML
 			<form id="PaymentForm" method="post" action="$url">$fields</form>
-			<script type="text/javascript">
+			<!-- script type="text/javascript">
 				jQuery(document).ready(function() {jQuery('#PaymentForm').submit();});
-			</script>
+			</script -->
 HTML;
 	}
 }
@@ -215,16 +215,33 @@ class PayPalPayment_Handler extends Controller {
 	 * Only For PayPal type payment, for dealing with reply from PayPal
 	 */
 	function complete() {
-		$payment = DataObject :: get_by_id('PayPalPayment', $_REQUEST['custom']);
-		if ($_REQUEST['payment_status'] == 'Completed') {
-			$payment->Status = 'Success';
-			$payment->TxnRef = $_REQUEST['txn_id'];
+		if($custom = $_REQUEST['custom']) {
+			$params = explode('-', $custom);
+			if(count($params) == 2) {
+				if($payment = DataObject::get_by_id('PayPalPayment', $params[0])) {
+					if(spl_object_hash($payment) == $params[1]) {
+						if ($_REQUEST['payment_status'] == 'Completed') {
+							$payment->Status = 'Success';
+							$payment->TxnRef = $_REQUEST['txn_id'];
+						}
+						else $payment->Status = 'Failure';
+						
+						$payment->write();
+						
+						$payment->redirectToOrder();
+					}
+					else {
+						
+					}
+				}
+			}
+			else {
+				
+			}
 		}
-		else $payment->Status = 'Failure';
-		
-		$payment->write();
-		
-		$payment->redirectToOrder();
+		else {
+			
+		}
 	}
 
 	function cancel() {
