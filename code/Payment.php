@@ -206,6 +206,22 @@ class Payment extends DataObject {
 		Director::redirect($order->Link());
 		return;
 	}
+	
+	static $authorization_code_prefix = 'Authorization Code : ';
+	
+	static function generate_authorization_code() {return md5(uniqid(rand(), true));}
+	
+	function writeNewAuthorizationCode() {
+		$this->Message = self::$authorization_code_prefix . self::generate_authorization_code();
+		$this->write();
+	}
+	
+	function getAuthorizationCode() {return str_replace(self::$authorization_code_prefix, '', $this->Message);}
+	
+	function removeAuthorizationCode() {
+		$this->Message = '';
+		$this->write();
+	}
 }
 
 abstract class Payment_Result {
