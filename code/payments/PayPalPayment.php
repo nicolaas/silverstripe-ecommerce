@@ -149,10 +149,13 @@ class PayPalPayment extends Payment {
 			$inputs['quantity_' . $cpt] = $item->Quantity;
 		}
 
-		// 4) Payment Informations
+		// 4) Payment Informations And Authorization Code
 
 		$inputs['business'] = self::$test_mode ? self::$test_account_email : self::$account_email;
-		$inputs['custom'] = $this->ID . '-' . Convert::raw2xml(spl_object_hash($this));
+		
+		$this->writeNewAuthorizationCode();
+		$inputs['custom'] = $this->ID . '-' . $this->getAuthorizationCode(); 
+		
 		// Add Here The Shipping And/Or Taxes
 		$inputs['currency_code'] = $this->Currency;
 
@@ -219,7 +222,8 @@ class PayPalPayment_Handler extends Controller {
 			$params = explode('-', $custom);
 			if(count($params) == 2) {
 				if($payment = DataObject::get_by_id('PayPalPayment', $params[0])) {
-					if(spl_object_hash($payment) == $params[1]) {
+					if($payment->getAuthorizationCode() == $params[1]) {
+						$payment->removeAuthorizationCode();
 						if ($_REQUEST['payment_status'] == 'Completed') {
 							$payment->Status = 'Success';
 							$payment->TxnRef = $_REQUEST['txn_id'];
