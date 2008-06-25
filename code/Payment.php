@@ -9,11 +9,6 @@
 class Payment extends DataObject {
 	
 	public static $testCredentials, $liveCredentials;
-
-	static $casting = array(
-		"Amount" => "Currency",
-		"LastEdited" => "Datetime"
-	);
 	
 	/**
  	 * Incomplete(Default) : Payment created but no successful yet or the process has been stop instantly
@@ -22,41 +17,39 @@ class Payment extends DataObject {
  	 * Pending : For cheque Only
  	 */
 	static $db = array(
-		"Message" => "Text",
-		"Status" => "Enum(array('Incomplete','Success','Failure','Pending'), 'Incomplete')",
-		"Amount" => "Decimal",
-		"Currency" =>"Varchar(3)",
-		"TxnRef" => "Text",
-		"IP" => "Varchar",
-		"ProxyIP" => "Varchar"
+		'Status' => "Enum(array('Incomplete', 'Success', 'Failure', 'Pending'), 'Incomplete')",
+		'Amount' => 'Currency',
+		'Currency' => 'Varchar(3)',
+		'TxnRef' => 'Text',
+		'Message' => 'Text',
+		'IP' => 'Varchar',
+		'ProxyIP' => 'Varchar',
+		'AuthorizationCode' => 'Text'
 	);
 	
-	/**
-	 * Sets up the relationship between Member and Payment
-	 */
 	static $has_one = array(
-		"Member" => "Member",
-		"Order" => "Order"
+		'Order' => 'Order'
 	);
-		
+	
 	/**
 	 * Process this payment, and set the status message in the session.
 	 * Returns true on a successful payment, false on an error (such as CC declined).
 	 */	 
-	function __construct($data = null) {
+	/*function __construct($data = null) {
 		parent::__construct($data);
-	}
+	}*/
 	
 	function populateDefaults() {
 		parent::populateDefaults();
 		$this->Currency = Order::site_currency();
 		$this->setClientIP();
+		$this->AuthorizationCode = md5(uniqid(rand(), true));
  	}
-
-	function setAmount($val){
+	
+	/*function setAmount($val){
 		$this->setField('Amount', number_format(ereg_replace("[^0-9.]", "", $val), 2, ".", ""));
-	}
-
+	}*/
+	
 	/**
 	 * Set the IP address and Proxy IP (if available) from the site visitor.
 	 * Does an ok job of proxy detection. Probably can't be too much better because anonymous proxies
@@ -64,24 +57,15 @@ class Payment extends DataObject {
 	 */	
 	function setClientIP() {
 		if(isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-			if(isset($_SERVER['HTTP_CLIENT_IP'])) {
-				$proxy = $_SERVER['HTTP_CLIENT_IP'];
-			} else {
-				$proxy = $_SERVER['REMOTE_ADDR'];
-			}
+			$proxy = isset($_SERVER['HTTP_CLIENT_IP']) ? $_SERVER['HTTP_CLIENT_IP'] : $_SERVER['REMOTE_ADDR'];
 			$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
-		} else {
-			if(isset($_SERVER['HTTP_CLIENT_IP'])) {
-				$ip = $_SERVER['HTTP_CLIENT_IP'];
-			} else {
-				$ip = $_SERVER['REMOTE_ADDR'];
-			}
 		}
+		else $ip = isset($_SERVER['HTTP_CLIENT_IP']) ? $_SERVER['HTTP_CLIENT_IP'] : $_SERVER['REMOTE_ADDR'];
 		
 		// If the IP and/or Proxy IP have already been set, we want to be sure we don't set it again.
-		if(!$this->IP && isset($ip)) $this->IP = $ip;
-		if(!$this->ProxyIP && isset($proxy)) $this->ProxyIP = $proxy;
-	}	
+		if(! $this->IP && isset($ip)) $this->IP = $ip;
+		if(! $this->ProxyIP && isset($proxy)) $this->ProxyIP = $proxy;
+	}
 	
 	/**
 	 * Subclasses of Payment that are allowed to be used on this site.
@@ -104,7 +88,7 @@ class Payment extends DataObject {
 	static function findPaymentMethod($method) {
 		return self::$supported_methods[$method];
 	}
-		
+	
 	/**
 	 * Returns the Payment method used. It just resolves the classname
 	 * to the 'nice' title as defined in Payment::set_supported_methods().
@@ -142,7 +126,7 @@ class Payment extends DataObject {
 		// Final fields below that
 		$fields->push(new ReadonlyField("Amount", "Amount", $amount));
 		$fields->push(new HiddenField("Subtotal", "Subtotal", $subtotal));
-
+		
 		return $fields;
 	}
 	
@@ -196,31 +180,12 @@ class Payment extends DataObject {
 			$order->write();
 			$order->sendReceipt();
 		}
-		if(!$this->MemberID) {
-			$this->MemberID = Member::currentUserID();
-		}
 	}
 	
 	function redirectToOrder() {
 		$order = $this->Order();
 		Director::redirect($order->Link());
 		return;
-	}
-	
-	static $authorization_code_prefix = 'Authorization Code : ';
-	
-	static function generate_authorization_code() {return md5(uniqid(rand(), true));}
-	
-	function writeNewAuthorizationCode() {
-		$this->Message = self::$authorization_code_prefix . self::generate_authorization_code();
-		$this->write();
-	}
-	
-	function getAuthorizationCode() {return str_replace(self::$authorization_code_prefix, '', $this->Message);}
-	
-	function removeAuthorizationCode() {
-		$this->Message = '';
-		$this->write();
 	}
 }
 
@@ -234,25 +199,22 @@ abstract class Payment_Result {
 	
 	abstract function isSuccess();
 	abstract function isProcessing();
-	
 }
 
 class Payment_Success extends Payment_Result {
-		
+	
 	function isSuccess() {return true;}
 	function isProcessing() {return false;}
 }
 
 class Payment_Processing extends Payment_Result {
-	
-	function __construct($form) {parent::__construct($form);}
-	
+		
 	function isSuccess() {return false;}
 	function isProcessing() {return true;}
 }
 
 class Payment_Failure extends Payment_Result {
-		
+	
 	function isSuccess() {return false;}
 	function isProcessing() {return false;}
 }	
