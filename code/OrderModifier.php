@@ -50,6 +50,10 @@ class OrderModifier extends Order_Attribute {
 		return ($this->IsChargable() ? '' : '- ') . $amount;
 	}
 	
+	// Permissions
+	
+	function CanRemove() {return ! $this->stat('is_chargable');}
+	
 	// Functions not to overload
 	
 	function Total() {
@@ -62,6 +66,8 @@ class OrderModifier extends Order_Attribute {
 		$js[] = array('id' => $this->TableTotalID(), 'parameter' => 'innerHTML', 'value' => $this->TotalNice());
 		$js[] = array('id' => $this->TableTitleID(), 'parameter' => 'innerHTML', 'value' => $this->TableTitle());
 	}
+	
+	function removeLink() {return ShoppingCart_Controller::remove_modifier_link($this->_id);}
 	
 	// Form Functions
 	
