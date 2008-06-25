@@ -154,9 +154,10 @@ class OrderForm extends Form {
 			$member->write();
 			$member->logIn();
 			
-			// 3) Save the current order details (items and modifiers) (which are at the moment in the session) in the database
+			// 3) Save the current order details (items and modifiers) (which are at the moment in the session) in the database and clear the session
 			
 			$order = ShoppingCart::save_current_order();
+			ShoppingCart::clear();
 			
 			// 4) Save shipping address details
 			
@@ -181,11 +182,9 @@ class OrderForm extends Form {
 			
 			// b) Successful payment
 			else if($result->isSuccess()) $order->sendReceipt();
-			
-			ShoppingCart::clear();
-			
+						
 			Director::redirect($order->Link());
-			return;		
+			return;
 			/*else { // Failed payment
 				$form->sessionMessage("Sorry, your payment was not accepted, please try again<br/><strong>$result[HelpText]:</strong> $result[MerchantHelpText]", 'bad');
 	 			Director::redirect(CheckoutPage::find_link() . $order->ID);
