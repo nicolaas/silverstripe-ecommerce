@@ -75,7 +75,15 @@
 					</td>
 					<td>&nbsp;</td>
 					<td class="right" id="$TableTotalID">$TotalNice</td>
-					<td>&nbsp;</td>
+					<td class="right remove">
+						<% if CanRemove %>
+							<strong>
+								<a class="ajaxQuantityLink" href="$removeLink" title="<% sprintf(_t("REMOVE","Remove &quot;%s&quot; from your order"),$TableTitle) %>">
+									<img src="ecommerce/images/remove.gif" alt="x"/>
+								</a>
+							</strong>
+						<% end_if %>
+					</td>
 				</tr>
 			<% end_if %>
 		<% end_control %>
