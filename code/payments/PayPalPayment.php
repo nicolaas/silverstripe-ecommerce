@@ -131,7 +131,7 @@ class PayPalPayment extends Payment {
 		
 		$order = $this->Order();
 		$items = $order->Items();
-		$member = $this->Member();
+		$member = $order->Member();
 		
 		// 2) Main Settings
 		
@@ -142,7 +142,7 @@ class PayPalPayment extends Payment {
 		// 3) Items Informations
 		
 		$cpt = 0;
-		foreach ($items as $item) {
+		foreach($items as $item) {
 			$inputs['item_name_' . ++$cpt] = $item->TableTitle();
 			// item_number is unnecessary
 			$inputs['amount_' . $cpt] = $item->UnitPrice();
@@ -152,31 +152,28 @@ class PayPalPayment extends Payment {
 		// 4) Payment Informations And Authorization Code
 
 		$inputs['business'] = self::$test_mode ? self::$test_account_email : self::$account_email;
-		
-		$this->writeNewAuthorizationCode();
-		$inputs['custom'] = $this->ID . '-' . $this->getAuthorizationCode(); 
-		
+		$inputs['custom'] = $this->ID . '-' . $this->AuthorizationCode; 
 		// Add Here The Shipping And/Or Taxes
 		$inputs['currency_code'] = $this->Currency;
 
 		// 5) Redirection Informations
 
-		$inputs['cancel_return'] = Director::absoluteBaseURL() . PayPalPayment_Handler::cancel_link();
+		$inputs['cancel_return'] = Director::absoluteBaseURL() . PayPalPayment_Handler::cancel_link($inputs['custom']);
 		$inputs['return'] = Director::absoluteBaseURL() . PayPalPayment_Handler::complete_link();
 		$inputs['rm'] = '2';
 		// Add Here The Notify URL
 
 		// 6) PayPal Pages Style Optional Informations
 
-		if (self:: $continue_button_text) $inputs['cbt'] = self::$continue_button_text;
+		if(self:: $continue_button_text) $inputs['cbt'] = self::$continue_button_text;
 
-		if (self::$header_image_url) $inputs['cpp_header_image'] = urlencode(self::$header_image_url);
-		if (self::$header_back_color) $inputs['cpp_headerback_color'] = self::$header_back_color;
-		if (self::$header_border_color) $inputs['cpp_headerborder_color'] = self::$header_border_color;
-		if (self::$payflow_color) $inputs['cpp_payflow_color'] = self::$payflow_color;
-		if (self::$back_color) $inputs['cs'] = self::$back_color;
-		if (self::$image_url) $inputs['image_url'] = urlencode(self::$image_url);
-		if (self::$page_style) $inputs['page_style'] = self::$page_style;
+		if(self::$header_image_url) $inputs['cpp_header_image'] = urlencode(self::$header_image_url);
+		if(self::$header_back_color) $inputs['cpp_headerback_color'] = self::$header_back_color;
+		if(self::$header_border_color) $inputs['cpp_headerborder_color'] = self::$header_border_color;
+		if(self::$payflow_color) $inputs['cpp_payflow_color'] = self::$payflow_color;
+		if(self::$back_color) $inputs['cs'] = self::$back_color;
+		if(self::$image_url) $inputs['image_url'] = urlencode(self::$image_url);
+		if(self::$page_style) $inputs['page_style'] = self::$page_style;
 
 		// 7) Prepopulating Customer Informations
 
@@ -188,18 +185,18 @@ class PayPalPayment extends Payment {
 		$inputs['country'] = $member->Country;
 		$inputs['email'] = $member->Email;
 
-		if ($member->hasMethod('getState'))	$inputs['state'] = $member->getState();
-		if ($member->hasMethod('getZip')) $inputs['zip'] = $member->getZip();
+		if($member->hasMethod('getState'))	$inputs['state'] = $member->getState();
+		if($member->hasMethod('getZip')) $inputs['zip'] = $member->getZip();
 
 		// 8) Form Creation
 
-		foreach ($inputs as $name => $value) $fields .= '<input type="hidden" name="' . $name . '" value="' . $value . '"/>';
+		foreach($inputs as $name => $value) $fields .= '<input type="hidden" name="' . $name . '" value="' . $value . '"/>';
 
 		return<<<HTML
 			<form id="PaymentForm" method="post" action="$url">$fields</form>
-			<!-- script type="text/javascript">
+			<script type="text/javascript">
 				jQuery(document).ready(function() {jQuery('#PaymentForm').submit();});
-			</script -->
+			</script>
 HTML;
 	}
 }
@@ -210,21 +207,21 @@ HTML;
 class PayPalPayment_Handler extends Controller {
 
 	static $URLSegment = 'paypal';
-
-	static function cancel_link() {return self::$URLSegment . '/cancel';}
+	
 	static function complete_link() {return self::$URLSegment . '/complete';}
+	static function cancel_link($custom) {return self::complete_link() . '?custom=' . $custom;}
 
 	/**
-	 * Only For PayPal type payment, for dealing with reply from PayPal
+	 * Manages the 'return' and 'cancel' PayPal replies
+	 * To-do : Escape as SQL : SQL_data
 	 */
 	function complete() {
-		if($custom = $_REQUEST['custom']) {
+		if(isset($_REQUEST['custom']) && $custom = $_REQUEST['custom']) {
 			$params = explode('-', $custom);
 			if(count($params) == 2) {
 				if($payment = DataObject::get_by_id('PayPalPayment', $params[0])) {
-					if($payment->getAuthorizationCode() == $params[1]) {
-						$payment->removeAuthorizationCode();
-						if ($_REQUEST['payment_status'] == 'Completed') {
+					if($payment->AuthorizationCode == $params[1]) {
+						if(isset($_REQUEST['payment_status']) && $_REQUEST['payment_status'] == 'Completed') {
 							$payment->Status = 'Success';
 							$payment->TxnRef = $_REQUEST['txn_id'];
 						}
@@ -235,27 +232,21 @@ class PayPalPayment_Handler extends Controller {
 						$payment->redirectToOrder();
 					}
 					else {
-						
+						user_error('error 1');
 					}
+				}
+				else {
+					user_error('error 2');
 				}
 			}
 			else {
-				
+				user_error('error 3');
 			}
 		}
 		else {
-			
+			user_error('error 4');
+			Debug::show($_REQUEST);
 		}
-	}
-
-	function cancel() {
-		$payment = DataObject :: get_by_id('PayPalPayment', $_REQUEST['custom']);
-		
-		$payment->Status = 'Failure';
-		
-		$payment->write();
-		
-		$payment->redirectToOrder();
 	}
 }
 
