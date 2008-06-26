@@ -60,6 +60,15 @@
 								<% end_if %>
 							</span>
 							<span id="$CartTotalID">$TotalNice</span>
+							<span class="remove">
+								<% if CanRemove %>
+									<strong>
+										<a class="ajaxQuantityLink" href="$removeLink" title="<% sprintf(_t("REMOVE","Remove &quot;%s&quot; from your order"),$TableTitle) %>">
+											<img src="ecommerce/images/remove.gif" alt="x"/>
+										</a>
+									</strong>
+								<% end_if %>
+							</span>
 						</li>
 					<% end_if %>
 				<% end_control %>
