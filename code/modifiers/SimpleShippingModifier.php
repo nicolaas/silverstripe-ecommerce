@@ -58,7 +58,7 @@ class SimpleShippingModifier extends OrderModifier {
 		return "Shipping to $country";
 	}
 	function CartTitle() {return 'Shipping';}
-		
+	
 	// Database Writing Function
 	
 	/*

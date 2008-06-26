@@ -170,7 +170,16 @@ class ShoppingCart extends Object {
 		$modifiersTableIndex = self::modifiers_table_name();
 		Session::addToArray($modifiersTableIndex, serialize($modifier));
 	}
-		
+	
+	static function can_remove_modifier($modifierIndex) {
+		$serializedModifierIndex = self::modifier_index($modifierIndex);
+		if($serializedModifier = Session::get($serializedModifierIndex)) {
+			$unserializedModifier = unserialize($serializedModifier);
+			return $unserializedModifier->CanRemove();
+		}
+		return false;
+	}
+	
 	static function remove_modifier($modifierIndex) {
 		$serializedModifierIndex = self::modifier_index($modifierIndex);
 		Session::clear($serializedModifierIndex);
@@ -277,7 +286,7 @@ class ShoppingCart_Controller extends Controller {
 	
 	function removemodifier() {
 		$modifierId = $this->urlParams['ID'];
-		ShoppingCart::remove_modifier($modifierId);
+		if(ShoppingCart::can_remove_modifier($modifierId)) ShoppingCart::remove_modifier($modifierId);
 		Director::redirectBack();
 	}
 	
