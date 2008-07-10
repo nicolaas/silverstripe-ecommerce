@@ -86,7 +86,7 @@
 		<td class="price"><strong>$TotalOutstanding.Nice </strong></td>
 	</tr>
 	
-	<% control Customer %>
+	<% control Member %>
 		<tr class="gap">
 			<th colspan="4" scope="row" class="left"><% _t("CUSTOMERDETAILS","Customer Details") %></th>
 		</tr>
