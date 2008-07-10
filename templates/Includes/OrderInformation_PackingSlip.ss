@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" >
 	<head>
 		<% base_tag %>
-		<link xmlns="http://www.w3.org/1999/xhtml" rel="stylesheet" type="text/css" href="ecommerce/css/order.css" />
+		<link xmlns="http://www.w3.org/1999/xhtml" rel="stylesheet" type="text/css" href="ecommerce/css/Order_PackingSlip.css" />
 		<style type="text/css">
 			html,body{
 				text-align:left;
