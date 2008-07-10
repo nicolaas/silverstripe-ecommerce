@@ -25,10 +25,11 @@
  	 * Processing : Order already paid and the package is  currently processed
  	 * Sent : Order already paid and now sent
  	 * Complete : 
- 	 * Cancelled : Order cancelled by the member
+ 	 * AdminCancelled : Order cancelled by the administrator
+ 	 * MemberCancelled : Order cancelled by the member
  	 */
 	static $db = array(
-		"Status" => "Enum('Unpaid,Paid,Query,Processing,Sent,Complete,Cancelled','Unpaid')",
+		'Status' => "Enum(array('Unpaid', 'Paid', 'Query', 'Processing', 'Sent', 'Complete', 'AdminCancelled', 'MemberCancelled'), 'Unpaid')",
 		"Country" => "Text",
 		"UseShippingAddress" => "Boolean",
 		"ShippingName" => "Text",
@@ -84,6 +85,16 @@
 	protected static $modifiers = array();
 	
 	static function set_modifiers($modifiers) {self::$modifiers = $modifiers;}
+	
+	protected static $can_cancel_before_payment = true;
+	protected static $can_cancel_before_processing = false;
+	protected static $can_cancel_before_sending = false;
+	protected static $can_cancel_after_sending = false;
+	
+	static function set_cancel_before_payment($value) {self::$can_cancel_before_payment = $value;}
+	static function set_cancel_before_processing($value) {self::$can_cancel_before_processing = $value;}
+	static function set_cancel_before_sending($value) {self::$can_cancel_before_sending = $value;}
+	static function set_cancel_after_sending($value) {self::$can_cancel_after_sending = $value;}
 	
 	// Items Management
 	
@@ -200,11 +211,11 @@
 	/**
 	 * Checks to see if any payments have been made on this order
 	 * and if so, subracts the payment amount from the order
-	 * ASSUMPTION : Only one payment per order
+	 * Precondition : The order is in DB
 	 */
 	function _TotalOutstanding(){
 		$total = $this->_Total();
-		if($this->ID && $payments = $this->Payments) {
+		if($payments = $this->Payments()) {
 			foreach($payments as $payment) {
 				if($payment->Status == 'Success') $total -= $payment->Amount;
 			}
@@ -214,10 +225,27 @@
 	
 	function Link() {return AccountPage::get_order_link($this->ID);}
 	
+	/*
+	 * Returns if the order can be cancelled
+	 * Precondition : Order is in DB
+	 */
+	function CanCancel() {
+		switch($this->Status) {
+			case 'Unpaid' : return self::$can_cancel_before_payment;
+			case 'Paid' : return self::$can_cancel_before_processing;
+			case 'Processing' :	case 'Query' : return self::$can_cancel_before_sending;
+			case 'Sent' : case 'Complete' : return self::$can_cancel_after_sending;
+			default : return false;
+		}
+	}
+		
 	// Order attributes access functions
 	
-	function Payment() {return $this->ID ? DataObject::get('Payment', "`OrderID` = '$this->ID'") : null;}
-	function Customer() {return $this->Member();}
+	/*
+	 * Returns the payments of the order
+	 * Precondition : Order is in DB
+	 */
+	function Payments() {return DataObject::get('Payment', "`OrderID` = '$this->ID'", '`LastEdited` DESC');}
 	
 	/**
 	 * Return the currency of this order.
@@ -273,7 +301,10 @@
 		$js[] = array('id' => $this->CartTotalID(), 'parameter' => 'innerHTML', 'value' => $total);
 	}
 	
-	function IsPaid() {return in_array($this->Status, self::$paid_status);}
+	function IsSent() {return $this->Status == 'Sent';}
+	function IsProcessing() {return $this->IsSent() || $this->Status == 'Processing';}
+	function IsValidate() {return $this->IsProcessing() || $this->Status == 'Paid';}
+	function IsPaid() {return $this->IsValidate();}
 	
 	function Status() {return $this->IsPaid() ? _t('Order.SUCCESSFULL', 'Order Successful') : _t('Order.INCOMPLETE', 'Order Incomplete');}
 	
@@ -402,7 +433,8 @@
 	function requireDefaultRecords() {
 		parent::requireDefaultRecords();
 		
-		// If some orders with the old structure exist (hasShippingCost, Shipping and AddedTax columns presents in Order table), create the Order Modifiers SimpleShippingModifier and TaxModifier and associate them to the order
+		// 1) If some orders with the old structure exist (hasShippingCost, Shipping and AddedTax columns presents in Order table), create the Order Modifiers SimpleShippingModifier and TaxModifier and associate them to the order
+		
 		$exist = DB::query("SHOW COLUMNS FROM `Order` LIKE 'Shipping'")->numRecords();
  		if($exist > 0) {
  			if($orders = DataObject::get('Order')) {
@@ -438,6 +470,16 @@
  			DB::query("ALTER TABLE `Order` CHANGE COLUMN `Shipping` `_obsolete_Shipping` decimal(9,2)");
  			DB::query("ALTER TABLE `Order` CHANGE COLUMN `AddedTax` `_obsolete_AddedTax` decimal(9,2)");
  			Database::alteration_message('The columns \'hasShippingCost\', \'Shipping\' and \'AddedTax\' of the table \'Order\' have been renamed successfully. Also, the columns have been renamed respectly to \'_obsolete_hasShippingCost\', \'_obsolete_Shipping\' and \'_obsolete_AddedTax\'', 'obsolete');
+  		}
+  		
+  		// 2) Cancel status update
+  		
+  		if($orders = DataObject::get('Order', "`Status` = 'Cancelled'")) {
+  			foreach($orders as $order) {
+  				$order->Status = 'AdminCancelled';
+  				$order->write();
+  			}
+  			Database::alteration_message('The orders which status was \'Cancelled\' have been successfully changed to the status \'AdminCancelled\'', 'changed');
   		}
 	}
 	
@@ -482,7 +524,7 @@ class Order_Attribute extends DataObject {
 		return implode(' ', $classes);
 	}
 	
-	function MainID() {return get_class($this) . '_' . ($this->ID ? $this->ID : $this->_id);}
+	function MainID() {return get_class($this) . '_' . ($this->ID ? 'DB_' . $this->ID : $this->_id);}
 	
 	function TableID() {return 'Table_' . $this->MainID();}
 	function CartID() {return 'Cart_' . $this->MainID();}
@@ -540,6 +582,25 @@ class Order_Item_Attribute extends Product_Attribute{
 		"Order_Item" => "Order_Item", // Internal field becomes OrderID, not Order
 		"Product_Atrribute" => "Product_Atrribute",
 	);
+}
+
+class Order_CancelForm extends Form {
+	
+	function __construct($controller, $name, $orderID) {
+		$fields[] = new HiddenField('OrderID', '', $orderID);
+		$actions[] = new FormAction('doCancel', 'Cancel This Order');
+		parent::__construct($controller, $name, new FieldSet($fields), new FieldSet($actions));
+	}
+	
+	function doCancel($RAW_data, $form) {
+		$SQL_data = Convert::raw2sql($RAW_data);
+		$order = DataObject::get_by_id('Order', $SQL_data['OrderID']);
+		$order->Status = 'MemberCancelled';
+		$order->write();
+		Director::redirectBack();
+		return;
+	}
+	
 }
 
 ?>
