@@ -100,7 +100,8 @@ class AccountPage_Controller extends Page_Controller {
 	 * Precondition : a user is logged 
 	 */
 	function order() {
-		Requirements::themedCSS('CheckoutPage');
+		Requirements::themedCSS('Order');
+		Requirements::themedCSS('Order_print', 'print');
 		$memberID = Member::currentUserID();
 		if($orderID = Director::urlParam('ID')) {
 			if($order = DataObject::get_one('Order', "`Order`.`ID` = '$orderID' AND `MemberID` = '$memberID'")) return array('Order' => $order);
@@ -117,6 +118,24 @@ class AccountPage_Controller extends Page_Controller {
 				'Message' => 'There is no order ID specified, so you can not see this page. However you can <a href="' . AccountPage::find_link() . '">see you details and orders</a>.'
 			);
 		}
+	}
+	
+	/**
+	 * Checks if the user can cancel his order
+	 * Precondition : A user is logged and there is an order ID in the URL which is valid
+	 */
+	function CanCancel() {
+		$orderID = Director::urlParam('ID');
+		return DataObject::get_by_id('Order', $orderID)->CanCancel();
+	}
+	
+	/**
+	 * Returns the form to cancel the current order.
+	 * Precondition : the user can cancel
+	 */
+	function CancelForm() {
+		$orderID = Director::urlParam('ID');
+		return new Order_CancelForm($this, 'CancelForm', $orderID);
 	}
 }
 
