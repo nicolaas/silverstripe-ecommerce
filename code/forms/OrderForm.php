@@ -58,7 +58,7 @@ class OrderForm extends Form {
 		
 		if(! $member->ID || $member->Password == '') {
 			$rightFields->push(new HeaderField('Membership Details', 3));
-			$rightFields->push(new LiteralField('MemberInfo', "<p class=\"message good\">If your are already a member, please <a href=\"Security/login?BackURL=checkout/\">login</a>.</p>"));
+			$rightFields->push(new LiteralField('MemberInfo', "<p class=\"message good\">If your are already a member, please <a href=\"Security/login?BackURL=" . CheckoutPage::find_link(true) . "/\">login</a>.</p>"));
 			$rightFields->push(new LiteralField('AccountInfo', "<p>Please choose a password, so you can login and check your order history in the future.</p><br/>"));
 			$rightFields->push(new FieldGroup(new ConfirmedPasswordField('Password', 'Password')));
 			
@@ -182,7 +182,7 @@ class OrderForm extends Form {
 			
 			// b) Successful payment
 			else if($result->isSuccess()) $order->sendReceipt();
-						
+			
 			Director::redirect($order->Link());
 			return;
 			/*else { // Failed payment
