@@ -21,7 +21,7 @@ HTML
 		$idprint = $this->ID."_printEachOrder";
 		$printeachorder = _t("OrderReport.PRINTEACHORDER","Print all orders shown");
 		return $printButton = <<<HTML
-<a href="OrderReport_Popup/index/All" class="popup">$record->ID<input name="$idprint" style="width: 12em" type="button" id="$idprint" class="DataReport_PrintEachOrderButton" value="$printeachorder" /></a>
+<a href="OrderReport_Popup/index/All" class="popup">$this->ID<input name="$idprint" style="width: 12em" type="button" id="$idprint" class="DataReport_PrintEachOrderButton" value="$printeachorder" /></a>
 HTML
 ;
 	}

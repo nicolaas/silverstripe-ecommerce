@@ -68,7 +68,7 @@ HTML
 //			"Normal"=>"Normal",
 //		);
 
-		if($this->filter['MemberName'] && $this->filter['MemberName'] != 'All'){
+		if(isset($this->filter['MemberName']) && $this->filter['MemberName'] != 'All'){
 			$member = DataObject::get_by_id("Member", $this->filter['MemberName']);
 			$name = $member->FirstName." ".$member->Surname;
 		}else{
