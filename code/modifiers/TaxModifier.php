@@ -61,7 +61,7 @@ class TaxModifier extends OrderModifier {
 	 * Get the tax amount that needs to be added to the given order.
 	 * If tax is inclusive, then this will be 0
 	 */
-	function AddedCharge() {return IsExclusive() ? $this->Charge() : 0;}
+	function AddedCharge() {return $this->IsExclusive() ? $this->Charge() : 0;}
 	
 	/**
 	 * Get the tax amount on the given order.
