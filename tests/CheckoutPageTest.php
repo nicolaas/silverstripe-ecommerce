@@ -27,7 +27,7 @@ class CheckoutPageTest extends FunctionalTest {
 		
 		/* Check the cart */
 		$this->get('checkout/');
-		//Debug::message($this->content());
+		echo $this->content();
 		$this->assertExactMatchBySelector('#InformationTable tr.orderitem td.product a', array(
 			'Product 1a',
 			'Product 1b',
@@ -38,7 +38,7 @@ class CheckoutPageTest extends FunctionalTest {
 			'<input name="Product_OrderItem_1_Quantity" class="ajaxQuantityField" type="text" value="2" size="3" maxlength="3" disabled="disabled"/>',
 		));
 		*/
-		$this->assertExactMatchBySelector('#InformationTable tr.orderitem td.tota', array(
+		$this->assertExactMatchBySelector('#InformationTable tr.orderitem td.total', array(
 			'$500.00',
 			'$1,200.00',
 		));
