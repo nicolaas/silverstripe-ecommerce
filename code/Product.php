@@ -267,14 +267,8 @@ class Product_OrderItem extends OrderItem {
 		else parent::__construct();
 	}
 	
-	// Product Access Functions
-	
-	/*public function ProductVersioned() {
-		return Versioned::get_version('Product', $this->ProductID, $this->ProductVersion);
-	}
-	
-	function getProductAttribute() {return $this->product;}*/
-	
+	// Product Access Function
+		
 	public function Product($current = false) {
 		if($current) return DataObject::get_by_id('Product', $this->_productID);
 		else return Versioned::get_version('Product', $this->_productID, $this->_productVersion);
