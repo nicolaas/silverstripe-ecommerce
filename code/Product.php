@@ -110,7 +110,9 @@ class Product extends Page {
 		$currentOrder = ShoppingCart::current_order();
 		if($items = $currentOrder->Items()) {
 			foreach($items as $item) {
-				if($item instanceof Product_OrderItem && $item->getProductAttribute()->ID == $this->ID) return $item;
+				if($item instanceof Product_OrderItem && $itemProduct = $item->Product()) {
+					if($itemProduct->ID == $this->ID && $itemProduct->Version == $this->Version) return $item;
+				}
 			}
 		}
 		else return null;
@@ -233,7 +235,8 @@ class Product_Image extends Image {
 
 class Product_OrderItem extends OrderItem {
 	
-	protected $product;
+	protected $_productID;
+	protected $_productVersion;
 	
 	static $db = array(
 		'ProductVersion' => 'Int'
@@ -248,66 +251,63 @@ class Product_OrderItem extends OrderItem {
 		// Case 1 : Constructed by the static function get of DataObject
 		
 		if(is_array($product)) {
-			if($dbProduct = DataObject::get_by_id('Product', $product['ProductID'])) {
-				$this->ProductVersion = $product['ProductVersion'];
-				$this->ProductID = $product['ProductID'];
-				$this->product = $dbProduct;
-				$this->failover = $dbProduct;
-				parent::__construct($product, $quantity);
-			}
-			else user_error("Product #$product[ProductID] not found", E_USER_ERROR);
+			$this->ProductID = $this->_productID = $product['ProductID'];
+			$this->ProductVersion = $this->_productVersion = $product['ProductVersion'];
+			parent::__construct($product, $quantity);
 		}
 		
 		// Case 2 : Constructed in memory
 		
 		else if(is_object($product)) {
 			parent::__construct($product, $quantity);
-			$this->product = $product;
- 			$this->failover = $product;
+			$this->_productID = $product->ID;
+ 			$this->_productVersion = $product->Version;
 		}
 		
 		else parent::__construct();
 	}
 	
-	public function ProductVersioned() {
+	// Product Access Functions
+	
+	/*public function ProductVersioned() {
 		return Versioned::get_version('Product', $this->ProductID, $this->ProductVersion);
 	}
 	
-	function getProductAttribute() {return $this->product;}
+	function getProductAttribute() {return $this->product;}*/
+	
+	public function Product($current = false) {
+		if($current) return DataObject::get_by_id('Product', $this->_productID);
+		else return Versioned::get_version('Product', $this->_productID, $this->_productVersion);
+	}
 	
 	// Functions to overload
 	
 	function hasSameContent($orderItem) {
 		$equals = parent::hasSameContent($orderItem);
-		return $equals && $orderItem instanceof Product_OrderItem && $this->product->ID == $orderItem->product->ID;
+		return $equals && $orderItem instanceof Product_OrderItem && $this->_productID == $orderItem->_productID && $this->_productVersion == $orderItem->_productVersion;
 	}
 	
-	function UnitPrice() {return $this->product->Price;}
+	function UnitPrice() {return $this->Product()->Price;}
 	
-	function TableTitle() {return $this->product->Title;}
-	function Link() {return $this->product->Link();}
+	function TableTitle() {return $this->Product()->Title;}
+	function Link() {
+		if($product = $this->Product(true)) return $product->Link();
+	}
 				
 	// Database Writing Methods
 	
 	function onBeforeWrite() {
 		parent::onBeforeWrite();
-		$this->ProductVersion = $this->product->Version;
-		$this->ProductID = $this->product->ID;
+		$this->ProductID = $this->_productID;
+		$this->ProductVersion = $this->_productVersion;
 	}
 	
 	// Debug Function
 		
 	public function debug() {
-		if($this->ID) {
-			$productTitle = $this->ProductVersioned()->Title;
-			$productID = $this->ProductID;
-			$productVersion = $this->ProductVersion;
-		}
-		else {
-			$productTitle = $this->product->Title;
-			$productID = $this->product->ID;
-			$productVersion = $this->product->Version;
-		}
+		$productTitle = $this->Product()->Title;
+		$productID = $this->_productID;
+		$productVersion = $this->_productVersion;
 		return parent::debug() .<<<HTML
 			<h3>Product_OrderItem class details</h3>
 			<p>
