@@ -27,7 +27,6 @@ class CheckoutPageTest extends FunctionalTest {
 		
 		/* Check the cart */
 		$this->get('checkout/');
-		echo $this->content();
 		$this->assertExactMatchBySelector('#InformationTable tr.orderitem td.product a', array(
 			'Product 1a',
 			'Product 1b',
