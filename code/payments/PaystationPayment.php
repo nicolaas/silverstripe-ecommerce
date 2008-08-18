@@ -2,7 +2,7 @@
 
 class PaystationPayment extends Payment {
 	
-	// PayPal Informations
+	// Paystation Informations
 	
 	protected static $privacy_link = 'http://paystation.co.nz/privacy-policy';
 	protected static $logo = 'ecommerce/images/payments/paystation.jpg';

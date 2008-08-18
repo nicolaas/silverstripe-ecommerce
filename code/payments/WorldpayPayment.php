@@ -41,7 +41,7 @@ class WorldpayPayment extends Payment {
 	static function set_test_mode_authorised_transaction() {self::set_test_mode('AUTHORISED');}
 	static function set_test_mode_error_transaction() {self::set_test_mode('ERROR');}
 	static function set_test_mode_captured_transaction() {self::set_test_mode('CAPTURED');}
-		
+	
 	// Payment Informations
 	
 	protected static $installation_id;
@@ -96,7 +96,7 @@ class WorldpayPayment extends Payment {
 
 		$controller = new Page_Controller($page);
 		
-		Requirements::javascript('ecommerce/javascript/jquery.js');
+		Requirements::javascript('ecommerce/javascript/jquery/jquery.js');
 		
 		$form = $controller->renderWith('PaymentProcessingPage');
 		
@@ -109,7 +109,7 @@ class WorldpayPayment extends Payment {
 
 		$order = $this->Order();
 		$items = $order->Items();
-		$member = $this->Member();
+		$member = $order->Member();
 		
 		// 2) Mandatory Settings
 		
@@ -153,13 +153,13 @@ class WorldpayPayment extends Payment {
 		$inputs['country'] = $member->Country;
 		$inputs['email'] = $member->Email;
 		
-		if ($member->hasMethod('getPostCode')) $inputs['postcode'] = $member->getPostCode();
-		if ($member->hasMethod('getFax')) $inputs['fax'] = $member->getFax();
+		if($member->hasMethod('getPostCode')) $inputs['postcode'] = $member->getPostCode();
+		if($member->hasMethod('getFax')) $inputs['fax'] = $member->getFax();
 		//$inputs['tel'] = $member->HomePhone;
 		
 		// 8) Form Creation
 
-		foreach ($inputs as $name => $value) $fields .= '<input type="hidden" name="' . $name . '" value="' . $value . '"/>';
+		foreach($inputs as $name => $value) $fields .= '<input type="hidden" name="' . $name . '" value="' . $value . '"/>';
 		
 		return <<<HTML
 			<form id="PaymentForm" method="post" action="$url">$fields</form>

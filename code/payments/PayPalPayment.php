@@ -118,7 +118,7 @@ class PayPalPayment extends Payment {
 
 		$controller = new Page_Controller($page);
 		
-		Requirements::javascript('ecommerce/javascript/jquery.js');
+		Requirements::javascript('ecommerce/javascript/jquery/jquery.js');
 		
 		$form = $controller->renderWith('PaymentProcessingPage');
 
