@@ -10,7 +10,13 @@
   */
 class ProductGroup extends Page {
 	
-	static $add_action = 'a Product Group Page';
+	static $db = array(
+		'ChildGroupsPermission' => "Enum('Show Only Featured Products,Show All Products')"
+	);
+	
+	static $belongs_many_many = array(
+		'Products' => 'Product'
+	);
 	
 	static $casting = array();
 	
@@ -18,14 +24,33 @@ class ProductGroup extends Page {
 	
 	static $default_child = 'Product';
 	
+	static $add_action = 'a Product Group Page';
+	
 	static $icon = 'cms/images/treeicons/folder';
-
-	static $db = array();
-
-	static $belongs_many_many = array(
-		'ChildProducts' => 'Product'
-	);
-
+	
+	static $featured_products_permissions = array('Show Only Featured Products','Show All Products');
+	static $non_featured_products_permissions = array('Show All Products');
+	
+	function getCMSFields() {
+		$fields = parent::getCMSFields();
+		$fields->addFieldToTab(
+			'Root.Content',
+			new Tab(
+				'Child Groups',
+				new HeaderField('How do I want to show the products present in the child groups ?'),
+				new DropdownField(
+  					'ChildGroupsPermission',
+  					'Permission',
+  					$this->dbObject('ChildGroupsPermission')->enumValues(),
+  					'',
+  					null,
+  					'Don\'t Show Any Products'
+				)
+			)
+		);
+		return $fields;
+	}
+	
 	/**
 	 * Returns the shopping cart
 	 */
@@ -33,60 +58,60 @@ class ProductGroup extends Page {
 		HTTP::set_cache_age(0);
 		return ShoppingCart::current_order();
 	}
-
-	/**
-	 * Return nested/child ProductGroups using the Children function
-	 * rather than a DataObject::get call
-	 */
-	function _ShowProductGroups(){
-		if($children = $this->Children()){
-			foreach($children as $child){
-				if(!is_a($child, "ProductGroup")) return false;
+	
+	function ProductsShowable($extraFilter, array $permissions) {
+		$filter = "`ShowInMenus` = '1' AND `AllowPurchase` = '1' AND $extraFilter";
+					
+		// 1) Children Products
+		
+		$products = DataObject::get('Product', "`ParentID` = '$this->ID' AND $filter");
+				
+		// 2) Products Many Many Related
+		
+		$products2 = $this->getManyManyComponents('Products', $filter);
+		if(! $products) $products = $products2;
+		else $products->merge($products2);
+		
+		// 3) Child Groups Products
+		
+		if(in_array($this->ChildGroupsPermission, $permissions)) {
+			if($groupChildren = DataObject::get('ProductGroup', "`ParentID` = '$this->ID' AND `ShowInMenus` = '1'")) {
+				foreach($groupChildren as $groupChild) $products->merge($groupChild->ProductsShowable($extraFilter, $permissions));
 			}
-			return true;
 		}
-	}
-
-	/**
-	 * Return all Products in the system that are flagged as 'featured'
-	 */
-	function FeaturedProducts() {
-		return DataObject::get("Product", "ShowInMenus = 1 AND FeaturedProduct = 1");	
+		
+		// 4) Products Duplicates Removal
+		
+		$products->removeDuplicates();
+		
+		return $products;
 	}
 	
+	function FeaturedProducts() {
+		return $this->ProductsShowable("`FeaturedProduct` = '1'", self::$featured_products_permissions);
+	}
+	
+	function NonFeaturedProducts() {
+		return $this->ProductsShowable("`FeaturedProduct` = '0'", self::$non_featured_products_permissions);
+	}
+		
 	/** 
 	 * Return ProductGroups as children of the current page
 	 */
 	function ChildGroups() {
-		return DataObject::get("ProductGroup", "ShowInMenus = 1 AND ParentID = " . $this->ID);
+		return DataObject::get('ProductGroup', "`ShowInMenus` = '1' AND `ParentID` = '$this->ID'");
 	}
 	
 	/**
 	 * Generate a product menu using this function
 	 */
 	function GroupsMenu() {
-		$p = $this->Parent();
-		if(!$p->ID || !($p instanceof ProductGroup)) {
-			return $this->ChildGroups();
-		} else {
-			return $p->GroupsMenu();
+		if($parent = $this->Parent()) {
+			return $parent instanceof ProductGroup ? $parent->GroupsMenu() : $this->ChildGroups();
 		}
+		else return $this->ChildGroups();
 	}
-	
-	/**
-	 * Returns the Products as children of the current page.
-	 */
-	public function childProducts() {
-		return DataObject::get("Product", "ShowInMenus = 1 AND ParentID = " . $this->ID);
-	}
-	
-	/**
-	 * Check if this product group is the top level
-	 */
-	function IsTopLevel() {
-		return (!$this->Parent() || !in_array($this->Parent()->class, $this->stat('allowed_children')));
-	}
-	
+		
 	/**
 	 * Creates automatically two product group pages when the ecommerce module
 	 * is added to a project
@@ -129,7 +154,14 @@ class ProductGroup_Controller extends Page_Controller {
 		Requirements::javascript('jsparty/prototype.js');
 		Requirements::javascript('jsparty/prototype_improvements.js');
 		Requirements::javascript('jsparty/behaviour.js');
-
+		
+		Requirements::javascript('ecommerce/javascript/jquery/jquery.js');
+		Requirements::javascript('ecommerce/javascript/jquery/jquery.domec.min.js');
+		Requirements::javascript('ecommerce/javascript/jquery/jquery.pagination.js');
+		Requirements::javascript('ecommerce/javascript/jquery/jquery.ui.effects.min.js');
+		Requirements::javascript('ecommerce/javascript/jquery.ssnavigation.js');
+		Requirements::javascript('ecommerce/javascript/product-group.js');
+		
 		Requirements::themedCSS('ProductGroup');
 		Requirements::themedCSS('Cart');
 		
