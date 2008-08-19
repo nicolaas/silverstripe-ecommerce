@@ -10,33 +10,34 @@
  */
 class Product extends Page {
 	
-	static $add_action = 'a Product Page';
-	
-	static $casting = array();
-	
-	static $default_parent = 'ProductGroup';
-	
-	static $icon = 'cms/images/treeicons/book';
-	
 	static $db = array(
 		'Price' => 'Currency',
 		'Weight' => 'Decimal(9,2)',
 		'Model' => 'Varchar',
 		'FeaturedProduct' => 'Boolean',
 		'AllowPurchase' => 'Boolean',
-		"InternalItemID" => "Varchar(30)",
+		'InternalItemID' => 'Varchar(30)'
 	);
 	
-	/**
-	 * Image Support 
-	 */
 	static $has_one = array(
 		'Image' => 'Product_Image'
+	);
+	
+	static $many_many = array(
+		'ProductGroups' => 'ProductGroup'
 	);
 	
 	static $defaults = array(
 		'AllowPurchase' => true
 	);
+	
+	static $casting = array();
+	
+	static $default_parent = 'ProductGroup';
+	
+	static $add_action = 'a Product Page';
+	
+	static $icon = 'cms/images/treeicons/book';
 	
 	/**
 	 * Create the fields for a product within the CMS
@@ -60,7 +61,31 @@ class Product extends Page {
 		$fields->addFieldToTab("Root.Content.Main", new CheckboxField("FeaturedProduct", "Featured Product"));
 		$fields->addFieldToTab("Root.Content.Main", new CheckboxField("AllowPurchase", "Allow product to be purchased",1));
 
+		$productGroupsTable = $this->getCMSProductGroups();
+		$fields->addFieldToTab(
+			'Root.Content',
+			new Tab(
+				'Product Groups',
+				new HeaderField('Which other groups I want this product to appear in ?'),
+				$productGroupsTable
+			)
+		);
+
 		return $fields;
+	}
+	
+	protected function getCMSProductGroups() {
+		$tableField = new ManyManyComplexTableField(
+			$this,
+			'ProductGroups',
+			'ProductGroup',
+			array(
+				'Title' => 'Product Group Page Title'
+			)
+		);
+		$tableField->setPageSize(30);
+		$tableField->setPermissions(array());
+		return $tableField;
 	}
 
 	/**
@@ -268,7 +293,10 @@ class Product_OrderItem extends OrderItem {
 	}
 	
 	// Product Access Function
-		
+	
+	/*
+	 * To DO : Add Lives and Drafts Values Management
+	 */
 	public function Product($current = false) {
 		if($current) return DataObject::get_by_id('Product', $this->_productID);
 		else return Versioned::get_version('Product', $this->_productID, $this->_productVersion);
