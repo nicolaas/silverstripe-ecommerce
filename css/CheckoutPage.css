@@ -6,69 +6,67 @@
 
 /* Information table styling */
 #InformationTable {
-	border-top: 1px solid #ccc;
-	border-bottom: 1px solid #ccc;
-	/*width: 70%;*/
+	width: 100%;
 	background: #fdfdfd;
+	margin:0 auto;
 }
 	
-	#InformationTable tr.Total {
-		background: #c9ebff;
+	/* Cells main styling */
+	#InformationTable th, #InformationTable td {
+		font-size:1em;
+		font-weight:normal;
+		color:#333;
+		border:1px solid #999999;
+		padding:5px;
 	}
 	
-	/* apply the colour to these elements */
-	#InformationTable tr.Total td,
 	#InformationTable th {
-		color: #4EA3D7 !important;
-		font-weight: bold;
-	}
-		.warningMessage {
-			margin: 4px 0 0 3px;
-			padding: 5px;
-			width: 92%;
-			color: #DC1313;
-			border: 4px solid #FF7373;
-			background: #FED0D0;
-		}
-	
-	/* total line in order information table */
-	#InformationTable tr.Total td {
-		text-transform: uppercase;
+		font-size:1.2em;
+		font-weight:bold;
+		color:#4EA3D7 !important;
 	}
 	
-	#InformationTable tr.summary {
-		font-weight: bold;
+	/* Cells alignment styling */
+	#InformationTable .title {
+		text-align:left;
 	}
-		#InformationTable tr td,
-		#InformationTable tr th {
-			padding: 5px;
-			font-size: 1.2em;
-			color: #333;
-		}
-			#InformationTable td.product {
-				width: 30%;
-			}
-			#InformationTable td.ordersummary {
-				font-size: 1em;
-				border-bottom: 1px solid #ccc;
-			}
-			#InformationTable tr td a {
-				color: #666;
-			}
-				#InformationTable tr td a img {
-					vertical-align: middle;
-				}
-	
-	/* Information table alignment classes */
-	#InformationTable .right {
+	#InformationTable .quantity {
+		text-align:center;
+	}
+	#InformationTable .unitprice, #InformationTable .total {
 		text-align: right;
 	}
-	#InformationTable .center {
-		text-align: center;
+	
+	/* Lines and cells special styling for subtotal and total */
+	#InformationTable tr.ordertotal, #InformationTable tr.ordersubtotal {
+		background: #c9ebff;
+		text-transform: uppercase;
 	}
-	#InformationTable .left {
-		text-align: left;
-	}
+		#InformationTable tr.ordertotal td, #InformationTable tr.ordersubtotal td {
+			font-weight:bold;
+		}
+		#InformationTable tr.ordersubtotal td {
+			font-size: 1.1em;
+		}
+		#InformationTable tr.ordertotal td {
+			font-size: 1.2em;
+		}
+		
+		#InformationTable tr td.transparent {
+			background: #ccc;
+			/*border-left:none;
+			border-right:none;*/
+			border:none;
+		}
+	
+.warningMessage {
+	margin: 4px 0 0 3px;
+	padding: 5px;
+	width: 92%;
+	color: #DC1313;
+	border: 4px solid #FF7373;
+	background: #FED0D0;
+}
 
 /* CheckoutPage form styling */
 #LeftOrder,
