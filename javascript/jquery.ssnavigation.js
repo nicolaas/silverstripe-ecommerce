@@ -7,6 +7,8 @@ jQuery.fn.ssnavigation = function(options) {
 		item_expr : '.item',
 		items_sublist_class : 'itemsSubList',
 		
+		one_page_with_pagination : true,
+		
 		pagination : {
 			prev_text : '&lt; Previous',
 			prev_show_always : false,
@@ -119,50 +121,42 @@ jQuery.fn.ssnavigation = function(options) {
 				);
 			}
 			
-			function updatePagination(newPageIndex, navigationBar, jQueryFunction) {
+			function initPagination() {
 				
-				// a) Main Settings
+				// a) Navigation Bar Node Creation
 				
-				pageIndex = newPageIndex;
-				var itemsPreviousSubListsExpr = itemsSubListExpr + ':lt(' + pageIndex + ')';
-				var itemsCurrentNextSubListsExpr = itemsSubListExpr + ':gt(' + (pageIndex - 1) + ')';
-				var marginLeft = - itemsListWidth;
-				
-				jQueryFunction = jQueryFunction || jQuery.fn.animate;
-												
-				// b) Sub Lists Selection
-				
-				var itemsPreviousSubLists = $(itemsPreviousSubListsExpr).filter(
-					function() {
-						return $(this).css('margin-left') != marginLeft + 'px';
-					}
-				);
-				var itemsCurrentNextSubLists = $(itemsCurrentNextSubListsExpr).filter(
-					function() {
-						return $(this).css('margin-left') == marginLeft + 'px';
+				var navigationBar = jQuery.create(
+					'div',
+					{
+						'class' : 'navigationBar'
 					}
 				);
 				
-				// c) Sub Lists Animation
+				// b) Navigation Bar Node Adding To The HTML Code
 				
-				jQueryFunction.apply($(itemsPreviousSubLists), [{'marginLeft' : marginLeft}]);
-				jQueryFunction.apply($(itemsCurrentNextSubLists), [{'marginLeft' : 0}]);
+				var clearDivExpr = itemsListExpr + ' + div.clear';
 				
-				// d) Results Bar Update
+				if($(clearDivExpr)) $(clearDivExpr).after(navigationBar);
+				else $(itemsListExpr).after(navigationBar);
 				
-				updateResultsBar();
+				// c) Register The Navigation Bar Node To The Pagination System
 				
-				return false;
+				var paginationParams = {
+					items_per_page : itemsPerPage,
+					current_page : 0,
+					callback : updatePagination
+				};
+				paginationParams = jQuery.extend(paginationParams, params.pagination);
+				if(paginationParams.current_page < 0) paginationParams.current_page = 0;
+				else if(paginationParams.current_page >= itemsSubListsLength()) paginationParams.current_page = itemsSubListsLength() - 1;
+				
+				$(navigationBar).pagination(itemsLength, paginationParams);
+				
+				// d) Apply The Current Page Parameter Value To The Sub Lists
+				
+				paginationParams.callback(paginationParams.current_page, navigationBar, jQuery.fn.css);
 			}
-			
-			function updateResultsBar() {
-				
-				$(firstItemExpr).text(itemsPerPage * pageIndex + 1);
-				$(lastItemExpr).text(Math.min(itemsPerPage * (pageIndex + 1), itemsLength));
-				$(itemsTotalExpr).text(itemsLength);
-				
-			}
-			
+									
 			function updateSubLists(itemsPerPageNew) {
 				var removeItems = itemsPerPageNew < itemsPerPage;
 				itemsPerPage = itemsPerPageNew;
@@ -239,6 +233,50 @@ jQuery.fn.ssnavigation = function(options) {
 				paginationParams.callback(paginationParams.current_page, navigationBar);
 			}
 			
+			function updateResultsBar() {
+				
+				$(firstItemExpr).text(itemsPerPage * pageIndex + 1);
+				$(lastItemExpr).text(Math.min(itemsPerPage * (pageIndex + 1), itemsLength));
+				$(itemsTotalExpr).text(itemsLength);
+				
+			}
+			
+			function updatePagination(newPageIndex, navigationBar, jQueryFunction) {
+				
+				// a) Main Settings
+				
+				pageIndex = newPageIndex;
+				var itemsPreviousSubListsExpr = itemsSubListExpr + ':lt(' + pageIndex + ')';
+				var itemsCurrentNextSubListsExpr = itemsSubListExpr + ':gt(' + (pageIndex - 1) + ')';
+				var marginLeft = - itemsListWidth;
+				
+				jQueryFunction = jQueryFunction || jQuery.fn.animate;
+												
+				// b) Sub Lists Selection
+				
+				var itemsPreviousSubLists = $(itemsPreviousSubListsExpr).filter(
+					function() {
+						return $(this).css('margin-left') != marginLeft + 'px';
+					}
+				);
+				var itemsCurrentNextSubLists = $(itemsCurrentNextSubListsExpr).filter(
+					function() {
+						return $(this).css('margin-left') == marginLeft + 'px';
+					}
+				);
+				
+				// c) Sub Lists Animation
+				
+				jQueryFunction.apply($(itemsPreviousSubLists), [{'marginLeft' : marginLeft}]);
+				jQueryFunction.apply($(itemsCurrentNextSubLists), [{'marginLeft' : 0}]);
+				
+				// d) Results Bar Update
+				
+				updateResultsBar();
+				
+				return false;
+			}
+			
 			function itemsSubListsLength() {return Math.ceil(itemsLength / itemsPerPage);}
 						
 			// 4) Toggle Elements Initialisation
@@ -253,44 +291,9 @@ jQuery.fn.ssnavigation = function(options) {
 			
 			initDropdown();
 			
-			// 7) Navigation Bar Creation (If There Is More Than One Page)
+			// 7) Navigation Bar Creation
 			
-			if(itemsLength > itemsPerPage) {
-				
-				// a) Navigation Bar Node Creation
-				
-				var navigationBar = jQuery.create(
-					'div',
-					{
-						'class' : 'navigationBar'
-					}
-				);
-				
-				// b) Navigation Bar Node Adding To The HTML Code
-				
-				var clearDivExpr = itemsListExpr + ' + div.clear';
-				
-				if($(clearDivExpr)) $(clearDivExpr).after(navigationBar);
-				else $(itemsListExpr).after(navigationBar);
-				
-				// c) Register The Navigation Bar Node To The Pagination System
-				
-				var paginationParams = {
-					items_per_page : itemsPerPage,
-					current_page : 0,
-					callback : updatePagination
-				};
-				paginationParams = jQuery.extend(paginationParams, params.pagination);
-				if(paginationParams.current_page < 0) paginationParams.current_page = 0;
-				else if(paginationParams.current_page >= itemsSubListsLength()) paginationParams.current_page = itemsSubListsLength() - 1;
-				
-				$(navigationBar).pagination(itemsLength, paginationParams);
-				
-				// d) Apply The Current Page Parameter Value To The Sub Lists
-				
-				paginationParams.callback(paginationParams.current_page, navigationBar, jQuery.fn.css);
-			}
-			else updateResultsBar();
+			initPagination();
 		}
 	);
 }
