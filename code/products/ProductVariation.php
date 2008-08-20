@@ -56,15 +56,13 @@ class ProductVariation extends DataObject {
 	function addLink() {return $this->Product()->addVariationLink($this->ID);}
 }
 
-class ProductVariation_OrderItem extends OrderItem {
+class ProductVariation_OrderItem extends Product_OrderItem {
 	
 	protected $_productVariationID;
 	protected $_productVariationVersion;
-	protected $_productVersion;
 	
 	static $db = array(
-		'ProductVariationVersion' => 'Int',
-		'ProductVersion' => 'Int'
+		'ProductVariationVersion' => 'Int'
 	);
 	
 	static $has_one = array(
@@ -78,17 +76,15 @@ class ProductVariation_OrderItem extends OrderItem {
 		if(is_array($productVariation)) {
 			$this->ProductVariationID = $this->_productVariationID = $productVariation['ProductVariationID'];
 			$this->ProductVariationVersion = $this->_productVariationVersion = $productVariation['ProductVariationVersion'];
-			$this->ProductVersion = $this->_productVersion = $productVariation['ProductVersion'];
 			parent::__construct($productVariation, $quantity);
 		}
 		
 		// Case 2 : Constructed in memory
 		
 		else if(is_object($productVariation)) {
-			parent::__construct($productVariation, $quantity);
+			parent::__construct($productVariation->Product(), $quantity);
 			$this->_productVariationID = $productVariation->ID;
  			$this->_productVariationVersion = $productVariation->Version;
- 			$this->_productVersion = $productVariation->Product()->Version;
 		}
 		
 		else parent::__construct();
@@ -96,41 +92,28 @@ class ProductVariation_OrderItem extends OrderItem {
 	
 	// ProductVariation Access Function
 	
-	/*
-	 * To DO : Add Lives and Drafts Values Management
-	 */
 	public function ProductVariation($current = false) {
 		if($current) return DataObject::get_by_id('ProductVariation', $this->_productVariationID);
 		else return Versioned::get_version('ProductVariation', $this->_productVariationID, $this->_productVariationVersion);
-	}
-	
-	public function Product($current = false) {
-		$productID = $this->ProductVariation()->ProductID;
-		if($current) return DataObject::get_by_id('Product', $productID);
-		else return Versioned::get_version('Product', $productID, $this->_productVersion);
 	}
 	
 	// Functions to overload
 	
 	function hasSameContent($orderItem) {
 		$equals = parent::hasSameContent($orderItem);
-		return $equals && $orderItem instanceof ProductVariation_OrderItem && $this->_productVariationID == $orderItem->_productVariationID && $this->_productVariationVersion == $orderItem->_productVariationVersion && $this->_productVersion == $orderItem->_productVersion;
+		return $equals && $orderItem instanceof ProductVariation_OrderItem && $this->_productVariationID == $orderItem->_productVariationID && $this->_productVariationVersion == $orderItem->_productVariationVersion;
 	}
 	
 	function UnitPrice() {return $this->ProductVariation()->Price;}
 	
-	function TableTitle() {return $this->Product()->Title . ' (' . $this->ProductVariation()->Title . ')';}
-	function Link() {
-		if($product = $this->Product(true)) return $product->Link();
-	}
-				
+	function TableTitle() {return parent::TableTitle() . ' (' . $this->ProductVariation()->Title . ')';}
+	
 	// Database Writing Methods
 	
 	function onBeforeWrite() {
 		parent::onBeforeWrite();
 		$this->ProductVariationID = $this->_productVariationID;
 		$this->ProductVariationVersion = $this->_productVariationVersion;
-		$this->ProductVersion = $this->_productVersion;
 	}
 	
 	// Debug Function
@@ -139,16 +122,12 @@ class ProductVariation_OrderItem extends OrderItem {
 		$title = $this->TableTitle();
 		$productVariationID = $this->_productVariationID;
 		$productVariationVersion = $this->_productVariationVersion;
-		$productID = $this->ProductVariation()->ProductID;
-		$productVersion = $this->_productVersion;
 		return parent::debug() .<<<HTML
 			<h3>ProductVariation_OrderItem class details</h3>
 			<p>
 				<b>Title : </b>$title<br/>
 				<b>ProductVariation ID : </b>$productVariationID<br/>
 				<b>ProductVariation Version : </b>$productVariationVersion<br/>
-				<b>Product ID : </b>$productID<br/>
-				<b>Product Version : </b>$productVersion
 			</p>
 HTML;
 	}
