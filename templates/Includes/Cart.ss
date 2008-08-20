@@ -9,9 +9,9 @@
 							<span class="itemdetails">
 								<span<% if Link %><% else %> id="$CartTitleID"<% end_if %> class="title">
 									<% if Link %>
-										<a id="$CartTitleID" href="$Link" title="<% sprintf(_t("READMORE","Click here to read more on &quot;%s&quot;"),$CartTitle) %>">$CartTitle</a>
+										<a id="$CartTitleID" href="$Link" title="<% sprintf(_t("READMORE","Click here to read more on &quot;%s&quot;"),$CartTitle.XML) %>">$CartTitle.XML</a>
 									<% else %>
-										$CartTitle
+										$CartTitle.XML
 									<% end_if %>
 								</span>
 								<span class="price">
@@ -20,7 +20,7 @@
 								<span class="quantity">
 									Quantity : 
 									<strong>
-										<a class="ajaxQuantityLink" href="$removeLink" title="<% sprintf(_t("REMOVEONE","Remove one of &quot;%s&quot; from your cart"),$CartTitle) %>">
+										<a class="ajaxQuantityLink" href="$removeLink" title="<% sprintf(_t("REMOVEONE","Remove one of &quot;%s&quot; from your cart"),$CartTitle.XML) %>">
 											<img src="ecommerce/images/minus.gif" alt="-"/>
 										</a>
 									</strong> 
@@ -30,7 +30,7 @@
 										$Quantity
 									<% end_if %>
 									<strong>
-										<a class="ajaxQuantityLink" href="$addLink" title="<% sprintf(_t("ADDONE","Add one more of &quot;%s&quot; to your cart"),$CartTitle) %>">
+										<a class="ajaxQuantityLink" href="$addLink" title="<% sprintf(_t("ADDONE","Add one more of &quot;%s&quot; to your cart"),$CartTitle.XML) %>">
 											<img src="ecommerce/images/plus.gif" alt="+"/>
 										</a>
 									</strong>
@@ -38,7 +38,7 @@
 							</span>
 							<span class="remove">
 								<strong>
-									<a class="ajaxQuantityLink" href="$removeallLink" title="<% sprintf(_t("REMOVEALL","Remove all of &quot;%s&quot; from your cart"),$CartTitle) %>">
+									<a class="ajaxQuantityLink" href="$removeallLink" title="<% sprintf(_t("REMOVEALL","Remove all of &quot;%s&quot; from your cart"),$CartTitle.XML) %>">
 										<img src="ecommerce/images/remove.gif" alt="x"/>
 									</a>
 								</strong>
