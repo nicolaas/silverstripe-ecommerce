@@ -159,7 +159,7 @@ class WorldpayPayment extends Payment {
 		
 		// 8) Form Creation
 
-		foreach($inputs as $name => $value) $fields .= '<input type="hidden" name="' . $name . '" value="' . $value . '"/>';
+		foreach($inputs as $name => $value) $fields .= '<input type="hidden" name="' . $name . '" value="' . Convert::raw2xml($value) . '"/>';
 		
 		return <<<HTML
 			<form id="PaymentForm" method="post" action="$url">$fields</form>
