@@ -121,7 +121,7 @@ class Product extends Page {
 		$tableField->setPermissions(array());
 		return $tableField;
 	}
-
+	
 	/**
 	 * Returns the shopping cart
 	 */
@@ -129,31 +129,14 @@ class Product extends Page {
 		HTTP::set_cache_age(0);
 		return ShoppingCart::current_order();
 	}
-
+	
 	/**
 	 * Conditions for whether a product can be purchased.
 	 * If it has the checkbox for 'Allow this product to be purchased',
 	 * as well as having a price. Otherwise a user can't buy it.
 	 */
 	function AllowPurchase() {return $this->AllowPurchase && $this->Price;}
-
-	/** 
-	 * Return nested/child ProductGroups underneath this one
-	 */
-	function ChildGroups() {
-		if($parent = $this->Parent()) {
-			return $parent instanceof ProductGroup ? $parent->ChildGroups() : null;
-		}
-		else return null;
-	}
 	
-	function GroupsMenu() {
-		if($parent = $this->Parent()) {
-			return $parent instanceof ProductGroup ? $parent->GroupsMenu() : null;
-		}
-		else return null;
-	}
-		
 	/*
 	 * Returns if the product is already in the shopping cart.
 	 * Note : This function is usable in the Product context because a
