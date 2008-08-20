@@ -1,4 +1,6 @@
-<% include ProductMenu %>
+<% control Parent %>
+	<% include ProductMenu %>
+<% end_control %>
 
 <div id="Product">
 	
