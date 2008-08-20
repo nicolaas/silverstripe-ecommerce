@@ -277,16 +277,18 @@ jQuery.fn.ssnavigation = function(options) {
 				
 				var paginationParams = {
 					items_per_page : itemsPerPage,
+					current_page : 0,
 					callback : updatePagination
 				};
 				paginationParams = jQuery.extend(paginationParams, params.pagination);
-				if(paginationParams.current_page && paginationParams.current_page >= itemsSubListsLength()) paginationParams.current_page = itemsSubListsLength() - 1;
+				if(paginationParams.current_page < 0) paginationParams.current_page = 0;
+				else if(paginationParams.current_page >= itemsSubListsLength()) paginationParams.current_page = itemsSubListsLength() - 1;
 				
 				$(navigationBar).pagination(itemsLength, paginationParams);
 				
 				// d) Apply The Current Page Parameter Value To The Sub Lists
 				
-				if(paginationParams.current_page) paginationParams.callback(paginationParams.current_page, navigationBar, jQuery.fn.css);
+				paginationParams.callback(paginationParams.current_page, navigationBar, jQuery.fn.css);
 			}
 			else updateResultsBar();
 		}
