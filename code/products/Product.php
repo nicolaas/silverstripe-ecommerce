@@ -23,6 +23,10 @@ class Product extends Page {
 		'Image' => 'Product_Image'
 	);
 	
+	static $has_many = array(
+		'Variations' => 'ProductVariation'
+	);
+	
 	static $many_many = array(
 		'ProductGroups' => 'ProductGroup'
 	);
@@ -61,6 +65,15 @@ class Product extends Page {
 		$fields->addFieldToTab("Root.Content.Main", new CheckboxField("FeaturedProduct", "Featured Product"));
 		$fields->addFieldToTab("Root.Content.Main", new CheckboxField("AllowPurchase", "Allow product to be purchased",1));
 
+		$productVariationstable = $this->getCMSVariations();
+		$fields->addFieldsToTab('Root.Content.Variations', 
+			array(
+				new HeaderField('Which variations do I want to set on this product ?'),
+				new LiteralField('VariationsNote', '<p class="message good">If this product has active variations, the price of the product will be the price of the variation added by the member to the shopping cart.</p>'),
+				$productVariationstable
+			)
+		);
+		
 		$productGroupsTable = $this->getCMSProductGroups();
 		$fields->addFieldToTab(
 			'Root.Content',
@@ -70,8 +83,27 @@ class Product extends Page {
 				$productGroupsTable
 			)
 		);
-
+		
 		return $fields;
+	}
+	
+	function getCMSVariations() {
+		/*$singleton = singleton('ProductVariation');
+		$query = $singleton->buildVersionSQL("`ProductID` = '{$this->ID}'");
+		$variations = $singleton->buildDataObjectSet($query->execute());
+		$filter = $variations ? "`ID` IN ('" . implode("','", $variations->column('RecordID')) . "')" : "`ID` < '0'";*/
+		$filter = "`ProductID` = '{$this->ID}'";
+		return new ComplexTableField(
+			$this,
+			'Variations',
+			'ProductVariation',
+			array(
+				'Title' => 'Title',
+				'Price' => 'Price'
+			),
+			'getCMSFields_forPopup',
+			$filter
+		);
 	}
 	
 	protected function getCMSProductGroups() {
@@ -107,16 +139,17 @@ class Product extends Page {
 	 * Return nested/child ProductGroups underneath this one
 	 */
 	function ChildGroups() {
-		return DataObject::get("ProductGroup", "ShowInMenus = 1 AND ParentID = " . $this->ID);
-	}	
+		if($parent = $this->Parent()) {
+			return $parent instanceof ProductGroup ? $parent->ChildGroups() : null;
+		}
+		else return null;
+	}
 	
 	function GroupsMenu() {
-		$p = $this->Parent();
-		if(!$p->ID || !($p instanceof ProductGroup)) {
-			return $this->ChildGroups();
-		} else {
-			return $p->GroupsMenu();
+		if($parent = $this->Parent()) {
+			return $parent instanceof ProductGroup ? $parent->GroupsMenu() : null;
 		}
+		else return null;
 	}
 		
 	/*
@@ -159,6 +192,7 @@ class Product extends Page {
 	}
 	
 	function addLink() {return $this->Link() . 'add';}
+	function addVariationLink($id) {return $this->Link() . 'addVariation/' . $id;}
 	
 	/**
 	 * Creates automatically two product pages when the ecommerce module is
@@ -226,10 +260,28 @@ class Product_Controller extends Page_Controller {
 	 * This is used by the OrderForm to add more of this product to the current cart.
 	 */
 	
+	/*
+	 * To Do : Replace return false
+	 */
 	function add() {
-		if($this->AllowPurchase()) {
+		if($this->AllowPurchase() && $this->Variations()->Count() == 0) {
 			ShoppingCart::add_new_item(new Product_OrderItem($this));
 			Director::redirectBack();
+		}
+		else return false;
+	}
+	
+	/*
+	 * To Do : Replace return false
+	 */
+	function addVariation() {
+		if($this->AllowPurchase && $id = $this->urlParams['ID']) {
+			if($variation = DataObject::get_one('ProductVariation', "`ID` = '{$id}' AND `ProductID` = '{$this->ID}'")) {
+				if($variation->AllowPurchase()) {
+					ShoppingCart::add_new_item(new ProductVariation_OrderItem($variation));
+					Director::redirectBack();
+				}
+			}
 		}
 		else return false;
 	}
@@ -327,13 +379,13 @@ class Product_OrderItem extends OrderItem {
 	// Debug Function
 		
 	public function debug() {
-		$productTitle = $this->Product()->Title;
+		$title = $this->TableTitle();
 		$productID = $this->_productID;
 		$productVersion = $this->_productVersion;
 		return parent::debug() .<<<HTML
 			<h3>Product_OrderItem class details</h3>
 			<p>
-				<b>Product Title : </b>$productTitle<br/>
+				<b>Title : </b>$title<br/>
 				<b>Product ID : </b>$productID<br/>
 				<b>Product Version : </b>$productVersion
 			</p>
