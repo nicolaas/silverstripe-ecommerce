@@ -503,6 +503,11 @@ class Order_Attribute extends DataObject {
 		'Order' => 'Order'
 	);
 	
+	static $casting = array(
+		'TableTitle' => 'Text',
+		'CartTitle' => 'Text'
+	);
+	
 	// Local ID Attribute Management
 	
 	public function getIdAttribute() {return $this->_id;}
