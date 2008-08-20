@@ -88,12 +88,12 @@ class Product extends Page {
 	}
 	
 	function getCMSVariations() {
-		/*$singleton = singleton('ProductVariation');
+		$singleton = singleton('ProductVariation');
 		$query = $singleton->buildVersionSQL("`ProductID` = '{$this->ID}'");
 		$variations = $singleton->buildDataObjectSet($query->execute());
-		$filter = $variations ? "`ID` IN ('" . implode("','", $variations->column('RecordID')) . "')" : "`ID` < '0'";*/
-		$filter = "`ProductID` = '{$this->ID}'";
-		return new ComplexTableField(
+		$filter = $variations ? "`ID` IN ('" . implode("','", $variations->column('RecordID')) . "')" : "`ID` < '0'";
+		//$filter = "`ProductID` = '{$this->ID}'";
+		$tableField = new HasManyComplexTableField(
 			$this,
 			'Variations',
 			'ProductVariation',
@@ -104,6 +104,8 @@ class Product extends Page {
 			'getCMSFields_forPopup',
 			$filter
 		);
+		$tableField->setRelationAutoSetting(true);
+		return $tableField;
 	}
 	
 	protected function getCMSProductGroups() {
