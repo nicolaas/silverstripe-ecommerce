@@ -12,7 +12,7 @@ $(document).ready(
 							if(! this.value) this.value = 0;
 							else this.value = this.value.replace(/[^0-9]+/g, '');
 							var url = $('base').attr('href') + setQuantityLink.value + '?quantity=' + this.value;
-							$.getJSON(url, null, setChangesJQuery);
+							$.getJSON(url, null, setChanges);
 						}
 					}
 				);
@@ -28,7 +28,7 @@ $(document).ready(
 						if($(setCountryLink).length > 0) {
 							setCountryLink = $(setCountryLink).get(0);
 							var url = $('base').attr('href') + setCountryLink.value + '/' + this.value;
-							$.getJSON(url, null, setChangesJQuery);
+							$.getJSON(url, null, setChanges);
 						}
 					}
 				);
