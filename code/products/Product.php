@@ -231,9 +231,7 @@ class Product_Controller extends Page_Controller {
 	 * otherwise use the module one instead
 	 */	
 	function init(){
-		Requirements::javascript('jsparty/prototype.js');
-		Requirements::javascript('jsparty/prototype_improvements.js');
-		Requirements::javascript('jsparty/behaviour.js');
+		Requirements::javascript('ecommerce/javascript/jquery/jquery.js');
 		
 		Requirements::themedCSS('Product');
 		Requirements::themedCSS('Cart');
