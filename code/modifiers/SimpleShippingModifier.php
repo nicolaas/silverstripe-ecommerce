@@ -42,7 +42,9 @@ class SimpleShippingModifier extends OrderModifier {
 		return $order->findShippingCountry(true);
 	}
 	
-	protected function LiveIsDefaultCharge() {return ! array_key_exists($this->LiveCountry(), self::$charges_by_country);}
+	protected function LiveIsDefaultCharge() {
+		return !$this->LiveCountry() || !array_key_exists($this->LiveCountry(), self::$charges_by_country);
+	}
 	
 	/**
 	 * Find the amount for the shipping on the shipping country for the order.
