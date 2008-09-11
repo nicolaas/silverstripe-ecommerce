@@ -13,12 +13,6 @@ Director::addRules(50, array(
 	PayPalPayment_Handler::$URLSegment . '/$Action/$ID' => 'PayPalPayment_Handler'
 ));
 
-// This is the default shipping method class - SimpleShippingModifier.
-// To use your own one, copy this line, with the second argument as your
-// custom shipping class into mysite/_config.php - this will override
-// SimpleShippingModifier
-//Order::set_modifiers(array('SimpleShippingModifier'));
-
 // Add additional fields to the MemberTableField in the CMS for e-commerce.
 MemberTableField::addPermissions(array('show', 'export'));
 MemberTableField::addMembershipFields(array(
