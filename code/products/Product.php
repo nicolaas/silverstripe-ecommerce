@@ -220,10 +220,6 @@ class Product extends Page {
 	}
 }
 
-class Product_Attribute extends DataObject {
-
-}
-
 class Product_Controller extends Page_Controller {
 	
 	/**

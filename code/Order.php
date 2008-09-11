@@ -569,26 +569,6 @@ class Order_StatusEmail extends Email_Template {
 
 }
 
-/**
- * This class stores extra information about the order item,
- * such as colour, size, or type as defined in the Product
- * Attribute class
- */
-class Order_Item_Attribute extends Product_Attribute{
-	static $db = array(
-		"AttributeTitle" => "Varchar(50)",
-		"Type" => "Enum (array('Size','Colour','Subscription'),'Size')",
-		"Quantity" => "Int",
-		"UnitPrice" => "Currency",
-		"OrderID" => "Int",
-		"ProductID" => "Int",
-	);
-	static $has_one = array(
-		"Order_Item" => "Order_Item", // Internal field becomes OrderID, not Order
-		"Product_Atrribute" => "Product_Atrribute",
-	);
-}
-
 class Order_CancelForm extends Form {
 	
 	function __construct($controller, $name, $orderID) {
