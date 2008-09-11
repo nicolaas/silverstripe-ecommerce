@@ -60,12 +60,12 @@ class ProductGroup extends Page {
 	}
 	
 	function ProductsShowable($extraFilter, array $permissions) {
-		$filter = "`ShowInMenus` = '1' AND `AllowPurchase` = '1' AND $extraFilter";
-					
+		$filter = "`ShowInMenus` = '1' AND $extraFilter";
+		
 		// 1) Children Products
 		
 		$products = DataObject::get('Product', "`ParentID` = '$this->ID' AND $filter");
-				
+		
 		// 2) Products Many Many Related
 		
 		$products2 = $this->getManyManyComponents('Products', $filter);
