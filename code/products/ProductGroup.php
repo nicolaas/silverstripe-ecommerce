@@ -1,12 +1,10 @@
 <?php
 
-/**
- * @package ecommerce
- */
- 
  /**
   * Product Group is a 'holder' for Products within the CMS
   * It contains functions for versioning child products
+  * 
+  * @package ecommerce
   */
 class ProductGroup extends Page {
 	
@@ -18,18 +16,20 @@ class ProductGroup extends Page {
 		'Products' => 'Product'
 	);
 	
-	static $casting = array();
-	
-	static $allowed_children = array('Product', 'ProductGroup');
-	
 	static $default_child = 'Product';
 	
 	static $add_action = 'a Product Group Page';
 	
 	static $icon = 'cms/images/treeicons/folder';
 	
-	static $featured_products_permissions = array('Show Only Featured Products','Show All Products');
-	static $non_featured_products_permissions = array('Show All Products');
+	static $featured_products_permissions = array(
+		'Show Only Featured Products',
+		'Show All Products'
+	);
+	
+	static $non_featured_products_permissions = array(
+		'Show All Products'
+	);
 	
 	function getCMSFields() {
 		$fields = parent::getCMSFields();
@@ -37,7 +37,7 @@ class ProductGroup extends Page {
 			'Root.Content',
 			new Tab(
 				'Child Groups',
-				new HeaderField('How do I want to show the products present in the child groups ?'),
+				new HeaderField('How should products be presented in the child groups?'),
 				new DropdownField(
   					'ChildGroupsPermission',
   					'Permission',
@@ -60,22 +60,22 @@ class ProductGroup extends Page {
 	}
 	
 	function ProductsShowable($extraFilter, array $permissions) {
-		$filter = "`ShowInMenus` = '1' AND $extraFilter";
+		$filter = "`ShowInMenus` = 1 AND $extraFilter";
 		
 		// 1) Children Products
 		
-		$products = DataObject::get('Product', "`ParentID` = '$this->ID' AND $filter");
+		$products = DataObject::get('Product', "`ParentID` = $this->ID AND $filter");
 		
 		// 2) Products Many Many Related
 		
 		$products2 = $this->getManyManyComponents('Products', $filter);
-		if(! $products) $products = $products2;
+		if(!$products) $products = $products2;
 		else $products->merge($products2);
 		
 		// 3) Child Groups Products
 		
 		if(in_array($this->ChildGroupsPermission, $permissions)) {
-			if($groupChildren = DataObject::get('ProductGroup', "`ParentID` = '$this->ID' AND `ShowInMenus` = '1'")) {
+			if($groupChildren = DataObject::get('ProductGroup', "`ParentID` = $this->ID AND `ShowInMenus` = 1")) {
 				foreach($groupChildren as $groupChild) $products->merge($groupChild->ProductsShowable($extraFilter, $permissions));
 			}
 		}
@@ -87,19 +87,27 @@ class ProductGroup extends Page {
 		return $products;
 	}
 	
+	/**
+	 * Return products that are featured, that is
+	 * products that have "FeaturedProduct = 1"
+	 */
 	function FeaturedProducts() {
-		return $this->ProductsShowable("`FeaturedProduct` = '1'", self::$featured_products_permissions);
+		return $this->ProductsShowable("`FeaturedProduct` = 1", self::$featured_products_permissions);
 	}
 	
+	/**
+	 * Return products that are not featured, that is
+	 * products that have "FeaturedProduct = 0"
+	 */
 	function NonFeaturedProducts() {
-		return $this->ProductsShowable("`FeaturedProduct` = '0'", self::$non_featured_products_permissions);
+		return $this->ProductsShowable("`FeaturedProduct` = 0", self::$non_featured_products_permissions);
 	}
 		
 	/** 
 	 * Return ProductGroups as children of the current page
 	 */
 	function ChildGroups() {
-		return DataObject::get('ProductGroup', "`ShowInMenus` = '1' AND `ParentID` = '$this->ID'");
+		return DataObject::get('ProductGroup', "`ShowInMenus` = 1 AND `ParentID` = '$this->ID'");
 	}
 	
 	/**
@@ -142,6 +150,7 @@ class ProductGroup extends Page {
 			Database::alteration_message('Product group page \'Example product group\' created', 'created');
 		}
 	}
+	
 }
 
 class ProductGroup_Controller extends Page_Controller {
@@ -151,6 +160,8 @@ class ProductGroup_Controller extends Page_Controller {
 	 * otherwise use the module one instead
 	 */
 	function init() {
+		parent::init();
+
 		Requirements::javascript('ecommerce/javascript/jquery/jquery.js');
 		Requirements::javascript('ecommerce/javascript/jquery/jquery.domec.min.js');
 		Requirements::javascript('ecommerce/javascript/jquery/jquery.pagination.js');
@@ -160,8 +171,6 @@ class ProductGroup_Controller extends Page_Controller {
 		
 		Requirements::themedCSS('ProductGroup');
 		Requirements::themedCSS('Cart');
-		
-		parent::init();
 	}
 
 }

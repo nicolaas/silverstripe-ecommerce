@@ -16,9 +16,13 @@ class ProductVariation extends DataObject {
 		'Price' => 'Currency'
 	);
 	
-	static $versioning = array('Stage');
+	static $versioning = array(
+		'Stage'
+	);
 	
-	static $extensions = array("Versioned('Stage')");
+	static $extensions = array(
+		"Versioned('Stage')"
+	);
 	
 	function getCMSFields_forPopup() {
 		$fields = array();
@@ -27,14 +31,18 @@ class ProductVariation extends DataObject {
 		return new FieldSet($fields);
 	}
 	
-	function AllowPurchase() {return $this->Price;}
+	function AllowPurchase() {
+		return $this->Price;
+	}
 	
 	/*
 	 * Returns if the product variation is already in the shopping cart.
 	 * Note : This function is usable in the Product Variation context because a
 	 * ProductVariation_OrderItem only has a ProductVariation object in attribute
 	 */
-	function IsInCart() {return $this->Item() ? true : false;}
+	function IsInCart() {
+		return $this->Item() ? true : false;
+	}
 	
 	/*
 	 * Returns the order item which contains the product variation
@@ -53,12 +61,15 @@ class ProductVariation extends DataObject {
 		else return null;
 	}
 	
-	function addLink() {return $this->Product()->addVariationLink($this->ID);}
+	function addLink() {
+		return $this->Product()->addVariationLink($this->ID);
+	}
 }
 
 class ProductVariation_OrderItem extends Product_OrderItem {
 	
 	protected $_productVariationID;
+	
 	protected $_productVariationVersion;
 	
 	static $db = array(
@@ -97,27 +108,28 @@ class ProductVariation_OrderItem extends Product_OrderItem {
 		else return Versioned::get_version('ProductVariation', $this->_productVariationID, $this->_productVariationVersion);
 	}
 	
-	// Functions to overload
+	## Overloaded functions ##
 	
 	function hasSameContent($orderItem) {
 		$equals = parent::hasSameContent($orderItem);
 		return $equals && $orderItem instanceof ProductVariation_OrderItem && $this->_productVariationID == $orderItem->_productVariationID && $this->_productVariationVersion == $orderItem->_productVariationVersion;
 	}
 	
-	function UnitPrice() {return $this->ProductVariation()->Price;}
+	function UnitPrice() {
+		return $this->ProductVariation()->Price;
+	}
 	
-	function TableTitle() {return parent::TableTitle() . ' (' . $this->ProductVariation()->Title . ')';}
-	
-	// Database Writing Methods
+	function TableTitle() {
+		return parent::TableTitle() . ' (' . $this->ProductVariation()->Title . ')';
+	}
 	
 	function onBeforeWrite() {
 		parent::onBeforeWrite();
+
 		$this->ProductVariationID = $this->_productVariationID;
 		$this->ProductVariationVersion = $this->_productVariationVersion;
 	}
 	
-	// Debug Function
-		
 	public function debug() {
 		$title = $this->TableTitle();
 		$productVariationID = $this->_productVariationID;

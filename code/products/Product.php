@@ -1,12 +1,10 @@
 <?php
 
 /**
- * @package ecommerce
- */
- 
-/**
  * Product contains the actual individual products
  * data - including extra fields like Price and Weight
+ * 
+ * @package ecommerce
  */
 class Product extends Page {
 	
@@ -34,8 +32,6 @@ class Product extends Page {
 	static $defaults = array(
 		'AllowPurchase' => true
 	);
-	
-	static $casting = array();
 	
 	static $default_parent = 'ProductGroup';
 	
@@ -132,19 +128,29 @@ class Product extends Page {
 	
 	/**
 	 * Conditions for whether a product can be purchased.
+	 * 
 	 * If it has the checkbox for 'Allow this product to be purchased',
-	 * as well as having a price. Otherwise a user can't buy it.
+	 * as well as having a price, it can be purchased. Otherwise a user
+	 * can't buy it.
+	 * 
+	 * @return boolean
 	 */
-	function AllowPurchase() {return $this->AllowPurchase && $this->Price;}
+	function AllowPurchase() {
+		return $this->AllowPurchase && $this->Price;
+	}
 	
-	/*
+	/**
 	 * Returns if the product is already in the shopping cart.
 	 * Note : This function is usable in the Product context because a
 	 * Product_OrderItem only has a Product object in attribute
+	 * 
+	 * @return boolean
 	 */
-	function IsInCart() {return $this->Item() ? true : false;}
+	function IsInCart() {
+		return $this->Item() ? true : false;
+	}
 	
-	/*
+	/**
 	 * Returns the order item which contains the product
 	 * Note : This function is usable in the Product context because a
 	 * Product_OrderItem only has a Product object in attribute
@@ -176,18 +182,23 @@ class Product extends Page {
 		return $currentOrder->TaxInfo();
 	}
 	
-	function addLink() {return $this->Link() . 'add';}
-	function addVariationLink($id) {return $this->Link() . 'addVariation/' . $id;}
+	function addLink() {
+		return $this->Link() . 'add';
+	}
+
+	function addVariationLink($id) {
+		return $this->Link() . 'addVariation/' . $id;
+	}
 	
 	/**
-	 * Creates automatically two product pages when the ecommerce module is
-	 * added to a project
+	 * When the ecommerce module is first installed, and db/build
+	 * is invoked, create some default records in the database.
 	 */
 	function requireDefaultRecords() {
 		parent::requireDefaultRecords();
 		
-		if(! DataObject::get_one('Product')) {		
-			if(! DataObject::get_one('ProductGroup')) singleton('ProductGroup')->requireDefaultRecords();
+		if(!DataObject::get_one('Product')) {		
+			if(!DataObject::get_one('ProductGroup')) singleton('ProductGroup')->requireDefaultRecords();
 			if($group = DataObject::get_one('ProductGroup', '', true, '`ParentID` DESC')) {
 				$content = '<p>This is a <em>product</em>. It\'s description goes into the Content field as a standard SilverStripe page would have it\'s content. This is an ideal place to describe your product.</p>';
 				
@@ -218,6 +229,7 @@ class Product extends Page {
 			}
 		}
 	}
+	
 }
 
 class Product_Controller extends Page_Controller {
@@ -227,20 +239,18 @@ class Product_Controller extends Page_Controller {
 	 * otherwise use the module one instead
 	 */	
 	function init(){
+		parent::init();
+		
 		Requirements::javascript('ecommerce/javascript/jquery/jquery.js');
 		
 		Requirements::themedCSS('Product');
 		Requirements::themedCSS('Cart');
-
-		parent::init();
 	}
-		
-	/**
-	 * This is used by the OrderForm to add more of this product to the current cart.
-	 */
 	
-	/*
-	 * To Do : Replace return false
+	### This is used by the OrderForm to add more of this product to the current cart. ###
+	
+	/**
+	 * @TODO replace return false
 	 */
 	function add() {
 		if($this->AllowPurchase() && $this->Variations()->Count() == 0) {
@@ -250,8 +260,8 @@ class Product_Controller extends Page_Controller {
 		else return false;
 	}
 	
-	/*
-	 * To Do : Replace return false
+	/**
+	 * @TODO replace return false
 	 */
 	function addVariation() {
 		if($this->AllowPurchase && $id = $this->urlParams['ID']) {
@@ -270,6 +280,7 @@ class Product_Controller extends Page_Controller {
  * Class to support product images
  */
 class Product_Image extends Image {
+
 	static $db = null;
 
 	function generateThumbnail($gd) {
@@ -292,6 +303,7 @@ class Product_Image extends Image {
 class Product_OrderItem extends OrderItem {
 	
 	protected $_productID;
+	
 	protected $_productVersion;
 	
 	static $db = array(
@@ -309,6 +321,7 @@ class Product_OrderItem extends OrderItem {
 		if(is_array($product)) {
 			$this->ProductID = $this->_productID = $product['ProductID'];
 			$this->ProductVersion = $this->_productVersion = $product['ProductVersion'];
+			
 			parent::__construct($product, $quantity);
 		}
 		
@@ -316,6 +329,7 @@ class Product_OrderItem extends OrderItem {
 		
 		else if(is_object($product)) {
 			parent::__construct($product, $quantity);
+			
 			$this->_productID = $product->ID;
  			$this->_productVersion = $product->Version;
 		}
@@ -323,40 +337,42 @@ class Product_OrderItem extends OrderItem {
 		else parent::__construct();
 	}
 	
-	// Product Access Function
+	## Product Access Function ##
 	
-	/*
-	 * To DO : Add Lives and Drafts Values Management
+	/**
+	 * @TODO Add live/draft value management
 	 */
 	public function Product($current = false) {
 		if($current) return DataObject::get_by_id('Product', $this->_productID);
 		else return Versioned::get_version('Product', $this->_productID, $this->_productVersion);
 	}
 	
-	// Functions to overload
+	## Overloaded functions ##
 	
 	function hasSameContent($orderItem) {
 		$equals = parent::hasSameContent($orderItem);
 		return $equals && $orderItem instanceof Product_OrderItem && $this->_productID == $orderItem->_productID && $this->_productVersion == $orderItem->_productVersion;
 	}
 	
-	function UnitPrice() {return $this->Product()->Price;}
+	function UnitPrice() {
+		return $this->Product()->Price;
+	}
 	
-	function TableTitle() {return $this->Product()->Title;}
+	function TableTitle() {
+		return $this->Product()->Title;
+	}
+
 	function Link() {
 		if($product = $this->Product(true)) return $product->Link();
 	}
 				
-	// Database Writing Methods
-	
 	function onBeforeWrite() {
 		parent::onBeforeWrite();
+
 		$this->ProductID = $this->_productID;
 		$this->ProductVersion = $this->_productVersion;
 	}
 	
-	// Debug Function
-		
 	public function debug() {
 		$title = $this->TableTitle();
 		$productID = $this->_productID;
