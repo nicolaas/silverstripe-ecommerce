@@ -483,16 +483,6 @@
   		}
 	}
 	
-	/**
-	 * Creates the OrderStatusLog objects and sends the order status mails
-	 * if and only if the oder status has changed 
-	 */
-	function onBeforeWrite() {
-		parent::onBeforeWrite();
-		/*if($this->Status != $this->original['Status']) {
-			
-		}*/
-	}
 }
 
 /**
