@@ -6,7 +6,7 @@
  * but also can include references to other information such as 
  * product attributes like colour, size, or type.
  */
-class OrderItem extends Order_Attribute {
+class OrderItem extends OrderAttribute {
 	
 	protected $_quantity;
 	

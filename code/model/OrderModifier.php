@@ -8,7 +8,7 @@
  * The OrderModifier class is a databound object for handling the additionale charges or deductions of an order.
  */
  
-class OrderModifier extends Order_Attribute {
+class OrderModifier extends OrderAttribute {
 
 	static $db = array(
 		'Amount' => 'Currency',
