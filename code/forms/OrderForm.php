@@ -13,7 +13,6 @@ class OrderForm extends Form {
 		Requirements::themedCSS('OrderForm');
 		
 		// 1) Member and shipping fields
-		
 		$member = Member::currentUser() ? Member::currentUser() : new Member();
 		$memberFields = $member->getEcommerceFields();
 		$requiredFields = $member->getEcommerceRequiredFields();
@@ -37,8 +36,7 @@ class OrderForm extends Form {
 			$requiredFields[] = 'ShippingAddress';
 			$requiredFields[] = 'ShippingCity';
 			$requiredFields[] = 'ShippingCountry';
-		}
-		else {
+		} else {
 			$countryField = $memberFields->fieldByName('Country');
 			$shippingFields = new FormAction_WithoutLabel('useDifferentShippingAddress', 'Use Different Shipping Address');
 		}
@@ -55,7 +53,7 @@ class OrderForm extends Form {
 		$rightFields = new CompositeField();
 		$rightFields->setID('RightOrder');
 		
-		if(! $member->ID || $member->Password == '') {
+		if(!$member->ID || $member->Password == '') {
 			$rightFields->push(new HeaderField('Membership Details', 3));
 			$rightFields->push(new LiteralField('MemberInfo', "<p class=\"message good\">If your are already a member, please <a href=\"Security/login?BackURL=" . CheckoutPage::find_link(true) . "/\">login</a>.</p>"));
 			$rightFields->push(new LiteralField('AccountInfo', "<p>Please choose a password, so you can login and check your order history in the future.</p><br/>"));
@@ -66,7 +64,6 @@ class OrderForm extends Form {
 		}
 		
 		// 2) Payment fields
-		
 		$currentOrder = ShoppingCart::current_order();
 		$total = '$' . number_format($currentOrder->Total(), 2);
 		$paymentFields = Payment::combined_form_fields("$total " . $currentOrder->Currency(), $currentOrder->Total());
@@ -75,11 +72,9 @@ class OrderForm extends Form {
 		if($paymentRequiredFields = Payment::combined_form_requirements()) $requiredFields = array_merge($requiredFields, $paymentRequiredFields);
 		
 		// 3) Put all the fields in one FieldSet
-		
 		$fields = new FieldSet($leftFields, $rightFields);
 		
 		// 4) Terms and conditions field
-		
 		// If a terms and conditions page exists, we need to create a field to confirm the user has read it
 		if($controller->TermsPageID && $termsPage = DataObject::get_by_id('Page', $controller->TermsPageID)) {
 			$bottomFields = new CompositeField(new CheckboxField('ReadTermsAndConditions', "I agree to the terms and conditions stated on the <a href=\"$termsPage->URLSegment\" title=\"Read the shop terms and conditions for this site\">terms and conditions</a> page"));
@@ -91,21 +86,16 @@ class OrderForm extends Form {
 		}
 		
 		// 5) Actions and required fields creation
-		
-		$actions = 	new FieldSet(new FormAction('processOrder', 'Place order and make payment'));
-		
+		$actions = new FieldSet(new FormAction('processOrder', 'Place order and make payment'));
 		$requiredFields = new CustomRequiredFields($requiredFields);
 		
 		// 6) Form construction
-		
 		parent::__construct($controller, $name, $fields, $actions, $requiredFields);
 		
 		// 7) Member details loading
-		
 		if($member->ID)	$this->loadNonBlankDataFrom($member);
 		
 		// 8) Country field value update
-		
 		$currentOrder = ShoppingCart::current_order();
 		$currentOrderCountry = $currentOrder->findShippingCountry(true);
 		$countryField->setValue($currentOrderCountry);
@@ -144,57 +134,51 @@ class OrderForm extends Form {
 	function processOrder($data, $form) {
 		
 		// 1) Check to see if there are still items in the current order
-		
-		if(ShoppingCart::has_items()) {
-			
-			// 2) Save the member details
-			
-			$member = EcommerceRole::createOrMerge($data);
-			$member->write();
-			$member->logIn();
-			
-			// 3) Save the current order details (items and modifiers) (which are at the moment in the session) in the database and clear the session
-			
-			$order = ShoppingCart::save_current_order();
-			ShoppingCart::clear();
-			
-			// 4) Save shipping address details
-			
-			$form->saveInto($order);
-			
-			$order->write();
-			
-			// 5) Proceed to payment
-						
-			// Save payment data from form and process payment
-			$payment = Object::create($data['PaymentMethod']);
-			if(! $payment instanceof Payment) user_error(get_class($payment) . ' is not a Payment object !', E_USER_ERROR);
-			$form->saveInto($payment);
-			$payment->OrderID = $order->ID;
-			$payment->Amount = $order->Total();
-			$payment->write();
-			
-			$result = $payment->processPayment($data, $form);
-			
-			// a) Long payment process redirected to another website (PayPal, Worldpay)
-			if($result->isProcessing()) return $result->getValue();
-			
-			// b) Successful payment
-			else if($result->isSuccess()) $order->sendReceipt();
-			
-			Director::redirect($order->Link());
-			return;
-			/*else { // Failed payment
-				$form->sessionMessage("Sorry, your payment was not accepted, please try again<br/><strong>$result[HelpText]:</strong> $result[MerchantHelpText]", 'bad');
-	 			Director::redirect(CheckoutPage::find_link() . $order->ID);
-	 			return;
-			}*/
-		}
-		else { // There is no items in the current order
+		if(!ShoppingCart::has_items()) {
 			$form->sessionMessage('Please add some items to your cart', 'warning');
-		   	Director::redirectBack();
-		   	return;
+	   	Director::redirectBack();
+	   	return;
 		}
+					
+		// 2) Save the member details
+		$member = EcommerceRole::createOrMerge($data);
+		$member->write();
+		$member->logIn();
+		
+		// 3) Save the current order details (items and modifiers)
+		// (which are at the moment in the session) in the database
+		// and clear the session
+		$order = ShoppingCart::save_current_order();
+		ShoppingCart::clear();
+		
+		// 4) Save shipping address details
+		$form->saveInto($order);
+		
+		$order->write();
+
+		// 5) Proceed to payment
+		// Save payment data from form and process payment
+		$payment = Object::create($data['PaymentMethod']);
+		
+		if(!$payment instanceof Payment) {
+			user_error(get_class($payment) . ' is not a Payment object !', E_USER_ERROR);
+		}
+		
+		$form->saveInto($payment);
+		$payment->OrderID = $order->ID;
+		$payment->Amount = $order->Total();
+		$payment->write();
+		
+		$result = $payment->processPayment($data, $form);
+		
+		// a) Long payment process redirected to another website (PayPal, Worldpay)
+		if($result->isProcessing()) return $result->getValue();
+		
+		// b) Successful payment
+		else if($result->isSuccess()) $order->sendReceipt();
+		
+		Director::redirect($order->Link());
+		return;
 	}
 }
 
