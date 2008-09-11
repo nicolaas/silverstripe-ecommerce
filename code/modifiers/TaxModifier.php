@@ -23,7 +23,9 @@ class TaxModifier extends OrderModifier {
 	);
 	
 	static $names_by_country;
+	
 	static $rates_by_country;
+
 	static $excl_by_country;
 	
 	/**
@@ -45,23 +47,49 @@ class TaxModifier extends OrderModifier {
 	
 	// Attributes Functions
 	
-	function Country() {return $this->ID ? $this->Country : $this->LiveCountry();}
-	function Rate() {return $this->ID ? $this->Rate : $this->LiveRate();}
-	function Name() {return $this->ID ? $this->Name : $this->LiveName();}
-	function IsExclusive() {return $this->ID ? $this->TaxType == 'Exclusive' : $this->LiveIsExclusive();}
+	function Country() {
+		return $this->ID ? $this->Country : $this->LiveCountry();
+	}
 	
-	protected function LiveCountry() {return EcommerceRole::findCountry();}
-	protected function LiveRate() {return self::$rates_by_country[$this->LiveCountry()];}
-	protected function LiveName() {return self::$names_by_country[$this->LiveCountry()];}
-	protected function LiveIsExclusive() {return self::$excl_by_country[$this->LiveCountry()];}
+	function Rate() {
+		return $this->ID ? $this->Rate : $this->LiveRate();
+	}
 	
-	function LiveAmount() {return $this->AddedCharge();}
+	function Name() {
+		return $this->ID ? $this->Name : $this->LiveName();
+	}
+	
+	function IsExclusive() {
+		return $this->ID ? $this->TaxType == 'Exclusive' : $this->LiveIsExclusive();
+	}
+	
+	protected function LiveCountry() {
+		return EcommerceRole::findCountry();
+	}
+	
+	protected function LiveRate() {
+		return self::$rates_by_country[$this->LiveCountry()];
+	}
+	
+	protected function LiveName() {
+		return self::$names_by_country[$this->LiveCountry()];
+	}
+	
+	protected function LiveIsExclusive() {
+		return self::$excl_by_country[$this->LiveCountry()];
+	}
+	
+	function LiveAmount() {
+		return $this->AddedCharge();
+	}
 	
 	/**
 	 * Get the tax amount that needs to be added to the given order.
 	 * If tax is inclusive, then this will be 0
 	 */
-	function AddedCharge() {return $this->IsExclusive() ? $this->Charge() : 0;}
+	function AddedCharge() {
+		return $this->IsExclusive() ? $this->Charge() : 0;
+	}
 	
 	/**
 	 * Get the tax amount on the given order.
@@ -79,12 +107,16 @@ class TaxModifier extends OrderModifier {
 					
 	// Display Functions
 	
-	function ShowInTable() {return $this->Rate();}
+	function ShowInTable() {
+		return $this->Rate();
+	}
 	
 	/*
 	 * Precondition : Their is a rate
 	 */
-	function TableTitle() {return number_format($this->Rate() * 100, 1) . '% ' . $this->Name() . ($this->IsExclusive() ? '' : ' (included in the above price)');}
+	function TableTitle() {
+		return number_format($this->Rate() * 100, 1) . '% ' . $this->Name() . ($this->IsExclusive() ? '' : ' (included in the above price)');
+	}
 	
 	// Database Writing Function
 	
@@ -93,6 +125,7 @@ class TaxModifier extends OrderModifier {
 	 */
 	public function onBeforeWrite() {
 		parent::onBeforeWrite();
+		
 		$this->Country = $this->LiveCountry();
 		$this->Rate = $this->LiveRate();
 		$this->Name = $this->LiveName();

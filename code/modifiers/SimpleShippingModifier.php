@@ -17,9 +17,13 @@ class SimpleShippingModifier extends OrderModifier {
 	);
 		
 	static $default_charge = 0;
-	static function set_default_charge($defaultCharge) {self::$default_charge = $defaultCharge;}
+	
+	static function set_default_charge($defaultCharge) {
+		self::$default_charge = $defaultCharge;
+	}
 	
 	static $charges_by_country = array();
+	
 	/**
 	 * Set shipping charges on a country by country basis. 
 	 * For example, SimpleShippingModifier::set_charges_for_countries(array(
@@ -34,8 +38,13 @@ class SimpleShippingModifier extends OrderModifier {
 	
 	// Attributes Functions
 	
-	function Country() {return $this->ID ? $this->Country : $this->LiveCountry();}
-	function IsDefaultCharge() {return $this->ID ? $this->ShippingChargeType == 'Default' : $this->LiveIsDefaultCharge();}
+	function Country() {
+		return $this->ID ? $this->Country : $this->LiveCountry();
+	}
+	
+	function IsDefaultCharge() {
+		return $this->ID ? $this->ShippingChargeType == 'Default' : $this->LiveIsDefaultCharge();
+	}
 	
 	protected function LiveCountry() {
 		$order = ShoppingCart::current_order();
@@ -49,17 +58,24 @@ class SimpleShippingModifier extends OrderModifier {
 	/**
 	 * Find the amount for the shipping on the shipping country for the order.
 	 */
-	function LiveAmount() {return $this->LiveIsDefaultCharge() ? self::$default_charge : self::$charges_by_country[$this->LiveCountry()];}
+	function LiveAmount() {
+		return $this->LiveIsDefaultCharge() ? self::$default_charge : self::$charges_by_country[$this->LiveCountry()];
+	}
 	
 	// Display Functions
 	
-	function ShowInCart() {return $this->Total() > 0;}
+	function ShowInCart() {
+		return $this->Total() > 0;
+	}
 	
 	function TableTitle() {
 		$country = Geoip::countryCode2name($this->Country());
 		return "Shipping to $country";
 	}
-	function CartTitle() {return 'Shipping';}
+	
+	function CartTitle() {
+		return 'Shipping';
+	}
 	
 	// Database Writing Function
 	
@@ -68,6 +84,7 @@ class SimpleShippingModifier extends OrderModifier {
 	 */
 	function onBeforeWrite() {
 		parent::onBeforeWrite();
+		
 		$this->Country = $this->LiveCountry();
 		$this->ShippingChargeType = $this->LiveIsDefaultCharge() ? 'Default' : 'ForCountry';
 	}
