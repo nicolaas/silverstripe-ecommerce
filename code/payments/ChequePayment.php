@@ -27,12 +27,17 @@ class ChequePayment extends Payment {
 			new HiddenField("Cheque", "Cheque", 0)
 		);
 	}
-	function getPaymentFormRequirements() {return null;}
+	
+	function getPaymentFormRequirements() {
+		return null;
+	}
 
 	/**
 	 * Returns the Cheque content from the CheckoutPage
 	 */
-	function ChequeContent() {return DataObject::get_one('CheckoutPage')->ChequeMessage;}
+	function ChequeContent() {
+		return DataObject::get_one('CheckoutPage')->ChequeMessage;
+	}
 	
 }
 

@@ -38,6 +38,7 @@ class DPSPayment extends Payment {
 	// DPS Informations
 	
 	protected static $privacy_link = 'http://www.paymentexpress.com/privacypolicy.htm';
+	
 	protected static $logo = 'ecommerce/images/payments/dps.gif';
 	
 	// URLs
@@ -47,14 +48,19 @@ class DPSPayment extends Payment {
 	// Payment Informations
 	
 	protected static $username;
+	
 	protected static $password;
+	
 	static function set_account($username, $password) {
 		self::$username = $username;
 		self::$password = $password;
 	}
 	
 	protected static $cvn_mode = true;
-	static function unset_cvn_mode() {self::$cvn_mode = false;}
+	
+	static function unset_cvn_mode() {
+		self::$cvn_mode = false;
+	}
 		
 	protected static $credit_cards = array(
 		'Visa' => 'ecommerce/images/payments/methods/visa.jpg',
@@ -63,7 +69,10 @@ class DPSPayment extends Payment {
 		'Dinners Club' => 'ecommerce/images/payments/methods/dinners-club.jpg',
 		'JCB' => 'ecommerce/images/payments/methods/jcb.jpg'
 	);
-	static function remove_credit_card($creditCard) {unset(self::$credit_cards[$creditCard]);}
+	
+	static function remove_credit_card($creditCard) {
+		unset(self::$credit_cards[$creditCard]);
+	}
 	
 	function getPaymentFormFields() {
 		$logo = '<img src="' . self::$logo . '" alt="Credit card payments powered by DPS"/>';
