@@ -1,11 +1,10 @@
 <?php
 
-/**
- * @package ecommerce
- */
- 
  /**
-  * Order form for the checkout object
+  * Order form that allows a user to purchase their
+  * order items on the {@see CheckoutPage}
+  * 
+  * @package ecommerce
   */
 class OrderForm extends Form {
 	

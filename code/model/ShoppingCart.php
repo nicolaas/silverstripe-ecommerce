@@ -1,12 +1,10 @@
 <?php
 
 /**
- * @package ecommerce
- */
- 
-/**
  * The ShoppingCart class is a 'data handler' for the Order object.
  * It turns the order into a shopping cart.
+ * 
+ * @package ecommerce
  */
 class ShoppingCart extends Object {
 		

@@ -5,6 +5,7 @@ class PaystationPayment extends Payment {
 	// Paystation Informations
 	
 	protected static $privacy_link = 'http://paystation.co.nz/privacy-policy';
+	
 	protected static $logo = 'ecommerce/images/payments/paystation.jpg';
 	
 	// URLs
@@ -14,12 +15,18 @@ class PaystationPayment extends Payment {
 	// Test Mode
 
 	protected static $test_mode = false;
-	static function set_test_mode() {self::$test_mode = true;}
+	
+	static function set_test_mode() {
+		self::$test_mode = true;
+	}
 
 	// Payment Informations
 
 	protected static $merchant_id;
-	static function set_merchant_id($merchant_id) {self::$merchant_id = $merchant_id;}
+	
+	static function set_merchant_id($merchant_id) {
+		self::$merchant_id = $merchant_id;
+	}
 	
 	function getPaymentFormFields() {
 		$logo = '<img src="' . self::$logo . '" alt="Credit card payments powered by Paystation"/>';

@@ -3,9 +3,9 @@
 /**
  * Payment class.
  * Use this to process all manner of payments
+ * 
  * @package ecommerce
  */
-
 class Payment extends DataObject {
 	
 	public static $testCredentials, $liveCredentials;

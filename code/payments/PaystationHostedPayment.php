@@ -2,9 +2,10 @@
 
 class PaystationHostedPayment extends Payment {
 	
-	// Paystation Informations
+	// Paystation Information
 	
 	protected static $privacy_link = 'http://paystation.co.nz/privacy-policy';
+	
 	protected static $logo = 'ecommerce/images/payments/paystation.jpg';
 	
 	// URLs
@@ -14,15 +15,24 @@ class PaystationHostedPayment extends Payment {
 	// Test Mode
 
 	protected static $test_mode = false;
-	static function set_test_mode() {self::$test_mode = true;}
+	
+	static function set_test_mode() {
+		self::$test_mode = true;
+	}
 	
 	// Payment Informations
 
 	protected static $merchant_id;
-	static function set_merchant_id($merchant_id) {self::$merchant_id = $merchant_id;}
+	
+	static function set_merchant_id($merchant_id) {
+		self::$merchant_id = $merchant_id;
+	}
 	
 	protected static $merchant_ref;
-	static function set_merchant_ref($merchant_ref) {self::$merchant_ref = $merchant_ref;}
+	
+	static function set_merchant_ref($merchant_ref) {
+		self::$merchant_ref = $merchant_ref;
+	}
 	
 	function getPaymentFormFields() {
 		$logo = '<img src="' . self::$logo . '" alt="Credit card payments powered by Paystation"/>';
@@ -38,7 +48,9 @@ class PaystationHostedPayment extends Payment {
 		);
 	}
 	
-	function getPaymentFormRequirements() {return null;}
+	function getPaymentFormRequirements() {
+		return null;
+	}
 	
 	function processPayment($data, $form) {
 		$page = new Page();
@@ -88,7 +100,9 @@ class PaystationHostedPayment_Handler extends Controller {
 
 	static $URLSegment = 'paystation';
 	
-	static function complete_link() {return self::$URLSegment . '/complete';}
+	static function complete_link() {
+		return self::$URLSegment . '/complete';
+	}
 	
 	function complete() {
 		if(isset($_REQUEST['ec'])) {
@@ -108,6 +122,7 @@ class PaystationHostedPayment_Handler extends Controller {
 		}
 		else user_error('There is no any Paystation hosted payment error code specified', E_USER_ERROR);
 	}
+	
 }
 
 ?>

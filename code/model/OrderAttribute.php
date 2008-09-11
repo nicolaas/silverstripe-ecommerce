@@ -1,5 +1,12 @@
-<?
+<?php
 
+/**
+ * OrderAttribute is an attribute which makes up
+ * an Order. {@see OrderModifier} and
+ * {@see OrderItem} for implementations of it.
+ * 
+ * @package ecommerce
+ */
 class OrderAttribute extends DataObject {
 	
 	protected $_id;

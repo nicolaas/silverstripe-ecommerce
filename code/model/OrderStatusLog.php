@@ -1,12 +1,10 @@
 <?php
 
 /**
+ * Class which implement a log object to keep a
+ * history of the status changes of an order.
+ * 
  * @package ecommerce
- */
- 
-/**
- * Class which implement a log object to keep a history of the status changes
- * of an order
  */
 class OrderStatusLog extends DataObject {
 	

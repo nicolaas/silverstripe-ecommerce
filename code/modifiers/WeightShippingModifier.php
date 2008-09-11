@@ -1,14 +1,13 @@
 <?php
 
 /**
- * @package ecommerce
- */
- 
-/**
  * Calculates the shipping cost of an order, by taking the products
  * and calculating the shipping weight, based on an array set in _config
+ * 
  * ASSUMPTION: The total order weight can be at maximum the last item
  * in the $shippingCosts array.
+ * 
+ * @package ecommerce
  */
 class WeightShippingModifier extends OrderModifier {
 	

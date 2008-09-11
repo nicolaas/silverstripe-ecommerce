@@ -1,68 +1,104 @@
 <?php
 
 /**
- * @package ecommerce
- */
- 
-/**
  * Sub-class of Payment that supports Worldpay as its payment processor
- **/ 
- 
-/** 
- *  Configuration
- *  =============
- *  You need to define the installation ID, test mode and callback
- *  password in _config.php of your project:
- *  WorldpayPayment::set_installation_id(111111);
- *  WorldpayPayment::set_testmode(100);
- *  WorldpayPayment::set_callback_password(blahblah);
+ *  
+ * Configuration
+ * =============
+ * You need to define the installation ID, test mode and callback
+ * password in _config.php of your project:
+ * WorldpayPayment::set_installation_id(111111);
+ * WorldpayPayment::set_testmode(100);
+ * WorldpayPayment::set_callback_password(blahblah);
+ * 
+ * @package ecommerce
  */
 class WorldpayPayment extends Payment {
 	
 	// WorldPay Informations
 	
 	protected static $privacy_link = 'http://www.worldpay.com/about_us/index.php?page=privacy';
+
 	protected static $logo = 'ecommerce/images/payments/worldpay.gif';
 	
 	// URL
 
 	protected static $url = 'https://select.worldpay.com/wcc/purchase';
+	
 	protected static $test_url = 'https://select-test.worldpay.com/wcc/purchase';
 	
 	// Test Mode
 
 	protected static $test_mode = false;
+	
 	protected static $test_mode_name;
+	
 	protected static function set_test_mode($name) {
 		self::$test_mode = '100';
 		self::$test_mode_name = $name;
 	}
-	static function set_test_mode_refused_transaction() {self::set_test_mode('REFUSED');}
-	static function set_test_mode_authorised_transaction() {self::set_test_mode('AUTHORISED');}
-	static function set_test_mode_error_transaction() {self::set_test_mode('ERROR');}
-	static function set_test_mode_captured_transaction() {self::set_test_mode('CAPTURED');}
+	
+	static function set_test_mode_refused_transaction() {
+		self::set_test_mode('REFUSED');
+	}
+	
+	static function set_test_mode_authorised_transaction() {
+		self::set_test_mode('AUTHORISED');
+	}
+	
+	static function set_test_mode_error_transaction() {
+		self::set_test_mode('ERROR');
+	}
+	
+	static function set_test_mode_captured_transaction() {
+		self::set_test_mode('CAPTURED');
+	}
 	
 	// Payment Informations
 	
 	protected static $installation_id;
-	static function set_installation_id($installation_id) {self::$installation_id = $installation_id;}
+	
+	static function set_installation_id($installation_id) {
+		self::$installation_id = $installation_id;
+	}
 	
 	protected static $result_file;
-	static function set_result_file($result_file) {self::$result_file = $result_file;}
+	
+	static function set_result_file($result_file) {
+		self::$result_file = $result_file;
+	}
 	
 	protected static $merchant_code;
-	static function set_merchant_code($merchant_code) {self::$merchant_code = $merchant_code;}
+	
+	static function set_merchant_code($merchant_code) {
+		self::$merchant_code = $merchant_code;
+	}
 	
 	protected static $authorisation_mode;
-	static function set_authorisation_mode_full() {self::$authorisation_mode = 'A';}
-	static function set_authorisation_mode_pre() {self::$authorisation_mode = 'E';}
-	static function set_authorisation_mode_post() {self::$authorisation_mode = 'O';}
+	
+	static function set_authorisation_mode_full() {
+		self::$authorisation_mode = 'A';
+	}
+	
+	static function set_authorisation_mode_pre() {
+		self::$authorisation_mode = 'E';
+	}
+	
+	static function set_authorisation_mode_post() {
+		self::$authorisation_mode = 'O';
+	}
 	
 	protected static $authorisation_valid_from;
-	static function set_authorisation_valid_from($authorisation_valid_from) {self::$authorisation_valid_from = $authorisation_valid_from;}
+	
+	static function set_authorisation_valid_from($authorisation_valid_from) {
+		self::$authorisation_valid_from = $authorisation_valid_from;
+	}
 	
 	protected static $authorisation_valid_to;
-	static function set_authorisation_valid_to($authorisation_valid_to) {self::$authorisation_valid_to = $authorisation_valid_to;}
+	
+	static function set_authorisation_valid_to($authorisation_valid_to) {
+		self::$authorisation_valid_to = $authorisation_valid_to;
+	}
 		
 	static $callback_password;
 		static function set_callback_password($pass) {
@@ -85,7 +121,9 @@ class WorldpayPayment extends Payment {
 		);
 	}
 	
-	function getPaymentFormRequirements() {return null;}
+	function getPaymentFormRequirements() {
+		return null;
+	}
 	
 	function processPayment($data, $form) {
 		$page = new Page();
@@ -177,7 +215,9 @@ class WorldpayPayment_Handler extends Controller {
 	
 	static $URLSegment = 'worldpay';
 	
-	static function complete_link() {return self::$URLSegment . '/complete';}
+	static function complete_link() {
+		return self::$URLSegment . '/complete';
+	}
 	
 	/**
 	 * Get the Order object to modify, check security that it's the object you want to modify based

@@ -1,60 +1,62 @@
 <?php
 
-
 /**
- * @package ecommerce
- */
-
-/**
- * Sub-class of Payment that supports PayPal Website Payment Standard 
+ * Implementation of Payment that supports PayPal Website Payment Standard 
  * (https://www.paypal.com/IntegrationCenter/ic_standard_home.html) as its payment processor
- 
- Configure using 
-  PayPalPayment::setMyVariable(value); 
- in www.mysite.com/ecommerce/_config.php file
-
- Must configure:
- $setPayPalRealAccount;
- $setPayPalTestAccount;
- $setPayPalUseTestAccount;
- 
- May configure
- $setPayPalImageLocation;
- $setPayPalContinueNextButton;
- $setPayPalPurchaseName;
- $setPayPalCppHeaderImage;
- $setPayPalCppHeaderBackcolor;
- $setPayPalCppHeaderBordercolor;
- $setPayPalCppPayflowColor;
- $setPayPalCs;
- 
- REQUIREMENTS:
-  need to add: "PayPalInstructions" field to CheckoutPage.php
-  static $db = array(
-   "PayPalInstructions" => "HTMLText"
-  );
-  
-  have a PayPalPaymentPage.ss template or replace some code below (search for renderwith)
-  on the PayPalPaymentPage you can use $PayPalInstructions (see above)
-  
-**/
-
+ * 
+ * Configure using PayPalPayment::setMyVariable(value); 
+ * in www.mysite.com/ecommerce/_config.php file
+ * 
+ * Must configure:
+ * 
+ * $setPayPalRealAccount;
+ * $setPayPalTestAccount;
+ * $setPayPalUseTestAccount;
+ * 
+ * Optionally configure:
+ * 
+ * $setPayPalImageLocation;
+ * $setPayPalContinueNextButton;
+ * $setPayPalPurchaseName;
+ * $setPayPalCppHeaderImage;
+ * $setPayPalCppHeaderBackcolor;
+ * $setPayPalCppHeaderBordercolor;
+ * $setPayPalCppPayflowColor;
+ * $setPayPalCs;
+ * REQUIREMENTS:
+ * 
+ * Need to add: "PayPalInstructions" field to CheckoutPage.php
+ * 
+ * static $db = array(
+ *   "PayPalInstructions" => "HTMLText"
+ * );
+ * 
+ * Have a PayPalPaymentPage.ss template or replace some code below
+ * (search for renderWith). On the PayPalPaymentPage you can use
+ * $PayPalInstructions (see above)
+ * 
+ * @package ecommerce 
+ */
 class PayPalPayment extends Payment {
 	
 	// PayPal Informations
 	
 	protected static $privacy_link = 'https://www.paypal.com/us/cgi-bin/webscr?cmd=p/gen/ua/policy_privacy-outside';
+	
 	protected static $logo = 'ecommerce/images/payments/paypal.jpg';
 	
 	// URLs
 
 	protected static $url = 'https://www.paypal.com/cgi-bin/webscr';
+	
 	protected static $test_url = 'https://www.sandbox.paypal.com/cgi-bin/webscr';
 
 	// Test Mode
 
 	protected static $test_mode = false;
+	
 	protected static $test_account_email;
+	
 	static function set_test_mode($test_account_email) {
 		self::$test_mode = true;
 		self::$test_account_email = $test_account_email;
@@ -63,32 +65,41 @@ class PayPalPayment extends Payment {
 	// Payment Informations
 
 	protected static $account_email;
+	
 	static function set_account_email($account_email) {self::$account_email = $account_email;}
 
 	// PayPal Pages Style Optional Informations
 
 	protected static $continue_button_text;
+	
 	static function set_continue_button_text($continue_button_text) {self::$continue_button_text = $continue_button_text;}
 
 	protected static $header_image_url;
+	
 	static function set_header_image_url($header_image_url) {self::$header_image_url = $header_image_url;}
 
 	protected static $header_back_color;
+	
 	static function set_header_back_color($header_back_color) {self::$header_back_color = $header_back_color;}
 
 	protected static $header_border_color;
+	
 	static function set_header_border_color($header_border_color) {self::$header_border_color = $header_border_color;}
 
 	protected static $payflow_color;
+	
 	static function set_payflow_color($payflow_color) {self::$payflow_color = $payflow_color;}
 
 	protected static $back_color;
+	
 	static function set_back_color_black() {self::$back_color = '1';}
 
 	protected static $image_url;
+	
 	static function set_image_url($image_url) {self::$image_url = $image_url;}
 
 	protected static $page_style;
+	
 	static function set_page_style($page_style) {self::$page_style = $page_style;}
 	
 	function getPaymentFormFields() {
@@ -208,8 +219,13 @@ class PayPalPayment_Handler extends Controller {
 
 	static $URLSegment = 'paypal';
 	
-	static function complete_link() {return self::$URLSegment . '/complete';}
-	static function cancel_link($custom) {return self::complete_link() . '?custom=' . $custom;}
+	static function complete_link() {
+		return self::$URLSegment . '/complete';
+	}
+	
+	static function cancel_link($custom) {
+		return self::complete_link() . '?custom=' . $custom;
+	}
 
 	/**
 	 * Manages the 'return' and 'cancel' PayPal replies

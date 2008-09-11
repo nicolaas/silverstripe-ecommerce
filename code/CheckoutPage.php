@@ -164,13 +164,17 @@ class CheckoutPage_Controller extends Page_Controller {
 	 * Returns a DataObjectSet which contains the forms to add some modifiers to update the OrderInformation table
 	 * Precondition : the user can checkout
 	 */
-	function ModifierForms() {return Order::get_modifier_forms($this);}
+	function ModifierForms() {
+		return Order::get_modifier_forms($this);
+	}
 	
 	/**
 	 * Returns the OrderForm object
 	 * Precondition : the user can checkout
 	 */
-	function OrderForm() {return new OrderForm($this, 'OrderForm');}
+	function OrderForm() {
+		return new OrderForm($this, 'OrderForm');
+	}
 	
 	/**
 	 * Returns the reason why the user can not checkout

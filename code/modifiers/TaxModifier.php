@@ -1,17 +1,17 @@
 <?php
 
 /**
- * @package ecommerce
- */
-
-/**
  * Handles calculation of sales tax on Orders.
  * If you would like to make your own tax calculator, create a subclass of
  * this and link it in using Order::set_modifiers()
  * 
- * Configuration:
+ * Sample configuration in your _config.php:
+ * 
  * TaxModifier::set_for_country("NZ", 0.125, "GST", "inclusive")
+ * 
  * See {@link set_for_country} for more information
+ * 
+ * @package ecommerce
  */
 class TaxModifier extends OrderModifier {
 	
@@ -29,11 +29,14 @@ class TaxModifier extends OrderModifier {
 	static $excl_by_country;
 	
 	/**
-	 * Set the tax information for a particular country.  By default, no tax is charged.
-	 * @param $country String The two-letter country code
-	 * @param $rate Float The tax rate, eg, 0.125 = 12.5%
-	 * @param $name String The name to give to the tax, eg, "GST"
-	 * @param $inclexcl String "inclusive" if the prices are tax-inclusive.  "exclusive" if tax should be added to the order total.
+	 * Set the tax information for a particular country.
+	 * By default, no tax is charged.
+	 * 
+	 * @param $country string The two-letter country code
+	 * @param $rate float The tax rate, eg, 0.125 = 12.5%
+	 * @param $name string The name to give to the tax, eg, "GST"
+	 * @param $inclexcl string "inclusive" if the prices are tax-inclusive.
+	 * 						"exclusive" if tax should be added to the order total.
 	 */
 	static function set_for_country($country, $rate, $name, $inclexcl) {
 		self::$names_by_country[$country] = $name;

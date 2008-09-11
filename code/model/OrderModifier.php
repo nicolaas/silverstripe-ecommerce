@@ -1,13 +1,12 @@
 <?php
 
-/**
+/** 
+ * The OrderModifier class is a databound object for
+ * handling the additional charges or deductions of
+ * an order.
+ * 
  * @package ecommerce
  */
- 
-/** 
- * The OrderModifier class is a databound object for handling the additionale charges or deductions of an order.
- */
- 
 class OrderModifier extends OrderAttribute {
 
 	static $db = array(

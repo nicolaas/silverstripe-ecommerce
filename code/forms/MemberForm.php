@@ -1,12 +1,10 @@
 <?php
 
-/**
- * @package ecommerce
- */
- 
  /**
   * MemberForm has a set of fields for the AccountPage object.
   * It allows the shop member to edit their details.
+  * 
+  * @package ecommerce
   */
 class MemberForm extends Form {
 	

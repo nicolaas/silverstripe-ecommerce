@@ -1,13 +1,11 @@
 <?php
 
-/**
+/** 
+ * @TODO What does this class do in relation to
+ * {@see OrderModifier} ?
+ * 
  * @package ecommerce
  */
- 
-/** 
- * The OrderModifier class is a databound object for handling the additionale charges or deductions of an order.
- */
- 
 class OrderModifierForm extends Form {
 	/*
 	protected $order;

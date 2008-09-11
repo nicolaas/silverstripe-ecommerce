@@ -1,10 +1,6 @@
 <?php
 
 /**
- * @package ecommerce
- */
-
-/**
  * Payment type to support credit-card payments through DPS.
  * 	
  * Supported currencies: 
@@ -28,11 +24,11 @@
  * 	MYR 	Malaysian Ringgit
  * 	KWD 	Kuwaiti Dinar
  * 	FJD 	Fiji Dollar
+ * 
+ * @TODO Fix the validation problem on the credit card number and date expiry.
+ * 
+ * @package ecommerce
  */	
-
-// To do : fix the validation problem on the credit card number and date expiry
-// js validation
-
 class DPSPayment extends Payment {
 	
 	// DPS Informations

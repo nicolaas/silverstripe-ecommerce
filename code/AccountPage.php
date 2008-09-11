@@ -73,17 +73,23 @@ class AccountPage_Controller extends Page_Controller {
 	/**
 	 * Returns the MemberForm object
 	 */
-	function MemberForm() {return new MemberForm($this, 'MemberForm');}
+	function MemberForm() {
+		return new MemberForm($this, 'MemberForm');
+	}
 	
 	/**
 	 * Returns all the complete orders of this member
 	 */
-	function CompleteOrders() {return $this->MemberOrders();}
+	function CompleteOrders() {
+		return $this->MemberOrders();
+	}
 	
 	/**
 	 * Returns all the incomplete orders of this member
 	 */
-	function IncompleteOrders() {return $this->MemberOrders(false);}
+	function IncompleteOrders() {
+		return $this->MemberOrders(false);
+	}
 	
 	/**
 	 * Returns the either complete or incomplete orders of this member

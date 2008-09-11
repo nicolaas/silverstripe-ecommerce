@@ -1,13 +1,14 @@
 <?php
 
 /**
+ * SimpleShoppingModifier is the default shipping calculation
+ * scheme. It lets you set fixed shipping* costs, or a fixed
+ * cost for each country you're delivering to.
+ * 
+ * If you require more advanced shipping control, we suggest
+ * that you create your own subclass of {@link OrderModifier}
+ * 
  * @package ecommerce
- */
-
-/**
- * SimpleShoppingModifier is the default shipping calculation scheme.
- * It lets you set a fixed shipping costs, or a fixed cost for each country you're delivering to.
- * If you require more advanced shipping control, we suggest that you create your own subclass of {@link OrderModifier}
  */
 class SimpleShippingModifier extends OrderModifier {
 	

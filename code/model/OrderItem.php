@@ -5,6 +5,8 @@
  * ready for purchase. An order item is typically a product itself,
  * but also can include references to other information such as 
  * product attributes like colour, size, or type.
+ * 
+ * @package ecommerce
  */
 class OrderItem extends OrderAttribute {
 	

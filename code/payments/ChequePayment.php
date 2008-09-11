@@ -1,11 +1,9 @@
 <?php
 
 /**
+ * Payment object representing a cheque payment.
+ * 
  * @package ecommerce
- */
-
-/**
- * Payment object representing a cheque payment
  */
 class ChequePayment extends Payment {
 	

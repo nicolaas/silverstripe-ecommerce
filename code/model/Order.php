@@ -1,22 +1,12 @@
 <?php 
 
-/**
+/** 
+ * The order class is a databound object for handling Orders
+ * within SilverStripe.
+ * 
  * @package ecommerce
  */
- 
-/** 
- * The order class is a databound object for handling Orders within sapphire.
- * Each order can contain one or many products, each with special attributes.
- * This class handles all order specific algorithims and processing. 
- * Listed below are
- * class Order ( our main order class ) 
- * class Order_item ( our subclass which handles multiple products in an order
- * class Order_item_attribute ( which handles any attributes of the product such as colour,
- * size, or type )
- * class Order_receiptEmail (which handles all emails generated from an order) * typically overloaded.
- */
- 
- class Order extends DataObject {
+class Order extends DataObject {
  	
  	/**
  	 * Unpaid(Default) : Order created but no successful payment yet
