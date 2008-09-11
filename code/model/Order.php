@@ -76,25 +76,66 @@
 	 */
 	protected static $site_currency = 'USD';
 	
-	static function set_site_currency($currency) {self::$site_currency = $currency;}
-	static function site_currency() {return self::$site_currency;}
+	protected static $receiptEmail;	
+
+	protected static $receiptSubject;
+
+	protected static $can_cancel_before_payment = true;
+
+	protected static $can_cancel_before_processing = false;
+	
+	protected static $can_cancel_before_sending = false;
+	
+	protected static $can_cancel_after_sending = false;
 	
 	/**
 	 * The modifiers represent the additional charges or deductions associated to an order like shipping, tax but also vounchers, etc...
 	 */
 	protected static $modifiers = array();
+
+	static function set_site_currency($currency) {
+		self::$site_currency = $currency;
+	}
+
+	static function set_email($e) {
+		self::$receiptEmail = $e;
+	}
+
+	/**
+	 * Return the site currency in use.
+	 *
+	 * @return string
+	 */
+	static function site_currency() {
+		return self::$site_currency;
+	}
+
+	/**
+	 * Set the subject of the order receipt email.
+	 */
+	static function set_subject($subject) {
+		self::$receiptSubject = $subject;
+	}	
 	
-	static function set_modifiers($modifiers) {self::$modifiers = $modifiers;}
+	static function set_modifiers($modifiers) {
+		self::$modifiers = $modifiers;
+	}
+
+	static function set_cancel_before_payment($value) {
+		self::$can_cancel_before_payment = $value;
+	}
+
+	static function set_cancel_before_processing($value) {
+		self::$can_cancel_before_processing = $value;
+	}
 	
-	protected static $can_cancel_before_payment = true;
-	protected static $can_cancel_before_processing = false;
-	protected static $can_cancel_before_sending = false;
-	protected static $can_cancel_after_sending = false;
+	static function set_cancel_before_sending($value) {
+		self::$can_cancel_before_sending = $value;
+	}
 	
-	static function set_cancel_before_payment($value) {self::$can_cancel_before_payment = $value;}
-	static function set_cancel_before_processing($value) {self::$can_cancel_before_processing = $value;}
-	static function set_cancel_before_sending($value) {self::$can_cancel_before_sending = $value;}
-	static function set_cancel_after_sending($value) {self::$can_cancel_after_sending = $value;}
+	static function set_cancel_after_sending($value) {
+		self::$can_cancel_after_sending = $value;
+	}
 	
 	// Items Management
 	
@@ -206,7 +247,9 @@
 	/**
   	 * Returns the total cost of an order including the additional charges or deductions of its modifiers.
   	 */
-	function _Total() {return $this->_SubTotal() + $this->_ModifiersSubTotal();}
+	function _Total() {
+		return $this->_SubTotal() + $this->_ModifiersSubTotal();
+	}
 	
 	/**
 	 * Checks to see if any payments have been made on this order
@@ -223,7 +266,9 @@
 		return $total;
 	}
 	
-	function Link() {return AccountPage::get_order_link($this->ID);}
+	function Link() {
+		return AccountPage::get_order_link($this->ID);
+	}
 	
 	/*
 	 * Returns if the order can be cancelled
@@ -245,20 +290,26 @@
 	 * Returns the payments of the order
 	 * Precondition : Order is in DB
 	 */
-	function Payments() {return DataObject::get('Payment', "`OrderID` = '$this->ID'", '`LastEdited` DESC');}
+	function Payments() {
+		return DataObject::get('Payment', "`OrderID` = '$this->ID'", '`LastEdited` DESC');
+	}
 	
 	/**
 	 * Return the currency of this order.
 	 * Note: this is a fixed value across the entire site. 
 	 */
-	function Currency() {return self::$site_currency;}
+	function Currency() {
+		return self::$site_currency;
+	}
 	
 	static function create() {
 		$orderClass = self::$order_class; 
 		return new $orderClass();
 	}
 	
-	static function current_order() {return self::create();}
+	static function current_order() {
+		return self::create();
+	}
 	
 	static function save_current_order() {
 		
@@ -286,11 +337,21 @@
 	
 	// Order Template Management
 	
-	function TableSubTotalID() {return 'Table_Order_SubTotal';}
-	function TableTotalID() {return 'Table_Order_Total';}
+	function TableSubTotalID() {
+		return 'Table_Order_SubTotal';
+	}
+
+	function TableTotalID() {
+		return 'Table_Order_Total';
+	}
 	
-	function CartSubTotalID() {return 'Cart_Order_SubTotal';}
-	function CartTotalID() {return 'Cart_Order_Total';}
+	function CartSubTotalID() {
+		return 'Cart_Order_SubTotal';
+	}
+
+	function CartTotalID() {
+		return 'Cart_Order_Total';
+	}
 	
 	function updateForAjax(array &$js) {
 		$subTotal = DBField::create('Currency', $this->_SubTotal())->Nice();
@@ -301,14 +362,29 @@
 		$js[] = array('id' => $this->CartTotalID(), 'parameter' => 'innerHTML', 'value' => $total);
 	}
 	
-	function IsSent() {return $this->Status == 'Sent';}
-	function IsProcessing() {return $this->IsSent() || $this->Status == 'Processing';}
-	function IsValidate() {return $this->IsProcessing() || $this->Status == 'Paid';}
-	function IsPaid() {return $this->IsValidate();}
+	function IsSent() {
+		return $this->Status == 'Sent';
+	}
 	
-	function Status() {return $this->IsPaid() ? _t('Order.SUCCESSFULL', 'Order Successful') : _t('Order.INCOMPLETE', 'Order Incomplete');}
+	function IsProcessing() {
+		return $this->IsSent() || $this->Status == 'Processing';
+	}
 	
-	function checkoutLink() {return $this->ID ? CheckoutPage::get_checkout_order_link($this->ID) : CheckoutPage::find_link();}
+	function IsValidate() {
+		return $this->IsProcessing() || $this->Status == 'Paid';
+	}
+	
+	function IsPaid() {
+		return $this->IsValidate();
+	}
+	
+	function Status() {
+		return $this->IsPaid() ? _t('Order.SUCCESSFULL', 'Order Successful') : _t('Order.INCOMPLETE', 'Order Incomplete');
+	}
+	
+	function checkoutLink() {
+		return $this->ID ? CheckoutPage::get_checkout_order_link($this->ID) : CheckoutPage::find_link();
+	}
 	
 	// Order Emails Sending Management 
   	
@@ -316,7 +392,9 @@
 	 * Send the receipt of the order by mail
 	 * Precondition : The order payment has been successful
 	 */
-	function sendReceipt() {$this->sendEmail('Order_ReceiptEmail');}
+	function sendReceipt() {
+		$this->sendEmail('Order_ReceiptEmail');
+	}
   	
 	/*
 	 * Send a mail of the order to the client (and another to the admin)
@@ -346,24 +424,6 @@
 		$email->send();
 	}
 	
-	/**
-	 * Set the email of the administrator
-	 */
-	protected static $receiptEmail;	
-
-	static function set_email($e) {
-		self::$receiptEmail = $e;
-	}
-	
-	/**
-	 * Set the subject of the order receipt email.
-	 */
-	protected static $receiptSubject;
-	
-	static function set_subject($subject) {
-		self::$receiptSubject = $subject;
-	}
-		
 	/**
 	 * Returns the correct shipping address. If there is an alternate
 	 * shipping country then it uses that. Else it's the member's country.

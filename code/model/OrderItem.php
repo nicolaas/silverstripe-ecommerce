@@ -38,27 +38,41 @@ class OrderItem extends OrderAttribute {
 	
 	// Functions to overload
 	
-	function hasSameContent($orderItem) {return $orderItem instanceof OrderItem;}
+	function hasSameContent($orderItem) {
+		return $orderItem instanceof OrderItem;
+	}
 	
-	function UnitPrice() {return 0;}
+	function UnitPrice() {
+		return 0;
+	}
 	
-	function TableTitle() {return 'Product';}
+	function TableTitle() {
+		return 'Product';
+	}
 	
 	// Functions not to overload
 	
-	public function getQuantity() {return $this->_quantity;}
+	public function getQuantity() {
+		return $this->_quantity;
+	}
 	
 	/*
 	 * Precondition : The order item is not saved in the database yet
 	 */
-	public function setQuantityAttribute($quantity) {$this->_quantity = $quantity;}
+	public function setQuantityAttribute($quantity) {
+		$this->_quantity = $quantity;
+	}
 	
 	/*
 	 * Precondition : The order item is not saved in the database yet
 	 */
-	public function addQuantityAttribute($quantity) {$this->_quantity += $quantity;}
+	public function addQuantityAttribute($quantity) {
+		$this->_quantity += $quantity;
+	}
 	
-	protected function AjaxQuantityFieldName() {return $this->MainID() . '_Quantity';}
+	protected function AjaxQuantityFieldName() {
+		return $this->MainID() . '_Quantity';
+	}
 	
 	function AjaxQuantityField() {
 		Requirements::javascript('ecommerce/javascript/ecommerce.js');
@@ -73,9 +87,13 @@ HTML;
 	
 	// Display Functions
 	
-	function Total() {return $this->UnitPrice() * $this->_quantity;}
+	function Total() {
+		return $this->UnitPrice() * $this->_quantity;
+	}
 	
-	function CartQuantityID() {return $this->CartID() . '_Quantity';}
+	function CartQuantityID() {
+		return $this->CartID() . '_Quantity';
+	}
 	
 	function updateForAjax(array &$js) {
 		$total = DBField::create('Currency', $this->Total())->Nice();
@@ -85,11 +103,25 @@ HTML;
 		$js[] = array('name' => $this->AjaxQuantityFieldName(), 'parameter' => 'value', 'value' => $this->getQuantity());
 	}
 	
-	function addLink() {return ShoppingCart_Controller::add_item_link($this->_id);}
-	function removeLink() {return ShoppingCart_Controller::remove_item_link($this->_id);}
-	function removeallLink() {return ShoppingCart_Controller::remove_all_item_link($this->_id);}
-	function setquantityLink() {return ShoppingCart_Controller::set_quantity_item_link($this->_id);}
-	function checkoutLink() {return CheckoutPage::find_link();}
+	function addLink() {
+		return ShoppingCart_Controller::add_item_link($this->_id);
+	}
+	
+	function removeLink() {
+		return ShoppingCart_Controller::remove_item_link($this->_id);
+	}
+	
+	function removeallLink() {
+		return ShoppingCart_Controller::remove_all_item_link($this->_id);
+	}
+	
+	function setquantityLink() {
+		return ShoppingCart_Controller::set_quantity_item_link($this->_id);
+	}
+	
+	function checkoutLink() {
+		return CheckoutPage::find_link();
+	}
 	
 	// Database Writing Function
 	

@@ -32,18 +32,26 @@ class OrderModifier extends OrderAttribute {
 	 * This function must be called all the time we want the amount value because it checks if the order modifier already exists in the DB. In That case, it returns the Amount value.
 	 * Otherwise, it returns the calculation based on the live order and its items.
 	 */
-	function Amount() {return $this->ID ? $this->Amount : $this->LiveAmount();}
+	function Amount() {
+		return $this->ID ? $this->Amount : $this->LiveAmount();
+	}
 	
 	/*
 	 * This function returns the amount of the modifier based on the current order and its items.
 	 */
-	protected function LiveAmount() {return 0;}
+	protected function LiveAmount() {
+		return 0;
+	}
 	
-	function IsChargable() {return $this->ID ? $this->Type == 'Chargable' : $this->stat('is_chargable');}
+	function IsChargable() {
+		return $this->ID ? $this->Type == 'Chargable' : $this->stat('is_chargable');
+	}
 		
 	// Display Functions
 	
-	function TableTitle() {return 'Modifier';}
+	function TableTitle() {
+		return 'Modifier';
+	}
 	
 	function TotalNice() {
 		$amount = DBField::create('Currency', $this->Amount())->Nice();
@@ -52,7 +60,9 @@ class OrderModifier extends OrderAttribute {
 	
 	// Permissions
 	
-	function CanRemove() {return ! $this->stat('is_chargable');}
+	function CanRemove() {
+		return !$this->stat('is_chargable');
+	}
 	
 	// Functions not to overload
 	
@@ -67,11 +77,15 @@ class OrderModifier extends OrderAttribute {
 		$js[] = array('id' => $this->TableTitleID(), 'parameter' => 'innerHTML', 'value' => $this->TableTitle());
 	}
 	
-	function removeLink() {return ShoppingCart_Controller::remove_modifier_link($this->_id);}
+	function removeLink() {
+		return ShoppingCart_Controller::remove_modifier_link($this->_id);
+	}
 	
 	// Form Functions
 	
-	static function show_form() {return false;}
+	static function show_form() {
+		return false;
+	}
 	
 	static function get_form($controller) {
 		return new OrderModifierForm($controller, 'ModifierForm', new FieldSet(), new FieldSet());

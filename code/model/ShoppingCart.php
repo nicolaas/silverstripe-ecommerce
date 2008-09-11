@@ -13,24 +13,56 @@ class ShoppingCart extends Object {
 	//1) Main data used to store the products and modifiers in the session
 	
 	static $current_order = 'current_order';
-		static $setting = 'setting';
-			static $initialized = 'initialized';
-			static $country = 'country';
-			static $uses_different_address = 'uses_different_address';
-		static $items = 'items';
-		static $modifiers = 'modifiers';
+
+	static $setting = 'setting';
+	
+	static $initialized = 'initialized';
+	
+	static $country = 'country';
+	
+	static $uses_different_address = 'uses_different_address';
+	
+	static $items = 'items';
+	
+	static $modifiers = 'modifiers';
 	
 	//2) Functions which return variable names stored in the session
 	
-	private static function setting_table_name() {return self::$current_order . '.' . self::$setting;}
-	private static function setting_index($setting) {return self::setting_table_name() . '.' . $setting;}
-		private static function initialized_setting_index() {return self::setting_index(self::$initialized);}
-		private static function country_setting_index() {return self::setting_index(self::$country);}
-		private static function uses_different_shipping_address_index() {return self::setting_index(self::$uses_different_address);}
-	private static function items_table_name() {return self::$current_order . '.' . self::$items;}
-	private static function item_index($index) {return self::items_table_name() . '.' . $index;}
-	private static function modifiers_table_name() {return self::$current_order . '.' . self::$modifiers;}
-	private static function modifier_index($index) {return self::modifiers_table_name() . '.' . $index;}
+	private static function setting_table_name() {
+		return self::$current_order . '.' . self::$setting;
+	}
+	
+	private static function setting_index($setting) {
+		return self::setting_table_name() . '.' . $setting;
+	}
+	
+	private static function initialized_setting_index() {
+		return self::setting_index(self::$initialized);
+	}
+	
+	private static function country_setting_index() {
+		return self::setting_index(self::$country);
+	}
+	
+	private static function uses_different_shipping_address_index() {
+		return self::setting_index(self::$uses_different_address);
+	}
+	
+	private static function items_table_name() {
+		return self::$current_order . '.' . self::$items;
+	}
+	
+	private static function item_index($index) {
+		return self::items_table_name() . '.' . $index;
+	}
+	
+	private static function modifiers_table_name() {
+		return self::$current_order . '.' . self::$modifiers;
+	}
+	
+	private static function modifier_index($index) {
+		return self::modifiers_table_name() . '.' . $index;
+	}
 		
 	//3) Initialisation management
 	
@@ -241,14 +273,29 @@ class ShoppingCart_Controller extends Controller {
 	
 	static $URLSegment = 'shoppingcart';
 	
-	static function add_item_link($id) {return self::$URLSegment . '/additem/' . $id;}
-	static function remove_item_link($id) {return self::$URLSegment . '/removeitem/' . $id;}
-	static function remove_all_item_link($id) {return self::$URLSegment . '/removeallitem/' . $id;}
-	static function set_quantity_item_link($id) {return self::$URLSegment . '/setquantityitem/' . $id;}
+	static function add_item_link($id) {
+		return self::$URLSegment . '/additem/' . $id;
+	}
 	
-	static function remove_modifier_link($id) {return self::$URLSegment . '/removemodifier/' . $id;}
+	static function remove_item_link($id) {
+		return self::$URLSegment . '/removeitem/' . $id;
+	}
+	
+	static function remove_all_item_link($id) {
+		return self::$URLSegment . '/removeallitem/' . $id;
+	}
+	
+	static function set_quantity_item_link($id) {
+		return self::$URLSegment . '/setquantityitem/' . $id;
+	}
+	
+	static function remove_modifier_link($id) {
+		return self::$URLSegment . '/removemodifier/' . $id;
+	}
 
-	static function set_country_link() {return self::$URLSegment . '/setcountry';}
+	static function set_country_link() {
+		return self::$URLSegment . '/setcountry';
+	}
 	
 	function additem() {
 		$itemId = $this->urlParams['ID'];
@@ -319,4 +366,5 @@ class ShoppingCart_Controller extends Controller {
 		
 		return function_exists('json_encode') ? json_encode($js) : Convert::array2json($js);
 	}
+	
 }

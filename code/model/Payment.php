@@ -31,24 +31,13 @@ class Payment extends DataObject {
 		'Order' => 'Order'
 	);
 	
-	/**
-	 * Process this payment, and set the status message in the session.
-	 * Returns true on a successful payment, false on an error (such as CC declined).
-	 */	 
-	/*function __construct($data = null) {
-		parent::__construct($data);
-	}*/
-	
 	function populateDefaults() {
 		parent::populateDefaults();
+		
 		$this->Currency = Order::site_currency();
 		$this->setClientIP();
 		$this->AuthorizationCode = md5(uniqid(rand(), true));
  	}
-	
-	/*function setAmount($val){
-		$this->setField('Amount', number_format(ereg_replace("[^0-9.]", "", $val), 2, ".", ""));
-	}*/
 	
 	/**
 	 * Set the IP address and Proxy IP (if available) from the site visitor.
@@ -196,30 +185,54 @@ abstract class Payment_Result {
 	
 	protected $value;
 	
-	function __construct($value = null) {$this->value = $value;}
+	function __construct($value = null) {
+		$this->value = $value;
+	}
 	
-	function getValue() {return $this->value;}
+	function getValue() {
+		return $this->value;
+	}
 	
 	abstract function isSuccess();
+	
 	abstract function isProcessing();
+	
 }
 
 class Payment_Success extends Payment_Result {
 	
-	function isSuccess() {return true;}
-	function isProcessing() {return false;}
+	function isSuccess() {
+		return true;
+	}
+	
+	function isProcessing() {
+		return false;
+	}
+	
 }
 
 class Payment_Processing extends Payment_Result {
 		
-	function isSuccess() {return false;}
-	function isProcessing() {return true;}
+	function isSuccess() {
+		return false;
+	}
+
+	function isProcessing() {
+		return true;
+	}
+	
 }
 
 class Payment_Failure extends Payment_Result {
 	
-	function isSuccess() {return false;}
-	function isProcessing() {return false;}
+	function isSuccess() {
+		return false;
+	}
+	
+	function isProcessing() {
+		return false;
+	}
+	
 }	
 
 ?>

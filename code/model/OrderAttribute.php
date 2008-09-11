@@ -15,8 +15,13 @@ class OrderAttribute extends DataObject {
 	
 	// Local ID Attribute Management
 	
-	public function getIdAttribute() {return $this->_id;}
-	public function setIdAttribute($id) {$this->_id = $id;}
+	public function getIdAttribute() {
+		return $this->_id;
+	}
+	
+	public function setIdAttribute($id) {
+		$this->_id = $id;
+	}
 	
 	// Order Function Access
 	
@@ -34,24 +39,54 @@ class OrderAttribute extends DataObject {
 		return implode(' ', $classes);
 	}
 	
-	function MainID() {return get_class($this) . '_' . ($this->ID ? 'DB_' . $this->ID : $this->_id);}
+	function MainID() {
+		return get_class($this) . '_' . ($this->ID ? 'DB_' . $this->ID : $this->_id);
+	}
 	
-	function TableID() {return 'Table_' . $this->MainID();}
-	function CartID() {return 'Cart_' . $this->MainID();}
+	function TableID() {
+		return 'Table_' . $this->MainID();
+	}
 	
-	function ShowInTable() {return true;}
-	function ShowInCart() {return $this->ShowInTable();}
+	function CartID() {
+		return 'Cart_' . $this->MainID();
+	}
 	
-	function TableTitleID() {return $this->TableID() . '_Title';}
-	function CartTitleID() {return $this->CartID() . '_Title';}
+	function ShowInTable() {
+		return true;
+	}
 	
-	function TableTitle() {return 'Attribute';}
-	function CartTitle() {return $this->TableTitle();}
+	function ShowInCart() {
+		return $this->ShowInTable();
+	}
 	
-	function Link() {return null;}
+	function TableTitleID() {
+		return $this->TableID() . '_Title';
+	}
 	
-	function TableTotalID() {return $this->TableID() . '_Total';}
-	function CartTotalID() {return $this->CartID() . '_Total';}
+	function CartTitleID() {
+		return $this->CartID() . '_Title';
+	}
+	
+	function TableTitle() {
+		return 'Attribute';
+	}
+	
+	function CartTitle() {
+		return $this->TableTitle();
+	}
+	
+	function Link() {
+		return null;
+	}
+	
+	function TableTotalID() {
+		return $this->TableID() . '_Total';
+	}
+	
+	function CartTotalID() {
+		return $this->CartID() . '_Total';
+	}
+
 }
 
 ?>
