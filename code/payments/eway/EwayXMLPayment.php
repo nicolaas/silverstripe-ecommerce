@@ -7,22 +7,27 @@ class EwayXMLPayment extends Payment {
 	// Eway Informations
 	
 	protected static $privacy_link = 'http://www.eway.com.au/Company/About/Privacy.aspx';
+	
 	protected static $logo = 'ecommerce/images/payments/eway.gif';
 	
 	// Test Mode
 	
 	protected static $test_credit_card_number = '4444333322221111';
+	
 	protected static $test_amount = '1000';
 	
 	protected static $test_mode = false;
+	
 	static function set_test_mode() {self::$test_mode = true;}
 	
 	// Payment Informations
 	
 	protected static $customer_id;
+	
 	static function set_customer_id($id) {self::$customer_id = $id;}
 	
 	protected static $cvn_mode = true;
+	
 	static function unset_cvn_mode() {self::$cvn_mode = false;}
 	
 	private static $test_total_amount = 'The test Total Amount should end in 00 or 08 to get a successful response and has to be in cents (e.g. 1000 for $10.00 or 1008 for $10.08) - all other amounts will return a failed response.';
