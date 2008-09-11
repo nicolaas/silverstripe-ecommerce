@@ -1,42 +1,14 @@
 <?php
 
 /**
- * @package ecommerce
- */
-
-/**
  * EcommerceRole is a DataObjectDecorator for the member class to allow additional
  * member fields for the module. It has a base set of contact fields that can be
  * statically called anywhere in the system using singleton('Member')->getEcommerceFields();
  * The OrderForm and MemberForm class uses this call.
+ * 
+ * @package ecommerce
  */
 class EcommerceRole extends DataObjectDecorator {
-
- 	/**
-	 * Edit the given query object to support queries for this extension
-	 */
-	function augmentSQL(SQLQuery &$query) {}
-
- 	/**
-	 * Update the database data, migrating ShopMember into Member, if necessary
-	 */
-	function augmentDefaultRecords() {
- 		$exist = DB::query("SHOW TABLES LIKE 'ShopMember'")->numRecords();
- 		if($exist > 0) {
- 			DB::query("UPDATE `Member`, `ShopMember` " .
- 				"SET `Member`.`ClassName` = 'Member'," .
- 				"`Member`.`Address` = `ShopMember`.`Address`," .
- 				"`Member`.`AddressLine2` = `ShopMember`.`AddressLine2`," .
- 				"`Member`.`City` = `ShopMember`.`City`," .
- 				"`Member`.`Country` = `ShopMember`.`Country`," .
- 				"`Member`.`HomePhone` = `ShopMember`.`HomePhone`," .
- 				"`Member`.`MobilePhone` = `ShopMember`.`MobilePhone`," .
-  				"`Member`.`Notes` = `ShopMember`.`Notes`" .				
- 				"WHERE `Member`.`ID` = `ShopMember`.`ID`"
- 			);
- 			echo("<div style=\"padding:5px; color:white; background-color:blue;\">The data transfer has succeeded. However, to complete it, you must delete the ShopMember table. To do this, execute the query \"DROP TABLE 'ShopMember'\".</div>");
- 		}
-	}
 
 	/**
 	 * Define extra database fields for this extension.
@@ -64,7 +36,10 @@ class EcommerceRole extends DataObjectDecorator {
 		$fields->push(new TextField('Address', 'Address'));
 		$fields->push(new TextField('AddressLine2', 'Address Line 2'));
 		$fields->push(new TextField('City', 'City'));
-		if( ! $fields->fieldByName( 'Country' ) ) $fields->push(new DropdownField('Country', 'Country', Geoip::getCountryDropDown()));
+		
+		if(!$fields->fieldByName('Country')) {
+			$fields->push(new DropdownField('Country', 'Country', Geoip::getCountryDropDown()));
+		}
 	}
 	
 	/**
@@ -89,7 +64,6 @@ class EcommerceRole extends DataObjectDecorator {
 		$this->owner->extend('augmentEcommerceFields', $fields);
 		
 		return new CompositeField($fields);
-		
 	}
 	
 	function getEcommerceRequiredFields() {
@@ -103,7 +77,9 @@ class EcommerceRole extends DataObjectDecorator {
 		);
 	}
 	
-	function CountryTitle() {return self::findCountryTitle($this->owner->Country);}
+	function CountryTitle() {
+		return self::findCountryTitle($this->owner->Country);
+	}
 
 	/**
 	 * Create a new member from the given data or merge with the built-in fields.
