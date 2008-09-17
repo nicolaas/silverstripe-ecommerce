@@ -1,8 +1,26 @@
-SilverStripe E-commerce Module 0.5.1 beta
-=======================================
+###############################################
+Ecommerce Module
+###############################################
 
-RELEASE NOTES
+Maintainer Contact
+-----------------------------------------------
+Sean Harvey (Nickname: sharvey, halkyon)
+<sean (at) silverstripe (dot) com>
 
-Known issues:
+Requirements
+-----------------------------------------------
 
-* WorldPay - Email receipt is not sent after being redirected back from payment gateway.
+Documentation
+-----------------------------------------------
+http://doc.silverstripe.com/doku.php?id=modules:ecommerce
+
+Installation Instructions
+-----------------------------------------------
+See INSTALL
+
+Usage Overview
+-----------------------------------------------
+
+Known issues
+-----------------------------------------------
+- WorldPay - Email receipt is not sent after being redirected back from payment gateway.
