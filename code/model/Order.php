@@ -12,14 +12,14 @@ class Order extends DataObject {
  	 * Unpaid(Default) : Order created but no successful payment yet
  	 * Paid : Order successfully paid
  	 * Query : 
- 	 * Processing : Order already paid and the package is  currently processed
+ 	 * Processing : Order already paid and the package is currently processed
  	 * Sent : Order already paid and now sent
  	 * Complete : 
  	 * AdminCancelled : Order cancelled by the administrator
  	 * MemberCancelled : Order cancelled by the member
  	 */
 	static $db = array(
-		'Status' => "Enum(array('Unpaid', 'Paid', 'Query', 'Processing', 'Sent', 'Complete', 'AdminCancelled', 'MemberCancelled'), 'Unpaid')",
+		'Status' => "Enum('Unpaid,Paid,Query,Processing,Sent,Complete,AdminCancelled,MemberCancelled', 'Unpaid')",
 		"Country" => "Text",
 		"UseShippingAddress" => "Boolean",
 		"ShippingName" => "Text",
@@ -89,7 +89,7 @@ class Order extends DataObject {
 
 	/**
 	 * Flag to determine whether the user can cancel
-	 * this order before payment processing has begun.
+	 * this order before processing has begun.
 	 *
 	 * @var boolean
 	 */
@@ -166,18 +166,42 @@ class Order extends DataObject {
 		self::$modifiers = $modifiers;
 	}
 
+	/**
+	 * Set the flag to determine whether a user can
+	 * cancel their order before payment.
+	 *
+	 * @param boolean $value
+	 */
 	static function set_cancel_before_payment($value) {
 		self::$can_cancel_before_payment = $value;
 	}
 
+	/**
+	 * Set the flag to determine whether a user can
+	 * cancel their order before processing begins.
+	 *
+	 * @param unknown_type $value
+	 */
 	static function set_cancel_before_processing($value) {
 		self::$can_cancel_before_processing = $value;
 	}
 	
+	/**
+	 * Set the flag to determine whether a user can
+	 * cancel their order before it is sent.
+	 *
+	 * @param boolean $value
+	 */
 	static function set_cancel_before_sending($value) {
 		self::$can_cancel_before_sending = $value;
 	}
 	
+	/**
+	 * Set the flag to determine whether a user can
+	 * cancel their order after it has been sent.
+	 *
+	 * @param boolean $value
+	 */
 	static function set_cancel_after_sending($value) {
 		self::$can_cancel_after_sending = $value;
 	}
@@ -197,8 +221,15 @@ class Order extends DataObject {
 		}
 	}
 
-	/*
-	 * Return a DataObjectSet which contains the forms to add some modifiers to update the OrderInformation table
+	/**
+	 * Return a set of forms to add modifiers
+	 * to update the OrderInformation table.
+	 * 
+	 * @TODO Make the above descrption clearer
+	 * after fully understanding what this
+	 * function does.
+	 * 
+	 * @return DataObjectSet
 	 */
 	static function get_modifier_forms($controller) {
 		$forms = array();
@@ -214,7 +245,8 @@ class Order extends DataObject {
 	}
 	
 	/**
-	 * Save the current order, writing it to the database.
+	 * Save the current order, writing it to
+	 * the database.
 	 *
 	 * @return Order The current order
 	 */

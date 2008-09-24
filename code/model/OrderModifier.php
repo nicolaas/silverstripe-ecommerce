@@ -11,43 +11,70 @@ class OrderModifier extends OrderAttribute {
 
 	static $db = array(
 		'Amount' => 'Currency',
-		'Type' => "Enum(array('Chargable','Deductable'))"
+		'Type' => "Enum('Chargable,Deductable')"
 	);
 	
+	/**
+	 * @TODO Describe this variable's role in
+	 * relation to the $db Type field.
+	 *
+	 * @var boolean
+	 */
 	protected static $is_chargable = true;
 	
 	/*
-	 * This function is called when the order inits its modifiers.
-	 * It is better than directly construct the modifier in the Order class because, the user may need to create several modifiers or customize it.
+	 * This function is called when the order initialises
+	 * it's modifiers. It is better than directly
+	 * constructing the modifier in the Order class
+	 * because the user may need to create several
+	 * modifiers or customize it.
+	 * 
+	 * @TODO Write a better description for this function
+	 * than the one above. It's not easy to understand.
 	 */
 	public static function init_for_order($className) {
 		$modifier = new $className();
 		ShoppingCart::add_new_modifier($modifier);
 	}
 	
-	// Attributes Functions
-	
-	/*
-	 * This function must be called all the time we want the amount value because it checks if the order modifier already exists in the DB. In That case, it returns the Amount value.
-	 * Otherwise, it returns the calculation based on the live order and its items.
+	/**
+	 * This function must be called all the time we want
+	 * the amount value because it checks if the order
+	 * modifier already exists in the DB. In That case,
+	 * it returns the Amount value. Otherwise, it returns
+	 * the calculation based on the live order and its items.
+	 * 
+	 * @TODO Write a better description for this function
+	 * than the one above. It's not easy to understand.
 	 */
 	function Amount() {
 		return $this->ID ? $this->Amount : $this->LiveAmount();
 	}
 	
-	/*
-	 * This function returns the amount of the modifier based on the current order and its items.
+	/**
+	 * This function returns the amount of the modifier
+	 * based on the current order and its items.
+	 * 
+	 * @TODO Does this return the total?
 	 */
 	protected function LiveAmount() {
 		return 0;
 	}
 	
+	/**
+	 * @TODO Write a description of what this method does.
+	 *
+	 * @return boolean
+	 */
 	function IsChargable() {
 		return $this->ID ? $this->Type == 'Chargable' : $this->stat('is_chargable');
 	}
-		
-	// Display Functions
 	
+	/**
+	 * @TODO Write a description of what this method does.
+	 *
+	 * @return unknown
+	 */
 	function TableTitle() {
 		return 'Modifier';
 	}
@@ -57,14 +84,20 @@ class OrderModifier extends OrderAttribute {
 		return ($this->IsChargable() ? '' : '- ') . $amount;
 	}
 	
-	// Permissions
-	
+	/**
+	 * @TODO Write a description of what this method does.
+	 *
+	 * @return boolean
+	 */
 	function CanRemove() {
 		return !$this->stat('is_chargable');
 	}
 	
-	// Functions not to overload
-	
+	/**
+	 * @TODO Write a description of what this method does.
+	 *
+	 * @return boolean
+	 */
 	function Total() {
 		$amount = $this->Amount();
 		return ($this->IsChargable() ? 1 : -1) * $amount;
@@ -80,19 +113,21 @@ class OrderModifier extends OrderAttribute {
 		return ShoppingCart_Controller::remove_modifier_link($this->_id);
 	}
 	
-	// Form Functions
-	
 	static function show_form() {
 		return false;
 	}
 	
+	/**
+	 * Enter description here...
+	 *
+	 * @param unknown_type $controller
+	 * @return unknown
+	 */
 	static function get_form($controller) {
 		return new OrderModifierForm($controller, 'ModifierForm', new FieldSet(), new FieldSet());
 	}
 	
-	// Database Writing Function
-		
-	/*
+	/**
 	 * Precondition : The order item is not saved in the database yet
 	 */
 	function onBeforeWrite() {
@@ -101,8 +136,9 @@ class OrderModifier extends OrderAttribute {
 		$this->Type = $this->stat('is_chargable') ? 'Chargable' : 'Deductable';
 	}
 	
-	// Debug Function
-	
+	/**
+	 * Debug helper method.
+	 */
 	public function debug() {
 		$id = $this->ID ? $this->ID : $this->_id;
 		$amount = $this->Amount();
