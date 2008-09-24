@@ -54,7 +54,9 @@ class Order extends DataObject {
 	 */
 	protected static $order_class = 'Order';
 	
-	static function set_order_class($orderClass) {self::$order_class = $orderClass;}
+	static function set_order_class($orderClass) {
+		self::$order_class = $orderClass;
+	}
 	
 	/**
 	 * Status which stand for already paid because the order has a payment successful
