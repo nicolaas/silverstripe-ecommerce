@@ -26,7 +26,7 @@ class CheckoutPage extends Page {
 	 */
 	static function find_link($urlSegment = false) {
 		$page = DataObject::get_one('CheckoutPage');
-		if(!$page) throw new Exception(_t('CheckoutPage.NOPAGE', 'No CheckoutPage on this site - please create one !'));
+		if(!$page) throw new Exception(_t('CheckoutPage.NOPAGE', 'No CheckoutPage on this site - please create one!'));
 		else return $urlSegment ? $page->URLSegment : $page->Link();
 	}
 	
@@ -38,7 +38,7 @@ class CheckoutPage extends Page {
 	 */
 	static function get_checkout_order_link($orderID, $urlSegment = false) {
 		$page = DataObject::get_one('CheckoutPage');
-		if(!$page) throw new Exception(_t('CheckoutPage.NOPAGE', 'No CheckoutPage on this site - please create one !'));
+		if(!$page) throw new Exception(_t('CheckoutPage.NOPAGE', 'No CheckoutPage on this site - please create one!'));
 		else return ($urlSegment ? $page->URLSegment . '/' : $page->Link()) . $orderID; 
 	}
 	
@@ -48,7 +48,7 @@ class CheckoutPage extends Page {
 	function getCMSFields() {
 		$fields = parent::getCMSFields();
 		
-		$fields->addFieldToTab('Root.Content.Main', new TreeDropdownField('TermsPageID', 'Terms And Conditions Page', 'SiteTree'));
+		$fields->addFieldToTab('Root.Content.Main', new TreeDropdownField('TermsPageID', 'Terms and Conditions Page', 'SiteTree'));
 		
 		// Information about the messages		
 		$shopMessageComplete = '<p>This message is shown, along with order information after they submit the checkout :<p>';

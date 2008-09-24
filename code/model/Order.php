@@ -47,50 +47,95 @@ class Order extends DataObject {
 		"TotalOutstanding" => "Currency",
 	);
 	
-	// Static Values And Management
-	
-	/**
-	 * Order class used for creation
-	 */
-	protected static $order_class = 'Order';
-	
-	static function set_order_class($orderClass) {
-		self::$order_class = $orderClass;
-	}
-	
 	/**
 	 * Status which stand for already paid because the order has a payment successful
+	 * 
+	 * @TODO Determine what this actually does, and document it.
+	 * 
+	 * @var array
 	 */
 	static $paid_status = array('Paid', 'Processing', 'Sent', 'Complete');
 	
 	/**
-	 * Currency used in orders
+	 * The currency code used for orders.
+	 * 
+	 * @var string
 	 */
 	protected static $site_currency = 'USD';
 	
-	protected static $receiptEmail;	
+	/**
+	 * This is the from address that the receipt
+	 * email contains. e.g. "info@shopname.com"
+	 *
+	 * @var string
+	 */
+	protected static $receipt_email;	
 
-	protected static $receiptSubject;
+	/**
+	 * This is the subject that the receipt
+	 * email will contain. e.g. "Joe's Shop Receipt".
+	 *
+	 * @var string
+	 */
+	protected static $receipt_subject;
 
+	/**
+	 * Flag to determine whether the user can cancel
+	 * this order before payment is received.
+	 *
+	 * @var boolean
+	 */
 	protected static $can_cancel_before_payment = true;
 
+	/**
+	 * Flag to determine whether the user can cancel
+	 * this order before payment processing has begun.
+	 *
+	 * @var boolean
+	 */
 	protected static $can_cancel_before_processing = false;
 	
+	/**
+	 * Flag to determine whether the user can cancel
+	 * this order before the goods are sent.
+	 *
+	 * @var boolean
+	 */
 	protected static $can_cancel_before_sending = false;
 	
+	/**
+	 * Flag to determine whether the user can cancel
+	 * this order after the goods are sent.
+	 *
+	 * @var unknown_type
+	 */
 	protected static $can_cancel_after_sending = false;
 	
 	/**
-	 * The modifiers represent the additional charges or deductions associated to an order like shipping, tax but also vounchers, etc...
+	 * Modifiers represent the additional charges or
+	 * deductions associated to an order, such as
+	 * shipping, taxes, vouchers etc.
+	 * 
+	 * @var array
 	 */
 	protected static $modifiers = array();
 
+	/**
+	 * Set the currency code that this site uses.
+	 *
+	 * @param string $currency Currency code. e.g. "NZD"
+	 */
 	static function set_site_currency($currency) {
 		self::$site_currency = $currency;
 	}
 
-	static function set_email($e) {
-		self::$receiptEmail = $e;
+	/**
+	 * Set the from address for receipt emails.
+	 * 
+	 * @param string $email From address. e.g. "info@myshop.com"
+	 */
+	static function set_email($email) {
+		self::$receipt_email = $email;
 	}
 
 	/**
@@ -104,11 +149,19 @@ class Order extends DataObject {
 
 	/**
 	 * Set the subject of the order receipt email.
+	 * 
+	 * @param string $subject The subject line text
 	 */
 	static function set_subject($subject) {
-		self::$receiptSubject = $subject;
+		self::$receipt_subject = $subject;
 	}	
 	
+	/**
+	 * Set the modifiers that apply to this site.
+	 *
+	 * @param array $modifiers An array of
+	 * 				{@link OrderModifier} objects
+	 */
 	static function set_modifiers($modifiers) {
 		self::$modifiers = $modifiers;
 	}
@@ -129,6 +182,63 @@ class Order extends DataObject {
 		self::$can_cancel_after_sending = $value;
 	}
 	
+	/**
+	 * Initialise all the {@link OrderModifier} objects
+	 * by evaluating init_for_order() on each of them.
+	 */
+	static function init_all_modifiers() {
+		if(self::$modifiers && is_array(self::$modifiers) && count(self::$modifiers) > 0) {
+			foreach(self::$modifiers as $className) {
+				if(class_exists($className)) {
+					$modifier = new $className();
+					if($modifier instanceof OrderModifier) eval("$className::init_for_order(\$className);");
+				}
+			}
+		}
+	}
+
+	/*
+	 * Return a DataObjectSet which contains the forms to add some modifiers to update the OrderInformation table
+	 */
+	static function get_modifier_forms($controller) {
+		$forms = array();
+		if(self::$modifiers && is_array(self::$modifiers) && count(self::$modifiers) > 0) {
+			foreach(self::$modifiers as $className) {
+				if(class_exists($className)) {
+					$modifier = new $className();
+					if($modifier instanceof OrderModifier && eval("return $className::show_form();") && $form = eval("return $className::get_form(\$controller);")) array_push($forms, $form);
+				}
+			}
+		}
+		return count($forms) > 0 ? new DataObjectSet($forms) : null;
+	}
+	
+	/**
+	 * Save the current order, writing it to the database.
+	 *
+	 * @return Order The current order
+	 */
+	static function save_current_order() {
+		
+		// Create a new order, and write it
+		$order = new Order();
+		$order->write();
+		
+		// Set the items from the cart into the order
+		if($items = ShoppingCart::get_items()) $order->createItems($items, true);
+		
+		// Set the modifiers from the cart into the order
+		if($modifiers = ShoppingCart::get_modifiers()) $order->createModifiers($modifiers, true);
+		
+		// Set the Member relation to this order
+		$order->MemberID = Member::currentUserID();
+		
+		// Write the order
+		$order->write();
+		
+		return $order;
+	}	
+	
 	// Items Management
 	
 	/**
@@ -142,10 +252,27 @@ class Order extends DataObject {
  		else return null;
 	}
 	
+	/**
+	 * Return all the {@link OrderItem} instances that are
+	 * available as records in the database.
+	 *
+	 * @return DataObjectSet
+	 */
 	protected function itemsFromDatabase() {
 		return DataObject::get('OrderItem', "`OrderID` = '$this->ID'");
 	}
 	
+	/**
+	 * Return a DataObjectSet of {@link OrderItem} objects.
+	 * 
+	 * If the write parameter is set to true, then each of
+	 * the item objects in the array are linked to this
+	 * order, then written to the database.
+	 *
+	 * @param array $items An array of {@link OrderItem} objects
+	 * @param boolean $write Flag if set to true, will write the items to the DB
+	 * @return DataObjectSet
+	 */
 	protected function createItems(array $items, $write = false) {
 		if($write) {
 			foreach($items as $item) {
@@ -167,8 +294,6 @@ class Order extends DataObject {
 		return $result;
 	}
 	
-	// Modifiers Management
-	
 	/**
 	 * Returns the modifiers of the order, if it hasn't been saved yet
 	 * it returns the modifiers from session, if it has, it returns them 
@@ -180,10 +305,29 @@ class Order extends DataObject {
  		else return null;
 	}
 	
+	/**
+	 * Get all {@link OrderModifier} instances that are
+	 * available as records in the database.
+	 *
+	 * @return DataObjectSet
+	 */
 	protected function modifiersFromDatabase() {
 		return DataObject::get('OrderModifier', "`OrderID` = '$this->ID'");
 	}
 	
+	/**
+	 * Return a DataObjectSet of {@link OrderModifier} objects.
+	 * 
+	 * {@link Order->Modifiers()} makes use of this method.
+	 * 
+	 * If the write parameter is set to true, then each of
+	 * the modifier objects in the array are linked to this
+	 * order, then written to the database.
+	 *
+	 * @param array $modifiers An array of {@link OrderModifier} objects
+	 * @param boolean $write Flag if set to true, will write the modifiers to the DB
+	 * @return DataObjectSet
+	 */
 	protected function createModifiers(array $modifiers, $write = false) {
 		if($write) {
 			foreach($modifiers as $modifier) {
@@ -191,6 +335,7 @@ class Order extends DataObject {
 				$modifier->write();
 			}
 		}
+		
 		return $write ? $this->modifiersFromDatabase() : new DataObjectSet($modifiers);
 	}
 	
@@ -205,33 +350,6 @@ class Order extends DataObject {
 			}
 		}
 		return $total;
-	}
-	
-	static function init_all_modifiers() {
-		if(self::$modifiers && is_array(self::$modifiers) && count(self::$modifiers) > 0) {
-			foreach(self::$modifiers as $className) {
-				if(class_exists($className)) {
-					$modifier = new $className();
-					if($modifier instanceof OrderModifier) eval("$className::init_for_order(\$className);");
-				}
-			}
-		}
-	}
-	
-	/*
-	 * Return a DataObjectSet which contains the forms to add some modifiers to update the OrderInformation table
-	 */
-	static function get_modifier_forms($controller) {
-		$forms = array();
-		if(self::$modifiers && is_array(self::$modifiers) && count(self::$modifiers) > 0) {
-			foreach(self::$modifiers as $className) {
-				if(class_exists($className)) {
-					$modifier = new $className();
-					if($modifier instanceof OrderModifier && eval("return $className::show_form();") && $form = eval("return $className::get_form(\$controller);")) array_push($forms, $form);
-				}
-			}
-		}
-		return count($forms) > 0 ? new DataObjectSet($forms) : null;
 	}
 	
 	// Order Management
@@ -258,13 +376,18 @@ class Order extends DataObject {
 		return $total;
 	}
 	
+	/**
+	 * @TODO Why do we need to get this from the AccountPage class?
+	 */
 	function Link() {
 		return AccountPage::get_order_link($this->ID);
 	}
 	
 	/*
 	 * Returns if the order can be cancelled
-	 * Precondition : Order is in DB
+	 * Precondition: Order is in DB
+	 * 
+	 * @TODO clean up the formatting of this code.
 	 */
 	function CanCancel() {
 		switch($this->Status) {
@@ -276,9 +399,7 @@ class Order extends DataObject {
 		}
 	}
 		
-	// Order attributes access functions
-	
-	/*
+	/**
 	 * Returns the payments of the order
 	 * Precondition : Order is in DB
 	 */
@@ -292,39 +413,6 @@ class Order extends DataObject {
 	 */
 	function Currency() {
 		return self::$site_currency;
-	}
-	
-	static function create() {
-		$orderClass = self::$order_class; 
-		return new $orderClass();
-	}
-	
-	static function current_order() {
-		return self::create();
-	}
-	
-	static function save_current_order() {
-		
-		//1) Order creation
-		
-		$order = self::current_order();
-		$order->write();
-		
-		//2) Items saving
-		
-		if($items = ShoppingCart::get_items()) $order->createItems($items, true);
-		
-		//3) Modifiers saving
-		
-		if($modifiers = ShoppingCart::get_modifiers()) $order->createModifiers($modifiers, true);
-		
-		//4) Member saving
-		
-		$order->MemberID = Member::currentUserID();
-		
-		$order->write();
-		
-		return $order;
 	}
 	
 	// Order Template Management
@@ -354,49 +442,81 @@ class Order extends DataObject {
 		$js[] = array('id' => $this->CartTotalID(), 'parameter' => 'innerHTML', 'value' => $total);
 	}
 	
+	/**
+	 * Has this order been sent to the customer?
+	 * (in "Sent" status).
+	 *
+	 * @return boolean
+	 */
 	function IsSent() {
 		return $this->Status == 'Sent';
 	}
 	
+	/**
+	 * Is this order currently being processed?
+	 * (in "Processing" status).
+	 * 
+	 * @return boolean
+	 */
 	function IsProcessing() {
 		return $this->IsSent() || $this->Status == 'Processing';
 	}
 	
+	/**
+	 * @TODO What does IsValidate mean in shop terms?
+	 * @return boolean
+	 */
 	function IsValidate() {
 		return $this->IsProcessing() || $this->Status == 'Paid';
 	}
 	
+	/**
+	 * Has this order been paid for? (in "Paid" status).
+	 * @return boolean
+	 */
 	function IsPaid() {
 		return $this->IsValidate();
 	}
 	
+	/**
+	 * Return a string of localised text based on the
+	 * determination of whether this order is paid for,
+	 * or not, by checking {@link IsPaid()}.
+	 *
+	 * @return string
+	 */
 	function Status() {
 		return $this->IsPaid() ? _t('Order.SUCCESSFULL', 'Order Successful') : _t('Order.INCOMPLETE', 'Order Incomplete');
 	}
 	
+	/**
+	 * Return a link to the {@link CheckoutPage} instance
+	 * that exists in the database.
+	 *
+	 * @return string
+	 */
 	function checkoutLink() {
 		return $this->ID ? CheckoutPage::get_checkout_order_link($this->ID) : CheckoutPage::find_link();
 	}
 	
-	// Order Emails Sending Management 
-  	
-  	/*
-	 * Send the receipt of the order by mail
-	 * Precondition : The order payment has been successful
+  	/**
+	 * Send the receipt of the order by mail.
+	 * Precondition: The order payment has been successful
 	 */
 	function sendReceipt() {
 		$this->sendEmail('Order_ReceiptEmail');
 	}
   	
-	/*
-	 * Send a mail of the order to the client (and another to the admin)
+	/**
+	 * Send a mail of the order to the client (and another to the admin).
+	 * 
 	 * @param $emailClass - the class name of the email you wish to send
 	 * @param $copyToAdmin - true by default, whether it should send a copy to the admin
 	 */
 	protected function sendEmail($emailClass, $copyToAdmin = true) {
- 		$from = self::$receiptEmail ? self::$receiptEmail : Email::getAdminEmail();
+ 		$from = self::$receipt_email ? self::$receipt_email : Email::getAdminEmail();
  		$to = $this->Member()->Email;
-		$subject = self::$receiptSubject ? self::$receiptSubject : "Shop Sale Information #$this->ID";
+		$subject = self::$receipt_subject ? self::$receipt_subject : "Shop Sale Information #$this->ID";
  		
  		$purchaseCompleteMessage = DataObject::get_one('CheckoutPage')->PurchaseComplete;
  		
@@ -418,17 +538,26 @@ class Order extends DataObject {
 	
 	/**
 	 * Returns the correct shipping address. If there is an alternate
-	 * shipping country then it uses that. Else it's the member's country.
-	 * @param $codeOnly - if set, returns only the country code as opposed to the full name.
+	 * shipping country then it uses that. Failing that, it returns
+	 * the country of the member.
+	 * 
+	 * @TODO This is pretty complicated code. It can be simplified.
+	 * 
+	 * @param boolean $codeOnly If true, returns only the country code, instead
+	 * 								of the full name.
+	 * @return string
 	 */
 	function findShippingCountry($codeOnly = false) {
-		if(! $this->ID)	$country = ShoppingCart::has_country() ? ShoppingCart::get_country() : EcommerceRole::findCountry();
-		else if(! $this->UseShippingAddress || ! $country = $this->ShippingCountry)	$country = EcommerceRole::findCountry();
+		if(!$this->ID)	$country = ShoppingCart::has_country() ? ShoppingCart::get_country() : EcommerceRole::findCountry();
+		else if(!$this->UseShippingAddress || !$country = $this->ShippingCountry) $country = EcommerceRole::findCountry();
 		return $codeOnly ? $country : EcommerceRole::findCountryTitle($country);
 	}
 							
-	/*
-	 * Returns a TaxModifier object that provides information about tax on this order.
+	/**
+	 * Returns a TaxModifier object that provides
+	 * information about tax on this order.
+	 * 
+	 * @return TaxModifier
 	 */
 	function TaxInfo() {
 		if($modifiers = $this->Modifiers()) {
@@ -439,10 +568,12 @@ class Order extends DataObject {
 	}
   			
 	/**
-	 * Send a message to the client containing the latest note of {@OrderStatusLog} and the current status.
-	 * Used in {@OrderReport}.
+	 * Send a message to the client containing the latest
+	 * note of {@link OrderStatusLog} and the current status.
 	 * 
-	 * @param $note Optional note-content (instead of using the OrderStatusLog)
+	 * Used in {@link OrderReport}.
+	 * 
+	 * @param string $note Optional note-content (instead of using the OrderStatusLog)
 	 */
 	function sendStatusChange($note = null) {
 		if(!$note) {
@@ -560,16 +691,35 @@ class Order_StatusEmail extends Email_Template {
 class Order_CancelForm extends Form {
 	
 	function __construct($controller, $name, $orderID) {
-		$fields[] = new HiddenField('OrderID', '', $orderID);
-		$actions[] = new FormAction('doCancel', 'Cancel This Order');
-		parent::__construct($controller, $name, new FieldSet($fields), new FieldSet($actions));
+		
+		$fields = new FieldSet(
+			new HiddenField('OrderID', '', $orderID)
+		);
+		
+		$actions = new FieldSet(
+			new FormAction('doCancel', 'Cancel Order')
+		);
+		
+		parent::__construct($controller, $name, $fields, $actions);
 	}
 	
-	function doCancel($RAW_data, $form) {
-		$SQL_data = Convert::raw2sql($RAW_data);
+	/**
+	 * Form action handler for Order_CancelForm.
+	 * 
+	 * Take the order that this was to be change on,
+	 * and set the status that was requested from
+	 * the form request data.
+	 *
+	 * @param array $data The form request data submitted
+	 * @param Form $form The {@link Form} this was submitted on
+	 */
+	function doCancel($data, $form) {
+		$SQL_data = Convert::raw2sql($data);
+		
 		$order = DataObject::get_by_id('Order', $SQL_data['OrderID']);
 		$order->Status = 'MemberCancelled';
 		$order->write();
+		
 		Director::redirectBack();
 		return;
 	}

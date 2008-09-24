@@ -256,7 +256,7 @@ class ShoppingCart extends Object {
 	//7) Current order access function
 	
 	static function current_order() {
-		 return Order::current_order();
+		 return new Order();
 	}
 	
 	//8) Database saving function
