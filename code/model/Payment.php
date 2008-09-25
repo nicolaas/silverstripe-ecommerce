@@ -17,7 +17,7 @@ class Payment extends DataObject {
  	 * Pending : For cheque Only
  	 */
 	static $db = array(
-		'Status' => "Enum(array('Incomplete', 'Success', 'Failure', 'Pending'), 'Incomplete')",
+		'Status' => "Enum('Incomplete,Success,Failure,Pending','Incomplete')",
 		'Amount' => 'Currency',
 		'Currency' => 'Varchar(3)',
 		'TxnRef' => 'Text',
