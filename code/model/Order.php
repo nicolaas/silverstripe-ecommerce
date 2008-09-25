@@ -332,9 +332,13 @@ class Order extends DataObject {
 	 * from the DB entry.
 	 */ 
  	function Modifiers() {
- 		if($this->ID) return $this->modifiersFromDatabase();
- 		else if($modifiers = ShoppingCart::get_modifiers()) return $this->createModifiers($modifiers);
- 		else return null;
+ 		if($this->ID) {
+ 			return $this->modifiersFromDatabase();
+ 		} elseif($modifiers = ShoppingCart::get_modifiers()) {
+ 			return $this->createModifiers($modifiers);
+ 		} else {
+ 			return false;
+ 		}
 	}
 	
 	/**

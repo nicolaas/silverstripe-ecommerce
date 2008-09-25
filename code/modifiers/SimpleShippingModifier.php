@@ -14,7 +14,7 @@ class SimpleShippingModifier extends OrderModifier {
 	
 	static $db = array(
 		'Country' => 'Text',
-		'ShippingChargeType' => "Enum(array('Default','ForCountry'))"
+		'ShippingChargeType' => "Enum('Default,ForCountry')"
 	);
 		
 	static $default_charge = 0;
@@ -69,11 +69,23 @@ class SimpleShippingModifier extends OrderModifier {
 		return $this->Total() > 0;
 	}
 	
+	/**
+	 * @TODO Add i18n entities to the text.
+	 * @return string
+	 */
 	function TableTitle() {
-		$country = Geoip::countryCode2name($this->Country());
-		return "Shipping to $country";
+		if($this->Country()) {
+			$countryList = Geoip::getCountryDropDown();
+			return "Shipping to {$countryList[$this->Country()]}";
+		} else {
+			return 'Shipping';
+		}
 	}
 	
+	/**
+	 * @TODO Add i18n entities to the text.
+	 * @return string
+	 */
 	function CartTitle() {
 		return 'Shipping';
 	}

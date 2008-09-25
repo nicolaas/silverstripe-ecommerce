@@ -224,12 +224,20 @@ class ShoppingCart extends Object {
 		$modifiersTableIndex = self::modifiers_table_name();
 		return Session::get($modifiersTableIndex) != null;
 	}
-		
+
+	/**
+	 * Get all the {@link OrderModifier} instances
+	 * that are currently in use. To set them, use
+	 * {@link Order::set_modifiers()}.
+	 *
+	 * @return array
+	 */
 	static function get_modifiers() {
-		if(! self::is_initialized()) {
+		if(!self::is_initialized()) {
 			self::init_all_modifiers();
 			self::set_initialized(true);
 		}
+		
 		$modifiersTableIndex = self::modifiers_table_name();
 		if($serializedModifiers = Session::get($modifiersTableIndex)) {
 			$modifiers = array();
@@ -240,9 +248,11 @@ class ShoppingCart extends Object {
 					array_push($modifiers, $unserializedModifier);
 				}
 			}
+			
 			return $modifiers;
 		}
-		return null;
+		
+		return false;
 	}
 	
 	//6) Init function
