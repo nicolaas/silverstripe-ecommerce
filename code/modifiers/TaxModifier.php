@@ -19,7 +19,7 @@ class TaxModifier extends OrderModifier {
 		'Country' => 'Text',
 		'Rate' => 'Decimal',
 		'Name' => 'Text',
-		'TaxType' => "Enum(array('Exclusive','Inclusive'))"
+		'TaxType' => "Enum('Exclusive,Inclusive')"
 	);
 	
 	static $names_by_country;
