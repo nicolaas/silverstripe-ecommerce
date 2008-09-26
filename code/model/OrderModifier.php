@@ -98,6 +98,8 @@ class OrderModifier extends OrderAttribute {
 	/**
 	 * This is the name of the attribute.
 	 * In which case, it's the modifier.
+	 * This is defined on the subclasses
+	 * to be more specific to it's function.
 	 *
 	 * @return string
 	 */
