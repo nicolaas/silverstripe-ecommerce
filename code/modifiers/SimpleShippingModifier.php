@@ -102,3 +102,5 @@ class SimpleShippingModifier extends OrderModifier {
 		$this->ShippingChargeType = $this->LiveIsDefaultCharge() ? 'Default' : 'ForCountry';
 	}
 }
+
+?>
