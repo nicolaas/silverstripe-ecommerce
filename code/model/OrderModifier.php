@@ -137,10 +137,17 @@ class OrderModifier extends OrderAttribute {
 	}
 	
 	/**
-	 * Precondition : The order item is not saved in the database yet
+	 * Before this OrderModifier is written to
+	 * the database, we set some of the fields
+	 * based on the way it was set up
+	 * {@link OrderModifier::is_chargable()}.
+	 * 
+	 * Precondition: The order item is not
+	 * saved in the database yet.
 	 */
 	function onBeforeWrite() {
 		parent::onBeforeWrite();
+		
 		$this->Amount = $this->Amount();
 		$this->Type = $this->stat('is_chargable') ? 'Chargable' : 'Deductable';
 	}

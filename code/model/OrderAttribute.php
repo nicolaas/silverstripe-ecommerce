@@ -20,8 +20,6 @@ class OrderAttribute extends DataObject {
 		'CartTitle' => 'Text'
 	);
 	
-	// Local ID Attribute Management
-	
 	public function getIdAttribute() {
 		return $this->_id;
 	}
@@ -30,8 +28,10 @@ class OrderAttribute extends DataObject {
 		$this->_id = $id;
 	}
 	
-	// Order Function Access
-	
+	/**
+	 * @TODO Where is this method used?
+	 * @return Order
+	 */
 	function Order() {
 		if($this->ID) return DataObject::get_by_id('Order', $this->OrderID);
 		else return ShoppingCart::current_order();
