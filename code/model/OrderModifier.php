@@ -38,6 +38,27 @@ class OrderModifier extends OrderAttribute {
 	}
 	
 	/**
+	 * This determines whether the OrderModifierForm
+	 * is shown or not. {@link OrderModifier::get_form()}.
+	 *
+	 * @return boolean
+	 */
+	static function show_form() {
+		return false;
+	}
+	
+	/**
+	 * This function returns a form that allows a user
+	 * to change the modifier to the order.
+	 *
+	 * @param Controller $controller $controller The controller
+	 * @return OrderModifierForm or subclass
+	 */
+	static function get_form($controller) {
+		return new OrderModifierForm($controller, 'ModifierForm', new FieldSet(), new FieldSet());
+	}
+	
+	/**
 	 * This function must be called all the time we want
 	 * the amount value because it checks if the order
 	 * modifier already exists in the DB. In That case,
@@ -62,7 +83,11 @@ class OrderModifier extends OrderAttribute {
 	}
 	
 	/**
-	 * @TODO Write a description of what this method does.
+	 * If the current instance of this OrderModifier
+	 * exists in the database, check if the Type in
+	 * the DB field is "Chargable", if it is, return
+	 * true, otherwise check the static "is_chargable",
+	 * since this instance currently isn't in the DB.
 	 *
 	 * @return boolean
 	 */
@@ -71,17 +96,13 @@ class OrderModifier extends OrderAttribute {
 	}
 	
 	/**
-	 * @TODO Write a description of what this method does.
+	 * This is the name of the attribute.
+	 * In which case, it's the modifier.
 	 *
-	 * @return unknown
+	 * @return string
 	 */
 	function TableTitle() {
 		return 'Modifier';
-	}
-	
-	function TotalNice() {
-		$amount = DBField::create('Currency', $this->Amount())->Nice();
-		return ($this->IsChargable() ? '' : '- ') . $amount;
 	}
 	
 	/**
@@ -104,27 +125,15 @@ class OrderModifier extends OrderAttribute {
 	}
 	
 	function updateForAjax(array &$js) {
-		$js[] = array('id' => $this->CartTotalID(), 'parameter' => 'innerHTML', 'value' => $this->TotalNice());
-		$js[] = array('id' => $this->TableTotalID(), 'parameter' => 'innerHTML', 'value' => $this->TotalNice());
+		$amount = $this->obj('Amount')->Nice();
+		
+		$js[] = array('id' => $this->CartTotalID(), 'parameter' => 'innerHTML', 'value' => $amount);
+		$js[] = array('id' => $this->TableTotalID(), 'parameter' => 'innerHTML', 'value' => $amount);
 		$js[] = array('id' => $this->TableTitleID(), 'parameter' => 'innerHTML', 'value' => $this->TableTitle());
 	}
 	
 	function removeLink() {
 		return ShoppingCart_Controller::remove_modifier_link($this->_id);
-	}
-	
-	static function show_form() {
-		return false;
-	}
-	
-	/**
-	 * Enter description here...
-	 *
-	 * @param unknown_type $controller
-	 * @return unknown
-	 */
-	static function get_form($controller) {
-		return new OrderModifierForm($controller, 'ModifierForm', new FieldSet(), new FieldSet());
 	}
 	
 	/**

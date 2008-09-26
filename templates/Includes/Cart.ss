@@ -59,7 +59,7 @@
 									$CartTitle
 								<% end_if %>
 							</span>
-							<span id="$CartTotalID">$TotalNice</span>
+							<span id="$CartTotalID"><% if IsChargable %>$Amount.Nice<% else %> -<% end_if %></span>
 							<span class="remove">
 								<% if CanRemove %>
 									<strong>

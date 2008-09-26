@@ -37,12 +37,31 @@ class OrderAttribute extends DataObject {
 		else return ShoppingCart::current_order();
 	}
 	
-	// Display Functions
+	######################
+	## TEMPLATE METHODS ##
+	######################
 	
+	/**
+	 * Return a string of class names, in order
+	 * of heirarchy from OrderAttribute for the
+	 * current attribute. 
+	 * 
+	 * e.g.: "product_orderitem orderitem
+	 * orderattribute".
+	 * 
+	 * Used by the templates.
+	 *
+	 * @return string
+	 */
 	function Classes() {
 		$class = get_class($this);
+		$classes = array();
 		$classes[] = strtolower($class);
-		while(get_parent_class($class) != 'DataObject' && $class = get_parent_class($class)) $classes[] = strtolower($class);
+		
+		while(get_parent_class($class) != 'DataObject' && $class = get_parent_class($class)) {
+			$classes[] = strtolower($class);
+		}
+
 		return implode(' ', $classes);
 	}
 	
@@ -74,16 +93,18 @@ class OrderAttribute extends DataObject {
 		return $this->CartID() . '_Title';
 	}
 	
+	/**
+	 * Return a name of what this attribute is
+	 * called e.g. "Modifier", or "Product".
+	 *
+	 * @return string
+	 */
 	function TableTitle() {
 		return 'Attribute';
 	}
 	
 	function CartTitle() {
 		return $this->TableTitle();
-	}
-	
-	function Link() {
-		return null;
 	}
 	
 	function TableTotalID() {
