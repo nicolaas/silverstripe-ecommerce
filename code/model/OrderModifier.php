@@ -59,14 +59,18 @@ class OrderModifier extends OrderAttribute {
 	}
 	
 	/**
-	 * This function must be called all the time we want
-	 * the amount value because it checks if the order
-	 * modifier already exists in the DB. In That case,
-	 * it returns the Amount value. Otherwise, it returns
-	 * the calculation based on the live order and its items.
+	 * This function is always called to determine the
+	 * amount this modifier needs to charge or deduct.
 	 * 
-	 * @TODO Write a better description for this function
-	 * than the one above. It's not easy to understand.
+	 * If the modifier exists in the DB, in which case it
+	 * already exists for a given order, we just return
+	 * the Amount data field from the DB. This is for
+	 * existing orders.
+	 * 
+	 * If this is a new order, and the modifier doesn't
+	 * exist in the DB ($this->ID is 0), so we return
+	 * the amount from $this->LiveAmount() which is a
+	 * calculation based on the order and it's items.
 	 */
 	function Amount() {
 		return $this->ID ? $this->Amount : $this->LiveAmount();
@@ -74,12 +78,16 @@ class OrderModifier extends OrderAttribute {
 	
 	/**
 	 * This function returns the amount of the modifier
-	 * based on the current order and its items.
+	 * based on the current order and its items. It's
+	 * designed to be overloaded and put on
 	 * 
-	 * @TODO Does this return the total?
+	 * For example, it could produce a tax calculation,
+	 * and return a number, which is the amount the
+	 * modifier uses to charge or deduct, based on the
+	 * setting of {@link OrderModifier::$is_chargable}.
 	 */
 	protected function LiveAmount() {
-		return 0;
+		user_error("Please implement LiveAmount() on $this->class", E_USER_ERROR);
 	}
 	
 	/**

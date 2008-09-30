@@ -22,17 +22,13 @@ class OrderItem extends OrderAttribute {
 	);
 	
 	public function __construct($object = null, $quantity = 1) {		
-		
-		// Case 1 : Constructed by the static function get of DataObject
-		
+
+		// Case 1: Constructed by getting OrderItem from DB
 		if(is_array($object)) {
 			$this->_quantity = $object['Quantity'];
 			parent::__construct($object);
-		}
-		
-		// Case 2 : Constructed in memory
-		
-		else {
+		} else {		
+			// Case 2: Constructed in memory
 			parent::__construct();
 			$this->_quantity = $quantity;
 		}
@@ -45,7 +41,7 @@ class OrderItem extends OrderAttribute {
 	}
 	
 	function UnitPrice() {
-		return 0;
+		user_error("Please implement UnitPrice() on $this->class", E_USER_ERROR);
 	}
 	
 	function TableTitle() {
