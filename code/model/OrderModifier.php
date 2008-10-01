@@ -104,10 +104,15 @@ class OrderModifier extends OrderAttribute {
 	}
 	
 	/**
-	 * This is the name of the attribute.
-	 * In which case, it's the modifier.
-	 * This is defined on the subclasses
-	 * to be more specific to it's function.
+	 * This describes what the name of the
+	 * modifier should be, in relation to
+	 * the order table on the check out page
+	 * - which the templates uses directly.
+	 * 
+	 * For example, this could be something
+	 * like "Shipping to NZ", where NZ is a
+	 * dynamic variable on where the user
+	 * currently is, using {@link Geoip}.
 	 *
 	 * @return string
 	 */
