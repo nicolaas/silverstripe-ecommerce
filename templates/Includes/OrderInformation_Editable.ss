@@ -69,7 +69,7 @@
 							<% end_if %>
 						</td>
 						<td>&nbsp;</td>
-						<td class="right" id="$TableTotalID"><% if IsChargable %>$Amount.Nice<% else %> -<% end_if %></td>
+						<td class="right" id="$TableTotalID"><% if IsChargable %>$Amount.Nice<% else %>- $Amount.Nice<% end_if %></td>
 						<td class="right remove">
 							<% if CanRemove %>
 								<strong>

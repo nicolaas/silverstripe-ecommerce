@@ -41,7 +41,7 @@
 								$TableTitle
 							<% end_if %>
 						</td>
-						<td id="$TableTotalID" class="price"><% if IsChargable %>$Amount.Nice<% else %> -<% end_if %></td>
+						<td id="$TableTotalID" class="price"><% if IsChargable %>$Amount.Nice<% else %>- $Amount.Nice<% end_if %></td>
 					</tr>
 				<% end_if %>
 			<% end_control %>
