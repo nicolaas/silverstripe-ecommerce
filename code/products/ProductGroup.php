@@ -155,10 +155,6 @@ class ProductGroup extends Page {
 
 class ProductGroup_Controller extends Page_Controller {
 
-	/**
-	 * Include the product's requirements, override if the project has the file,
-	 * otherwise use the module one instead
-	 */
 	function init() {
 		parent::init();
 
