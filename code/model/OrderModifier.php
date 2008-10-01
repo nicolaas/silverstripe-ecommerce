@@ -15,8 +15,14 @@ class OrderModifier extends OrderAttribute {
 	);
 	
 	/**
-	 * @TODO Describe this variable's role in
-	 * relation to the $db Type field.
+	 * This determines whether the current modifier
+	 * is chargable, in that it adds an amount to the
+	 * order. An example of when this would be true is
+	 * for a shipping or tax calculator.
+	 * 
+	 * If you set this to false for your modifier, then
+	 * it will deduct from the order instead given the
+	 * amount returned in {@link OrderModifier->LiveAmount()}.
 	 *
 	 * @var boolean
 	 */
@@ -50,6 +56,8 @@ class OrderModifier extends OrderAttribute {
 	/**
 	 * This function returns a form that allows a user
 	 * to change the modifier to the order.
+	 * 
+	 * @TODO When is this used?
 	 *
 	 * @param Controller $controller $controller The controller
 	 * @return OrderModifierForm or subclass
