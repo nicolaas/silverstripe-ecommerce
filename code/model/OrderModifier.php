@@ -87,7 +87,11 @@ class OrderModifier extends OrderAttribute {
 	/**
 	 * This function returns the amount of the modifier
 	 * based on the current order and its items. It's
-	 * designed to be overloaded and put on
+	 * designed to be overloaded on your OrderModifier
+	 * subclass.
+	 * 
+	 * @see SimpleShippingModifier->LiveAmount()
+	 * @see TaxModifier->LiveAmount()
 	 * 
 	 * For example, it could produce a tax calculation,
 	 * and return a number, which is the amount the
