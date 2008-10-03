@@ -183,7 +183,7 @@ class Payment extends DataObject {
 	 * This is used by {@link OrderForm} when it is
 	 * submitted.
 	 *
-	 * @param array $data The form request data {@see OrderForm}
+	 * @param array $data The form request data - see OrderForm
 	 * @param OrderForm $form The form object submitted on
 	 */
 	function processPayment($data, $form) {
