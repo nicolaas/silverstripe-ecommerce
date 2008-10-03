@@ -62,12 +62,16 @@ class Payment extends DataObject {
 	/**
 	 * Subclasses of Payment that are allowed to be used on this site.
 	 */
-	protected static $supported_methods = array('ChequePayment' => 'Cheque');
+	protected static $supported_methods = array(
+		'ChequePayment' => 'Cheque'
+	);
 	
 	/**
-	 * Set the payment methods that this site supports
-	 * @param methodMap A map, mapping class names to human-readable descriptions of the payment methods.
-	 * The classes should all be subclasses of Payment.
+	 * Set the payment methods that this site supports.
+	 * 
+	 *The classes should all be subclasses of Payment.
+	 *
+	 * @param array $methodMap A map, mapping class names to human-readable descriptions of the payment methods.
 	 */
 	static function set_supported_methods($methodMap) {
 		self::$supported_methods = $methodMap;
@@ -75,7 +79,8 @@ class Payment extends DataObject {
 	
 	/**
 	 * Returns the 'nice' title of the payment method given.
-	 * @param - $method - the ClassName of the payment method.
+	 * 
+	 * @param string $method The ClassName of the payment method.
 	 */
 	static function findPaymentMethod($method) {
 		return self::$supported_methods[$method];
@@ -85,6 +90,8 @@ class Payment extends DataObject {
 	 * Returns the Payment method used. It just resolves the classname
 	 * to the 'nice' title as defined in Payment::set_supported_methods().
 	 * For example: 'ChequePayment' => 'Cheque'
+	 * 
+	 * @return string
 	 */
 	function PaymentMethod() {
 		if(self::findPaymentMethod($this->ClassName)) {
@@ -123,7 +130,8 @@ class Payment extends DataObject {
 	}
 	
 	/**
-	 * Return the form requirements for all the payment methods
+	 * Return the form requirements for all the payment methods.
+	 * 
 	 * @return An array suitable for passing to CustomRequiredFields
 	 */
 	static function combined_form_requirements() {
@@ -148,24 +156,60 @@ class Payment extends DataObject {
 		return $requirements;
 	}
 	
+	/**
+	 * Return the payment form fields that should
+	 * be shown on the checkout order form for the
+	 * payment type. e.g. for {@link DPSPayment},
+	 * this would be a set of fields to enter your
+	 * credit card details.
+	 * 
+	 * This needs to be implemented on your subclass
+	 * of Payment, even if it only returns NULL. It
+	 * should return a {@link FieldSet}.
+	 * 
+	 * @return FieldSet
+	 */
 	function getPaymentFormFields() {
 		user_error("Please implement getPaymentFormFields() on $this->class", E_USER_ERROR);
 	}
 	
+	/**
+	 * Perform payment processing for the type of
+	 * payment. For example, if this was a credit card
+	 * payment type, you would perform the data send
+	 * off to the payment gateway on this function for
+	 * your payment subclass.
+	 * 
+	 * This is used by {@link OrderForm} when it is
+	 * submitted.
+	 *
+	 * @param array $data The form request data {@see OrderForm}
+	 * @param OrderForm $form The form object submitted on
+	 */
 	function processPayment($data, $form) {
 		user_error("Please implement processPayment() on $this->class", E_USER_ERROR);
 	}
 	
+	/**
+	 * Define what fields defined in {@link Order->getPaymentFormFields()}
+	 * should be required. {@see DPSPayment->getPaymentFormRequirements()}
+	 * for an example on how this is implemented.
+	 * 
+	 * @return array
+	 */
 	function getPaymentFormRequirements() {
 		user_error("Please implement getPaymentFormRequirements() on $this->class", E_USER_ERROR);
 	}
 	
 	/**
-	 * Function which automatically changes the status of the order to paid if successful
-	 * Precondition : Order status is unpaid
+	 * Automatically change the status of the order to paid
+	 * if successful.
+	 * 
+	 * Precondition: Order status is unpaid.
 	 */
 	function onBeforeWrite() {
 		parent::onBeforeWrite();
+		
 		if($this->Status == 'Success') {
 			$order = $this->Order();
 			$order->Status = 'Paid';
