@@ -24,4 +24,7 @@ MemberTableField::addMembershipFields(array(
 	'Country' => 'Country'
 ));
 
+LeftAndMain::require_css('ecommerce/css/DataReportCMSMain.css');
+LeftAndMain::require_javascript('ecommerce/javascript/DataReport.js');
+
 ?>
