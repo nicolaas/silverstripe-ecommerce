@@ -1,34 +1,34 @@
-$(document).ready(
+jQuery(document).ready(
 	function() {
-		$('input.ajaxQuantityField').each(
+		jQuery('input.ajaxQuantityField').each(
 			function() {
-				$(this).attr('disabled', false);
-				$(this).change(
+				jQuery(this).attr('disabled', false);
+				jQuery(this).change(
 					function() {
-						var name = $(this).attr('name')+ '_SetQuantityLink';
-						var setQuantityLink = $('[name=' + name + ']');
-						if($(setQuantityLink).length > 0) {
-							setQuantityLink = $(setQuantityLink).get(0);
+						var name = jQuery(this).attr('name')+ '_SetQuantityLink';
+						var setQuantityLink = jQuery('[name=' + name + ']');
+						if(jQuery(setQuantityLink).length > 0) {
+							setQuantityLink = jQuery(setQuantityLink).get(0);
 							if(! this.value) this.value = 0;
 							else this.value = this.value.replace(/[^0-9]+/g, '');
-							var url = $('base').attr('href') + setQuantityLink.value + '?quantity=' + this.value;
-							$.getJSON(url, null, setChanges);
+							var url = jQuery('base').attr('href') + setQuantityLink.value + '?quantity=' + this.value;
+							jQuery.getJSON(url, null, setChanges);
 						}
 					}
 				);
 			}
 		);
-		$('select.ajaxCountryField').each(
+		jQuery('select.ajaxCountryField').each(
 			function() {
-				$(this).attr('disabled', false);
-				$(this).change(
+				jQuery(this).attr('disabled', false);
+				jQuery(this).change(
 					function() {
-						var id = '#' + $(this).attr('id') + '_SetCountryLink';
-						var setCountryLink = $(id);
-						if($(setCountryLink).length > 0) {
-							setCountryLink = $(setCountryLink).get(0);
-							var url = $('base').attr('href') + setCountryLink.value + '/' + this.value;
-							$.getJSON(url, null, setChanges);
+						var id = '#' + jQuery(this).attr('id') + '_SetCountryLink';
+						var setCountryLink = jQuery(id);
+						if(jQuery(setCountryLink).length > 0) {
+							setCountryLink = jQuery(setCountryLink).get(0);
+							var url = jQuery('base').attr('href') + setCountryLink.value + '/' + this.value;
+							jQuery.getJSON(url, null, setChanges);
 						}
 					}
 				);
@@ -45,13 +45,13 @@ function setChanges(changes) {
 			var value = escapeHTML(change.value);
 			if(change.id) {
 				var id = '#' + change.id;
-				$(id).attr(parameter, value);
+				jQuery(id).attr(parameter, value);
 			}
 			else if(change.name) {
 				var name = change.name;
-				$('[name=' + name + ']').each(
+				jQuery('[name=' + name + ']').each(
 					function() {
-						$(this).attr(parameter, value);
+						jQuery(this).attr(parameter, value);
 					}
 				);
 			}

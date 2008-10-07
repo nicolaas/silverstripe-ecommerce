@@ -2,7 +2,7 @@
 
 <div id="ProductGroup">
 	<div id="Breadcrumbs" class="typography">
-   		<p>$Breadcrumbs</p>
+   	<p>$Breadcrumbs</p>
 	</div>
 	
 	<h2 class="pageTitle">$Title</h2>
@@ -14,7 +14,7 @@
 	<% end_if %>
 	
 	<% if FeaturedProducts %>
-		<h3 class="categoryTitle"><% _t("FEATURED","Featured Products") %><img src="ecommerce/images/products/hide.gif" alt="Hide" name="FeaturedProducts" class="hide"/><img src="ecommerce/images/products/show.gif" alt="Show" name="FeaturedProducts" class="show"/></h3>
+		<h3 class="categoryTitle"><% _t("FEATURED","Featured Products") %></h3>
 		<div id="FeaturedProducts" class="category">
 			<div class="resultsBar typography">
 				<select class="productsDropdown" disabled="disabled">
@@ -33,7 +33,7 @@
 		</div>
 	<% end_if %>
 	<% if NonFeaturedProducts %>
-		<h3 class="categoryTitle"><% _t("OTHER","Other Products") %><img src="ecommerce/images/products/hide.gif" alt="Hide" name="NonFeaturedProducts" class="hide"/><img src="ecommerce/images/products/show.gif" alt="Show" name="NonFeaturedProducts" class="show"/></h3>
+		<h3 class="categoryTitle"><% _t("OTHER","Other Products") %></h3>
 		<div id="NonFeaturedProducts" class="category">
 			<div class="resultsBar typography">
 				<select class="productsDropdown" disabled="disabled">

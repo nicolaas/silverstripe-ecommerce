@@ -158,13 +158,6 @@ class ProductGroup_Controller extends Page_Controller {
 	function init() {
 		parent::init();
 
-		Requirements::javascript('ecommerce/javascript/jquery/jquery.js');
-		Requirements::javascript('ecommerce/javascript/jquery/jquery.domec.min.js');
-		Requirements::javascript('ecommerce/javascript/jquery/jquery.pagination.js');
-		Requirements::javascript('ecommerce/javascript/jquery/jquery.ui.effects.min.js');
-		Requirements::javascript('ecommerce/javascript/jquery.ssnavigation.js');
-		Requirements::javascript('ecommerce/javascript/product-group.js');
-		
 		Requirements::themedCSS('ProductGroup');
 		Requirements::themedCSS('Cart');
 	}

@@ -241,8 +241,6 @@ class Product_Controller extends Page_Controller {
 	function init(){
 		parent::init();
 		
-		Requirements::javascript('ecommerce/javascript/jquery/jquery.js');
-		
 		Requirements::themedCSS('Product');
 		Requirements::themedCSS('Cart');
 	}
