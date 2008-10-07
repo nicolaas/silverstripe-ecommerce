@@ -17,10 +17,6 @@
 		<h3 class="categoryTitle"><% _t("FEATURED","Featured Products") %></h3>
 		<div id="FeaturedProducts" class="category">
 			<div class="resultsBar typography">
-				<select class="productsDropdown" disabled="disabled">
-					<option value="$FeaturedProducts.Count" selected="selected">$FeaturedProducts.Count</option>
-				</select>
-				<p class="productsDropdown">Products Per Page</p>
 				<p class="resultsShowing">Showing <span class="firstProductIndex">1</span> to <span class="lastProductIndex">$FeaturedProducts.Count</span> of <span class="productsTotal">$FeaturedProducts.Count</span> products</p>
 			</div>
 			<div class="clear"><!-- --></div>
@@ -36,10 +32,6 @@
 		<h3 class="categoryTitle"><% _t("OTHER","Other Products") %></h3>
 		<div id="NonFeaturedProducts" class="category">
 			<div class="resultsBar typography">
-				<select class="productsDropdown" disabled="disabled">
-					<option value="$NonFeaturedProducts.Count" selected="selected">$NonFeaturedProducts.Count</option>
-				</select>
-				<p class="productsDropdown">Products Per Page</p>
 				<p class="resultsShowing">Showing <span class="firstProductIndex">1</span> to <span class="lastProductIndex">$NonFeaturedProducts.Count</span> of <span class="productsTotal">$NonFeaturedProducts.Count</span> products</p>
 			</div>
 			<div class="clear"><!-- --></div>
