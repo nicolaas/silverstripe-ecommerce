@@ -29,9 +29,9 @@ HTML
 
 	function filter_onchange(){
 	
-		if($_REQUEST['From']) $this->dateFilter['From'] = $_REQUEST['From'];
-		if($_REQUEST['To']) $this->dateFilter['To'] = $_REQUEST['To'];
-		if($_REQUEST['orderType']) $this->filter['OrderType'] = $_REQUEST['orderType'];
+		if(!empty($_REQUEST['From'])) $this->dateFilter['From'] = $_REQUEST['From'];
+		if(!empty($_REQUEST['To'])) $this->dateFilter['To'] = $_REQUEST['To'];
+		if(!empty($_REQUEST['orderType'])) $this->filter['OrderType'] = $_REQUEST['orderType'];
 		
 		// Dealing with the name field of the filter, let it search on Members FirstName or Surname or both and using "Like" so it can be a free text search
 		if($_REQUEST['MemberName'] && $_REQUEST['MemberName'] !== 'All' && $_REQUEST['MemberName'] !== 'all') {
