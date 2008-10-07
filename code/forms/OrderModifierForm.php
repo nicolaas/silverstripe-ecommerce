@@ -2,7 +2,8 @@
 
 /** 
  * @TODO What does this class do in relation to
- * {@see OrderModifier} ?
+ * 
+ * @see OrderModifier
  * 
  * @package ecommerce
  */

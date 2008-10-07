@@ -2,8 +2,11 @@
 
 /**
  * OrderAttribute is an attribute which makes up
- * an Order. {@see OrderModifier} and
- * {@see OrderItem} for implementations of it.
+ * an Order. 
+ * 
+ * @see OrderModifier
+ * @see OrderItem
+ * @see OrderModifier
  * 
  * @package ecommerce
  */

@@ -2,7 +2,9 @@
 
  /**
   * Order form that allows a user to purchase their
-  * order items on the {@see CheckoutPage}
+  * order items on the 
+  * 
+  * @see CheckoutPage
   * 
   * @package ecommerce
   */

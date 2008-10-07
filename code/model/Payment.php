@@ -192,8 +192,10 @@ class Payment extends DataObject {
 	
 	/**
 	 * Define what fields defined in {@link Order->getPaymentFormFields()}
-	 * should be required. {@see DPSPayment->getPaymentFormRequirements()}
-	 * for an example on how this is implemented.
+	 * should be required. 
+	 * 
+	 * @see DPSPayment->getPaymentFormRequirements() for an example on how
+	 * this is implemented.
 	 * 
 	 * @return array
 	 */
