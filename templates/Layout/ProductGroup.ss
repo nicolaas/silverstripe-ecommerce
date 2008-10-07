@@ -28,6 +28,7 @@
 			<div class="clear"><!-- --></div>
 		</div>
 	<% end_if %>
+	
 	<% if NonFeaturedProducts %>
 		<h3 class="categoryTitle"><% _t("OTHER","Other Products") %></h3>
 		<div id="NonFeaturedProducts" class="category">
