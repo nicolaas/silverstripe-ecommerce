@@ -45,7 +45,6 @@ class DataReport extends FormField {
 	 * @param sort The sort clause will be made from this parameter
 	 */
 	function __construct($name, $title, $value, $form, $baseClass, $fieldMap=null, $headFields=null, $filter=null, $dateFilter=null, $sort=null, $join=null) {
-		
 		$this->baseClass = $baseClass;
 		
 		//Work out $filters, $sort, $join, $filters need to be further processed in getRecords();
@@ -54,26 +53,24 @@ class DataReport extends FormField {
 		if($dateFilter) $this->dateFilter=$dateFilter;
 		if($sort) $this->sort = $sort;
 		if($join) $this->join = $join;
+
+		$heads = array();
+		$fields = array();
 		
 		//Work out $headFields, $dataFields
 		if($fieldMap){
-			
 			if(is_array($fieldMap)){
 				foreach($fieldMap as $k => $v){
 					$fields[] = $v;
-					if(!$headFields)
-						$heads[] = $k;
+					if(!$headFields) $heads[] = $k;
 				}
 			}
 		}
 		
-		if($fields)
-			$this->dataFields = $fields;
+		if($fields) $this->dataFields = $fields;
 
-		if(!$headFields)
-			$this->headFields = $heads;
-		else
-			$this->headFields = $headFields;
+		if(!$headFields) $this->headFields = $heads;
+		else $this->headFields = $headFields;
 		
 		parent::__construct($name, $title, $value, $form);
 	}

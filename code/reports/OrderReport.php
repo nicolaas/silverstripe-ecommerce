@@ -34,7 +34,7 @@ HTML
 		if(!empty($_REQUEST['orderType'])) $this->filter['OrderType'] = $_REQUEST['orderType'];
 		
 		// Dealing with the name field of the filter, let it search on Members FirstName or Surname or both and using "Like" so it can be a free text search
-		if($_REQUEST['MemberName'] && $_REQUEST['MemberName'] !== 'All' && $_REQUEST['MemberName'] !== 'all') {
+		if(!empty($_REQUEST['MemberName']) && $_REQUEST['MemberName'] !== 'All' && $_REQUEST['MemberName'] !== 'all') {
 			list($firstname, $surname) = explode(" ", $_REQUEST['MemberName']);
 			$SQL_firstname = Convert::raw2sql($firstname);
 			$SQL_surname = Convert::raw2sql($surname);
@@ -60,7 +60,7 @@ HTML
 		$this->filter['`Order`.Status'] = (!empty($_REQUEST['Status'])) ? Convert::raw2sql($_REQUEST['Status']) : "All";
 
 		// Dealing with the Order Number field of the filter. In case it is a 
-		if($_REQUEST['OrderID'] && $_REQUEST['OrderID'] !== 'All' && $_REQUEST['OrderID'] !== 'all'){
+		if(!empty($_REQUEST['OrderID']) && $_REQUEST['OrderID'] !== 'All' && $_REQUEST['OrderID'] !== 'all'){
 			$this->filter = null;
 			$this->dateFilter = null;
 			$this->filter['`Order`.ID'] = $_REQUEST['OrderID'];
@@ -162,7 +162,7 @@ class OrderReport_Popup extends Controller {
 		*Todo: get orders by ID or using the current filter if ID is not numeric such as 'all'.
 		*/
 	function DisplayFinalisedOrder(){
-		$id = $this->urlParams[ID];
+		$id = $this->urlParams['ID'];
 
 		if(is_numeric($id)){
 			$order = DataObject::get_by_id("Order", $id);
@@ -197,7 +197,7 @@ class OrderReport_Popup extends Controller {
 		Requirements::javascript('jsparty/prototype.js');
 		Requirements::javascript('jsparty/prototype_improvements.js');
 
-		$id = (isset($_REQUEST['ID'])) ? $_REQUEST['ID'] : $this->urlParams[ID];
+		$id = (isset($_REQUEST['ID'])) ? $_REQUEST['ID'] : $this->urlParams['ID'];
 
 		if(is_numeric($id)) {
 			$order = DataObject::get_by_id("Order", $id);
@@ -230,7 +230,7 @@ class OrderReport_Popup extends Controller {
 				'Note' => 'Note',
 				'SentToCustomer' => 'Sent to customer',
 			),
-			"OrderID = {$this->urlParams[ID]}"
+			"OrderID = {$this->urlParams['ID']}"
 		);
 		$table->setFieldCasting(array(
 			"Created" => "Date->Nice",
