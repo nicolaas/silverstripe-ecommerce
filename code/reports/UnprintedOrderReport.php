@@ -1,6 +1,6 @@
 <?php
 
-class UnprintedOrderReport extends Report {
+class UnprintedOrderReport extends SSReport {
 
 	protected $title = 'Unprinted Orders';
 

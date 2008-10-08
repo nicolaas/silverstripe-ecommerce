@@ -1,6 +1,6 @@
 <?php
 
-class CurrentOrdersReport extends Report {
+class CurrentOrdersReport extends SSReport {
 
 	protected $title = 'Current Orders';
 

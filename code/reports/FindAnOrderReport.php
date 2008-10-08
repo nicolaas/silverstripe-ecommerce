@@ -1,6 +1,6 @@
 <?php
 
-class FindAnOrderReport extends Report {
+class FindAnOrderReport extends SSReport {
 
 	protected $title = 'Find an Order';
 
