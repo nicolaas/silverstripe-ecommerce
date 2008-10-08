@@ -90,8 +90,8 @@ class OrderModifier extends OrderAttribute {
 	 * designed to be overloaded on your OrderModifier
 	 * subclass.
 	 * 
-	 * @see SimpleShippingModifier->LiveAmount()
-	 * @see TaxModifier->LiveAmount()
+	 * See SimpleShippingModifier->LiveAmount()
+	 * See TaxModifier->LiveAmount()
 	 * 
 	 * For example, it could produce a tax calculation,
 	 * and return a number, which is the amount the
