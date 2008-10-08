@@ -41,9 +41,9 @@ class UnprintedOrderReport extends SSReport {
 			"Payment.ClassName",
 		));
 		$orderReport->setExtraFields(array(
-			"Invoice" => '<a href=\"OrderReport_Popup/invoice/$record->ID/\">'._t("Report.INVOICE","invoice").'</a>',
-			"Print" => '<a href=\"OrderReport_Popup/index/$record->ID/?print=1\">'._t("Report.PRINT","print").'</a>',
-			"Packing Slip" => '<a href=\"OrderReport_Popup/packingSlip/$record->ID\">'._t("Report.VIEW","view").'</a>'
+			"Invoice" => '<a href=\"OrderReport_Popup/invoice/$record->ID/\">'._t("SSReport.INVOICE", 'Invoice').'</a>',
+			"Print" => '<a href=\"OrderReport_Popup/index/$record->ID/?print=1\">'._t("SSReport.PRINT", 'Print').'</a>',
+			"Packing Slip" => '<a href=\"OrderReport_Popup/packingSlip/$record->ID\">'._t("SSReport.VIEW", 'View').'</a>'
 			));
 
 			return $orderReport;

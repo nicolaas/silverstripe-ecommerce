@@ -40,8 +40,8 @@ class CurrentOrdersReport extends SSReport {
 			"OrderStatusLog.Created",
 		));
 		$orderReport->setExtraFields(array(
-			"Invoice" => '<a href=\"OrderReport_Popup/invoice/$record->ID/\">'._t("Report.INVOICE","invoice").'</a>',
-			"Print" => '<a href=\"OrderReport_Popup/index/$record->ID/?print=1\">'._t("Report.PRINT").'</a>',
+			"Invoice" => '<a href=\"OrderReport_Popup/invoice/$record->ID/\">'._t("SSReport.INVOICE", 'Invoice').'</a>',
+			"Print" => '<a href=\"OrderReport_Popup/index/$record->ID/?print=1\">'._t("SSReport.PRINT", 'Print').'</a>',
 		));
 
 		return $orderReport;
