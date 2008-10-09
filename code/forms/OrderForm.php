@@ -95,7 +95,7 @@ class OrderForm extends Form {
 		parent::__construct($controller, $name, $fields, $actions, $requiredFields);
 		
 		// 7) Member details loading
-		if($member->ID)	$this->loadNonBlankDataFrom($member);
+		if($member->ID) $this->loadNonBlankDataFrom($member);
 		
 		// 8) Country field value update
 		$currentOrder = ShoppingCart::current_order();
