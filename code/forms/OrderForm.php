@@ -163,7 +163,7 @@ class OrderForm extends Form {
 		$payment = Object::create($data['PaymentMethod']);
 		
 		if(!$payment instanceof Payment) {
-			user_error(get_class($payment) . ' is not a Payment object !', E_USER_ERROR);
+			user_error(get_class($payment) . ' is not a Payment object!', E_USER_ERROR);
 		}
 		
 		$form->saveInto($payment);
