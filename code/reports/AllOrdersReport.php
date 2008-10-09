@@ -1,10 +1,10 @@
 <?php
 
-class UnprintedOrderReport extends SSReport {
+class AllOrdersReport extends SSReport {
 
-	protected $title = 'Unprinted Orders';
+	protected $title = 'All orders';
 
-	protected $description = 'This shows all orders that are complete, but haven\'t been printed yet.';
+	protected $description = 'Show all orders in the system.';
 
 	/**
 	 * Return a {@link ComplexTableField} that shows
@@ -34,7 +34,7 @@ class UnprintedOrderReport extends SSReport {
 		// all the fields. Invoice and Printed are dummy fields that just have some
 		// text in them, which would be automatically queried if we didn't specify
 		// a custom query.
-		$query = singleton('Order')->buildSQL('Order.Printed = 0', 'Order.Created DESC');
+		$query = singleton('Order')->buildSQL('', 'Order.Created DESC');
 		$query->groupby[] = 'Order.Created';
 		$table->setCustomQuery($query);
 

@@ -121,11 +121,44 @@ class Order extends DataObject {
 	protected static $modifiers = array();
 
 	/**
+	 * These are the fields, used for a {@link ComplexTableField}
+	 * in order to show for the table columns on a report.
+	 * 
+	 * @see CurrentOrdersReport
+	 * @see UnprintedOrdersReport
+	 * 
+	 * To customise these, simply define Order::set_table_overview_fields(Array)
+	 * inside your project _config.php where Array is a set of fields that
+	 * you want to display on the table.
+	 *
+	 * @var array
+	 */
+	public static $table_overview_fields = array(
+		'ID' => 'Order No',
+		'Created' => 'Created',
+		'Member.FirstName' => 'Customer First Name',
+		'Member.Surname' => 'Customer Surname',
+		'Total' => 'Order Total',
+		'Status' => 'Status'
+	);
+	
+	/**
+	 * Set the fields to be used for {@link ComplexTableField}
+	 * tables for Order instances, such as for reports. This
+	 * sets the {@link Order::$table_overview_fields} variable.
+	 * 
+	 * @param array $fields An array of fields to show
+	 */
+	public static function set_table_overview_fields($fields) {
+		self::$table_overview_fields = $fields;
+	}
+	
+	/**
 	 * Set the currency code that this site uses.
 	 *
 	 * @param string $currency Currency code. e.g. "NZD"
 	 */
-	static function set_site_currency($currency) {
+	public static function set_site_currency($currency) {
 		self::$site_currency = $currency;
 	}
 
@@ -134,7 +167,7 @@ class Order extends DataObject {
 	 * 
 	 * @param string $email From address. e.g. "info@myshop.com"
 	 */
-	static function set_email($email) {
+	public static function set_email($email) {
 		self::$receipt_email = $email;
 	}
 
@@ -143,7 +176,7 @@ class Order extends DataObject {
 	 *
 	 * @return string
 	 */
-	static function site_currency() {
+	public static function site_currency() {
 		return self::$site_currency;
 	}
 
@@ -152,7 +185,7 @@ class Order extends DataObject {
 	 * 
 	 * @param string $subject The subject line text
 	 */
-	static function set_subject($subject) {
+	public static function set_subject($subject) {
 		self::$receipt_subject = $subject;
 	}	
 	
@@ -162,7 +195,7 @@ class Order extends DataObject {
 	 * @param array $modifiers An array of
 	 * 				{@link OrderModifier} objects
 	 */
-	static function set_modifiers($modifiers) {
+	public static function set_modifiers($modifiers) {
 		self::$modifiers = $modifiers;
 	}
 
@@ -172,7 +205,7 @@ class Order extends DataObject {
 	 *
 	 * @param boolean $value
 	 */
-	static function set_cancel_before_payment($value) {
+	public static function set_cancel_before_payment($value) {
 		self::$can_cancel_before_payment = $value;
 	}
 
@@ -182,7 +215,7 @@ class Order extends DataObject {
 	 *
 	 * @param unknown_type $value
 	 */
-	static function set_cancel_before_processing($value) {
+	public static function set_cancel_before_processing($value) {
 		self::$can_cancel_before_processing = $value;
 	}
 	
@@ -192,7 +225,7 @@ class Order extends DataObject {
 	 *
 	 * @param boolean $value
 	 */
-	static function set_cancel_before_sending($value) {
+	public static function set_cancel_before_sending($value) {
 		self::$can_cancel_before_sending = $value;
 	}
 	
@@ -202,7 +235,7 @@ class Order extends DataObject {
 	 *
 	 * @param boolean $value
 	 */
-	static function set_cancel_after_sending($value) {
+	public static function set_cancel_after_sending($value) {
 		self::$can_cancel_after_sending = $value;
 	}
 	
@@ -210,7 +243,7 @@ class Order extends DataObject {
 	 * Initialise all the {@link OrderModifier} objects
 	 * by evaluating init_for_order() on each of them.
 	 */
-	static function init_all_modifiers() {
+	public static function init_all_modifiers() {
 		if(self::$modifiers && is_array(self::$modifiers) && count(self::$modifiers) > 0) {
 			foreach(self::$modifiers as $className) {
 				if(class_exists($className)) {
@@ -231,7 +264,7 @@ class Order extends DataObject {
 	 * 
 	 * @return DataObjectSet
 	 */
-	static function get_modifier_forms($controller) {
+	public static function get_modifier_forms($controller) {
 		$forms = array();
 		if(self::$modifiers && is_array(self::$modifiers) && count(self::$modifiers) > 0) {
 			foreach(self::$modifiers as $className) {
@@ -241,6 +274,7 @@ class Order extends DataObject {
 				}
 			}
 		}
+		
 		return count($forms) > 0 ? new DataObjectSet($forms) : null;
 	}
 	
@@ -250,7 +284,7 @@ class Order extends DataObject {
 	 *
 	 * @return Order The current order
 	 */
-	static function save_current_order() {
+	public static function save_current_order() {
 		
 		// Create a new order, and write it
 		$order = new Order();
