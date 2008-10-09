@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * An extension to {@link SSReport} that allows a user
+ * to view all Order instances in the system that
+ * are not printed. {@link UnprintedOrderReport->getReportField()}
+ * outlines the logic for what orders are considered to be "unprinted".
+ * 
+ * @package ecommerce
+ */
 class UnprintedOrderReport extends SSReport {
 
 	protected $title = 'Unprinted Orders';

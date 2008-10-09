@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * An extension to {@link SSReport} that allows a user
+ * to view all Order instances that are "current",
+ * {@link CurrentOrdersReport->getReportField()} has
+ * the detail on the logic for what "Current" means.
+ * 
+ * @package ecommerce
+ */
 class CurrentOrdersReport extends SSReport {
 
 	protected $title = 'Current Orders';
