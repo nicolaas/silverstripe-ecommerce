@@ -100,31 +100,50 @@ class Payment extends DataObject {
 	}
 	
 	/**
-	 * Return the field set of payment fields from all the enabled payment classes in this site, ready to be 
-	 * inserted into a form.
+	 * Return a set of payment fields from all enabled
+	 * payment methods for this site, given the . {@link Payment::set_supported_methods()}
+	 * is used to define which methods are available.
+	 * 
+	 * @TODO Why do we have subtotal? What is the relevance of
+	 * a subtotal? If you pay for something, you just require a single
+	 * amount!
+	 * 
+	 * @return FieldSet
 	 */
 	static function combined_form_fields($amount, $subtotal) {
-		// Initial form, with the optionset for switching between methods		
+
+		// Create the initial form fields, which defines an OptionsetField
+		// allowing the user to choose which payment method to use.
 		$fields = new FieldSet(
-			// Payment Form
-			new HeaderField("Payment Type",3),
-			new OptionsetField("PaymentMethod", "",
+			new HeaderField(_t('Payment.PAYMENTTYPE', 'Payment Type'), 3),
+			new OptionsetField(
+				'PaymentMethod',
+				'',
 				self::$supported_methods,
 				array_shift(array_keys(self::$supported_methods))
 			)
 		);
 		
-		// 1x CompositeField for each payment method
-		foreach(self::$supported_methods as $method => $methodTitle) {
-			$composite = new CompositeField(singleton($method)->getPaymentFormFields());
-			$composite->setID("MethodFields_$method");
-			$composite->addExtraClass('paymentfields');
-			$fields->push($composite);
+		// If the user defined an numerically indexed array, throw an error
+		if(ArrayLib::is_associative(self::$supported_methods)) {
+			foreach(self::$supported_methods as $methodClass => $methodTitle) {
+				
+				// Create a new CompositeField with method specific fields,
+				// as defined on each payment method class using getPaymentFormFields()
+				$methodFields = new CompositeField(singleton($methodClass)->getPaymentFormFields());
+				$methodFields->setID("MethodFields_$methodClass");
+				$methodFields->addExtraClass('paymentfields');
+				
+				// Add those fields to the initial FieldSet we first created
+				$fields->push($methodFields);
+			}
+		} else {
+			user_error('Payment::set_supported_methods() requires an associative array.', E_USER_ERROR);
 		}
 		
-		// Final fields below that
-		$fields->push(new ReadonlyField("Amount", "Amount", $amount));
-		$fields->push(new HiddenField("Subtotal", "Subtotal", $subtotal));
+		// Add the amount and subtotal fields for the payment amount
+		$fields->push(new ReadonlyField('Amount', _t('Payment.AMOUNT', 'Amount'), $amount));
+		$fields->push(new HiddenField('Subtotal', _t('Payment.SUBTOTAL', 'Subtotal'), $subtotal));
 		
 		return $fields;
 	}
