@@ -31,11 +31,11 @@ class EcommerceRole extends DataObjectDecorator {
 	 * Add fields to the member popup box in the CMS.
 	 */
 	function updateCMSFields(FieldSet &$fields) {
-		$fields->push(new TextField('HomePhone', 'Phone'));
-		$fields->push(new TextField('MobilePhone', 'Mobile'));
-		$fields->push(new TextField('Address', 'Address'));
-		$fields->push(new TextField('AddressLine2', 'Address Line 2'));
-		$fields->push(new TextField('City', 'City'));
+		$fields->addFieldToTab('Root.Ecommerce',new TextField('HomePhone', 'Phone'));
+		$fields->addFieldToTab('Root.Ecommerce',new TextField('MobilePhone', 'Mobile'));
+		$fields->addFieldToTab('Root.Ecommerce',new TextField('Address', 'Address'));
+		$fields->addFieldToTab('Root.Ecommerce',new TextField('AddressLine2', 'Address Line 2'));
+		$fields->addFieldToTab('Root.Ecommerce',new TextField('City', 'City'));
 		
 		if(!$fields->fieldByName('Country')) {
 			$fields->push(new DropdownField('Country', 'Country', Geoip::getCountryDropDown()));
