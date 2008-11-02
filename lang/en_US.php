@@ -55,16 +55,6 @@ $lang['en_US']['CheckoutPage']['SINGULARNAME'] = array(
 	50,
 	'Singular name of the object, used in dropdowns and to generally identify a single object in the interface'
 );
-$lang['en_US']['CheckoutPage']['db_ChequeMessage'] = array(
-	'ChequeMessage',
-	50,
-	'Name of the object property, mainly used for automatically generating forms'
-);
-$lang['en_US']['CheckoutPage']['db_PurchaseComplete'] = array(
-	'PurchaseComplete',
-	50,
-	'Name of the object property, mainly used for automatically generating forms'
-);
 $lang['en_US']['CheckoutPage.ss']['CHECKOUT'] = 'Checkout';
 $lang['en_US']['CheckoutPage.ss']['ORDERSTATUS'] = 'Order Status';
 $lang['en_US']['CheckoutPage.ss']['PROCESS'] = 'Process';
@@ -113,66 +103,6 @@ $lang['en_US']['Order']['SINGULARNAME'] = array(
 	'Singular name of the object, used in dropdowns and to generally identify a single object in the interface'
 );
 $lang['en_US']['Order']['SUCCESSFULL'] = 'Order Successful';
-$lang['en_US']['Order']['db_Country'] = array(
-	'Country',
-	50,
-	'Name of the object property, mainly used for automatically generating forms'
-);
-$lang['en_US']['Order']['db_Printed'] = array(
-	'Printed',
-	50,
-	'Name of the object property, mainly used for automatically generating forms'
-);
-$lang['en_US']['Order']['db_ShippingAddress'] = array(
-	'ShippingAddress',
-	50,
-	'Name of the object property, mainly used for automatically generating forms'
-);
-$lang['en_US']['Order']['db_ShippingAddress2'] = array(
-	'ShippingAddress2',
-	50,
-	'Name of the object property, mainly used for automatically generating forms'
-);
-$lang['en_US']['Order']['db_ShippingCity'] = array(
-	'ShippingCity',
-	50,
-	'Name of the object property, mainly used for automatically generating forms'
-);
-$lang['en_US']['Order']['db_ShippingCountry'] = array(
-	'ShippingCountry',
-	50,
-	'Name of the object property, mainly used for automatically generating forms'
-);
-$lang['en_US']['Order']['db_ShippingName'] = array(
-	'ShippingName',
-	50,
-	'Name of the object property, mainly used for automatically generating forms'
-);
-$lang['en_US']['Order']['db_Status'] = array(
-	'Status',
-	50,
-	'Name of the object property, mainly used for automatically generating forms'
-);
-$lang['en_US']['Order']['db_UseShippingAddress'] = array(
-	'UseShippingAddress',
-	50,
-	'Name of the object property, mainly used for automatically generating forms'
-);
-$lang['en_US']['Order']['has_many_Attributes'] = array(
-	'Attributes',
-	50,
-	'Name of an object relation, mainly used for automatically generating forms'
-);
-$lang['en_US']['Order']['has_many_OrderStatusLogs'] = array(
-	'OrderStatusLogs',
-	50,
-	'Name of an object relation, mainly used for automatically generating forms'
-);
-$lang['en_US']['Order']['has_many_Payments'] = array(
-	'Payments',
-	50,
-	'Name of an object relation, mainly used for automatically generating forms'
-);
 $lang['en_US']['OrderAttribute']['PLURALNAME'] = array(
 	'Order Attributs',
 	50,
@@ -252,11 +182,6 @@ $lang['en_US']['OrderItem']['SINGULARNAME'] = array(
 	50,
 	'Singular name of the object, used in dropdowns and to generally identify a single object in the interface'
 );
-$lang['en_US']['OrderItem']['db_Quantity'] = array(
-	'Quantity',
-	50,
-	'Name of the object property, mainly used for automatically generating forms'
-);
 $lang['en_US']['OrderModifier']['PLURALNAME'] = array(
 	'Order Modifiers',
 	50,
@@ -266,16 +191,6 @@ $lang['en_US']['OrderModifier']['SINGULARNAME'] = array(
 	'Order Modifier',
 	50,
 	'Singular name of the object, used in dropdowns and to generally identify a single object in the interface'
-);
-$lang['en_US']['OrderModifier']['db_Amount'] = array(
-	'Amount',
-	50,
-	'Name of the object property, mainly used for automatically generating forms'
-);
-$lang['en_US']['OrderModifier']['db_Type'] = array(
-	'Type',
-	50,
-	'Name of the object property, mainly used for automatically generating forms'
 );
 $lang['en_US']['OrderReport']['CHANGESTATUS'] = 'Change Order Status';
 $lang['en_US']['OrderReport']['NOTEEMAIL'] = 'Note/Email';
@@ -289,21 +204,6 @@ $lang['en_US']['OrderStatusLog']['SINGULARNAME'] = array(
 	'Order Status Log',
 	50,
 	'Singular name of the object, used in dropdowns and to generally identify a single object in the interface'
-);
-$lang['en_US']['OrderStatusLog']['db_Note'] = array(
-	'Note',
-	50,
-	'Name of the object property, mainly used for automatically generating forms'
-);
-$lang['en_US']['OrderStatusLog']['db_SentToCustomer'] = array(
-	'SentToCustomer',
-	50,
-	'Name of the object property, mainly used for automatically generating forms'
-);
-$lang['en_US']['OrderStatusLog']['db_Status'] = array(
-	'Status',
-	50,
-	'Name of the object property, mainly used for automatically generating forms'
 );
 $lang['en_US']['Order_Content.ss']['NOITEMS'] = 'There are <strong>no</strong> items in your order.';
 $lang['en_US']['Order_Content.ss']['PRICE'] = 'Price';
@@ -349,46 +249,6 @@ $lang['en_US']['Payment']['SINGULARNAME'] = array(
 	'Singular name of the object, used in dropdowns and to generally identify a single object in the interface'
 );
 $lang['en_US']['Payment']['SUBTOTAL'] = 'Subtotal';
-$lang['en_US']['Payment']['db_Amount'] = array(
-	'Amount',
-	50,
-	'Name of the object property, mainly used for automatically generating forms'
-);
-$lang['en_US']['Payment']['db_AuthorizationCode'] = array(
-	'AuthorizationCode',
-	50,
-	'Name of the object property, mainly used for automatically generating forms'
-);
-$lang['en_US']['Payment']['db_Currency'] = array(
-	'Currency',
-	50,
-	'Name of the object property, mainly used for automatically generating forms'
-);
-$lang['en_US']['Payment']['db_IP'] = array(
-	'IP',
-	50,
-	'Name of the object property, mainly used for automatically generating forms'
-);
-$lang['en_US']['Payment']['db_Message'] = array(
-	'Message',
-	50,
-	'Name of the object property, mainly used for automatically generating forms'
-);
-$lang['en_US']['Payment']['db_ProxyIP'] = array(
-	'ProxyIP',
-	50,
-	'Name of the object property, mainly used for automatically generating forms'
-);
-$lang['en_US']['Payment']['db_Status'] = array(
-	'Status',
-	50,
-	'Name of the object property, mainly used for automatically generating forms'
-);
-$lang['en_US']['Payment']['db_TxnRef'] = array(
-	'TxnRef',
-	50,
-	'Name of the object property, mainly used for automatically generating forms'
-);
 $lang['en_US']['PaymentInformation.ss']['AMOUNT'] = 'Amount';
 $lang['en_US']['PaymentInformation.ss']['DATE'] = 'Date';
 $lang['en_US']['PaymentInformation.ss']['DETAILS'] = 'Details';
@@ -427,46 +287,6 @@ $lang['en_US']['Product']['SINGULARNAME'] = array(
 	50,
 	'Singular name of the object, used in dropdowns and to generally identify a single object in the interface'
 );
-$lang['en_US']['Product']['db_AllowPurchase'] = array(
-	'AllowPurchase',
-	50,
-	'Name of the object property, mainly used for automatically generating forms'
-);
-$lang['en_US']['Product']['db_FeaturedProduct'] = array(
-	'FeaturedProduct',
-	50,
-	'Name of the object property, mainly used for automatically generating forms'
-);
-$lang['en_US']['Product']['db_InternalItemID'] = array(
-	'InternalItemID',
-	50,
-	'Name of the object property, mainly used for automatically generating forms'
-);
-$lang['en_US']['Product']['db_Model'] = array(
-	'Model',
-	50,
-	'Name of the object property, mainly used for automatically generating forms'
-);
-$lang['en_US']['Product']['db_Price'] = array(
-	'Price',
-	50,
-	'Name of the object property, mainly used for automatically generating forms'
-);
-$lang['en_US']['Product']['db_Weight'] = array(
-	'Weight',
-	50,
-	'Name of the object property, mainly used for automatically generating forms'
-);
-$lang['en_US']['Product']['has_many_Variations'] = array(
-	'Variations',
-	50,
-	'Name of an object relation, mainly used for automatically generating forms'
-);
-$lang['en_US']['Product']['many_many_ProductGroups'] = array(
-	'ProductGroups',
-	50,
-	'Name of an object relation, mainly used for automatically generating forms'
-);
 $lang['en_US']['Product.ss']['ADD'] = 'Add &quot;%s&quot; to your cart';
 $lang['en_US']['Product.ss']['ADDLINK'] = 'Add this item to cart';
 $lang['en_US']['Product.ss']['ADDONE'] = 'Add one more of &quot;%s&quot; to your cart';
@@ -491,11 +311,6 @@ $lang['en_US']['ProductGroup']['SINGULARNAME'] = array(
 	'Product Group',
 	50,
 	'Singular name of the object, used in dropdowns and to generally identify a single object in the interface'
-);
-$lang['en_US']['ProductGroup']['db_ChildGroupsPermission'] = array(
-	'ChildGroupsPermission',
-	50,
-	'Name of the object property, mainly used for automatically generating forms'
 );
 $lang['en_US']['ProductGroup.ss']['FEATURED'] = 'Featured Products';
 $lang['en_US']['ProductGroup.ss']['OTHER'] = 'Other Products';
@@ -524,16 +339,6 @@ $lang['en_US']['ProductVariation']['SINGULARNAME'] = array(
 	50,
 	'Singular name of the object, used in dropdowns and to generally identify a single object in the interface'
 );
-$lang['en_US']['ProductVariation']['db_Price'] = array(
-	'Price',
-	50,
-	'Name of the object property, mainly used for automatically generating forms'
-);
-$lang['en_US']['ProductVariation']['db_Title'] = array(
-	'Title',
-	50,
-	'Name of the object property, mainly used for automatically generating forms'
-);
 $lang['en_US']['SimpleShippingModifier']['PLURALNAME'] = array(
 	'Simple Shipping Modifiers',
 	50,
@@ -544,16 +349,6 @@ $lang['en_US']['SimpleShippingModifier']['SINGULARNAME'] = array(
 	50,
 	'Singular name of the object, used in dropdowns and to generally identify a single object in the interface'
 );
-$lang['en_US']['SimpleShippingModifier']['db_Country'] = array(
-	'Country',
-	50,
-	'Name of the object property, mainly used for automatically generating forms'
-);
-$lang['en_US']['SimpleShippingModifier']['db_ShippingChargeType'] = array(
-	'ShippingChargeType',
-	50,
-	'Name of the object property, mainly used for automatically generating forms'
-);
 $lang['en_US']['TaxModifier']['PLURALNAME'] = array(
 	'Tax Modifiers',
 	50,
@@ -563,26 +358,6 @@ $lang['en_US']['TaxModifier']['SINGULARNAME'] = array(
 	'Tax Modifier',
 	50,
 	'Singular name of the object, used in dropdowns and to generally identify a single object in the interface'
-);
-$lang['en_US']['TaxModifier']['db_Country'] = array(
-	'Country',
-	50,
-	'Name of the object property, mainly used for automatically generating forms'
-);
-$lang['en_US']['TaxModifier']['db_Name'] = array(
-	'Name',
-	50,
-	'Name of the object property, mainly used for automatically generating forms'
-);
-$lang['en_US']['TaxModifier']['db_Rate'] = array(
-	'Rate',
-	50,
-	'Name of the object property, mainly used for automatically generating forms'
-);
-$lang['en_US']['TaxModifier']['db_TaxType'] = array(
-	'TaxType',
-	50,
-	'Name of the object property, mainly used for automatically generating forms'
 );
 $lang['en_US']['WeightShippingModifier']['PLURALNAME'] = array(
 	'Weight Shipping Modifiers',
