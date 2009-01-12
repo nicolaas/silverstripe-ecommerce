@@ -16,6 +16,7 @@ if(array_key_exists('pt_PT', $lang) && is_array($lang['pt_PT'])) {
 	$lang['pt_PT'] = $lang['en_US'];
 }
 
+$lang['pt_PT']['AccountPage.ss']['HISTORY'] = 'Histórico de pedidos';
 $lang['pt_PT']['Cart.ss']['CheckoutClick'] = 'Carregue aqui para ir para a caixa';
 $lang['pt_PT']['Cart.ss']['CheckoutGoTo'] = 'Ir para a caixa';
 $lang['pt_PT']['Cart.ss']['HEADLINE'] = 'Carrinho de compras';
@@ -61,6 +62,7 @@ $lang['pt_PT']['OrderInformation.ss']['SHIPPINGTO'] = 'para';
 $lang['pt_PT']['OrderInformation.ss']['SUBTOTAL'] = 'Sub-total';
 $lang['pt_PT']['OrderInformation.ss']['TOTAL'] = 'Total';
 $lang['pt_PT']['OrderInformation.ss']['TOTALl'] = 'Total';
+$lang['pt_PT']['OrderInformation.ss']['TOTALOUTSTANDING'] = 'Valor Total ';
 $lang['pt_PT']['OrderInformation.ss']['TOTALPRICE'] = 'Preço Total';
 $lang['pt_PT']['OrderInformation_Editable.ss']['NOITEMS'] = 'Não existem produtos no seu carrinho';
 $lang['pt_PT']['OrderInformation_Editable.ss']['ORDERINFORMATION'] = 'Informação do pedido';
@@ -131,6 +133,7 @@ $lang['pt_PT']['ViewAllProducts.ss']['LASTEDIT'] = 'Editado pela última vez';
 $lang['pt_PT']['ViewAllProducts.ss']['LINK'] = 'Link';
 $lang['pt_PT']['ViewAllProducts.ss']['NOCONTENT'] = 'Conteúdo não adicionado';
 $lang['pt_PT']['ViewAllProducts.ss']['NOIMAGE'] = 'Imagem não inserida para &quot;%s&quot;';
+$lang['pt_PT']['ViewAllProducts.ss']['NOSUBJECTS'] = 'Sem assunto definido';
 $lang['pt_PT']['ViewAllProducts.ss']['PRICE'] = 'Preço';
 $lang['pt_PT']['ViewAllProducts.ss']['PRODUCTID'] = 'ID do Produto';
 $lang['pt_PT']['ViewAllProducts.ss']['WEIGHT'] = 'Peso';
