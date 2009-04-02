@@ -99,6 +99,10 @@ class CheckoutPage_Controller extends Page_Controller {
 	 * has the file, otherwise uses the module one instead
 	 */
 	public function init() {
+		if(!class_exists('Payment')) {
+			trigger_error('The payment module must be installed for the ecommerce module to function.', E_USER_WARNING);
+		}
+		
 		// include extra js requirements for this page
 		Requirements::javascript('jsparty/behaviour.js');
 		Requirements::javascript('ecommerce/javascript/CheckoutPage.js');
