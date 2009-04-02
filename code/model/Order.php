@@ -57,13 +57,6 @@ class Order extends DataObject {
 	static $paid_status = array('Paid', 'Processing', 'Sent', 'Complete');
 	
 	/**
-	 * The currency code used for orders.
-	 * 
-	 * @var string
-	 */
-	protected static $site_currency = 'USD';
-	
-	/**
 	 * This is the from address that the receipt
 	 * email contains. e.g. "info@shopname.com"
 	 *
@@ -152,15 +145,6 @@ class Order extends DataObject {
 	public static function set_table_overview_fields($fields) {
 		self::$table_overview_fields = $fields;
 	}
-	
-	/**
-	 * Set the currency code that this site uses.
-	 *
-	 * @param string $currency Currency code. e.g. "NZD"
-	 */
-	public static function set_site_currency($currency) {
-		self::$site_currency = $currency;
-	}
 
 	/**
 	 * Set the from address for receipt emails.
@@ -169,15 +153,6 @@ class Order extends DataObject {
 	 */
 	public static function set_email($email) {
 		self::$receipt_email = $email;
-	}
-
-	/**
-	 * Return the site currency in use.
-	 *
-	 * @return string
-	 */
-	public static function site_currency() {
-		return self::$site_currency;
 	}
 
 	/**
@@ -482,7 +457,7 @@ class Order extends DataObject {
 	 * Note: this is a fixed value across the entire site. 
 	 */
 	function Currency() {
-		return self::$site_currency;
+		return Payment::site_currency();
 	}
 	
 	// Order Template Management
@@ -505,7 +480,7 @@ class Order extends DataObject {
 	
 	function updateForAjax(array &$js) {
 		$subTotal = DBField::create('Currency', $this->_SubTotal())->Nice();
-		$total = DBField::create('Currency', $this->_Total())->Nice() . ' ' . self::$site_currency;
+		$total = DBField::create('Currency', $this->_Total())->Nice() . ' ' . Payment::site_currency();
 		$js[] = array('id' => $this->TableSubTotalID(), 'parameter' => 'innerHTML', 'value' => $subTotal);
 		$js[] = array('id' => $this->TableTotalID(), 'parameter' => 'innerHTML', 'value' => $total);
 		$js[] = array('id' => $this->CartSubTotalID(), 'parameter' => 'innerHTML', 'value' => $subTotal);

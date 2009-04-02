@@ -171,7 +171,7 @@ class Product extends Page {
 	 * Return the currency being used on the site.
 	 */
 	function Currency() {
-		return Order::site_currency();
+		return Payment::site_currency();
 	}
 	
 	/**
