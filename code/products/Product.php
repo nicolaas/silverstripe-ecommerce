@@ -89,6 +89,7 @@ class Product extends Page {
 		$variations = $singleton->buildDataObjectSet($query->execute());
 		$filter = $variations ? "`ID` IN ('" . implode("','", $variations->column('RecordID')) . "')" : "`ID` < '0'";
 		//$filter = "`ProductID` = '{$this->ID}'";
+		
 		$tableField = new HasManyComplexTableField(
 			$this,
 			'Variations',
@@ -100,7 +101,11 @@ class Product extends Page {
 			'getCMSFields_forPopup',
 			$filter
 		);
-		$tableField->setRelationAutoSetting(true);
+		
+		if(method_exists($tableField, 'setRelationAutoSetting')) {
+			$tableField->setRelationAutoSetting(true);
+		}
+		
 		return $tableField;
 	}
 	
