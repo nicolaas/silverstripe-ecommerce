@@ -48,6 +48,10 @@ class OrderItem extends OrderAttribute {
 		return 'Product';
 	}
 	
+	function ProductTitle() {
+		return $this->Product()->Title;
+	}
+	
 	// Functions not to overload
 	
 	public function getQuantity() {
