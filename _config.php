@@ -11,9 +11,7 @@ DataObject::add_extension('Member', 'EcommerceRole');
 DataObject::add_extension('Payment', 'EcommercePayment');
 
 Director::addRules(50, array(
-	ShoppingCart_Controller::$URLSegment . '/$Action/$ID' => 'ShoppingCart_Controller',
-	WorldpayPayment_Handler::$URLSegment . '/$Action/$ID' => 'WorldpayPayment_Handler',
-	PayPalPayment_Handler::$URLSegment . '/$Action/$ID' => 'PayPalPayment_Handler'
+	ShoppingCart_Controller::$URLSegment . '/$Action/$ID' => 'ShoppingCart_Controller'
 ));
 
 ?>
