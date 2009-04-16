@@ -643,7 +643,7 @@ class Order extends DataObject {
 				"Note" => $note
 			)
 		);
-		$e->from = $adminEmail;
+		$e->setFrom($adminEmail);
 		$e->setSubject('Your order status');
 		$e->setTo($member->Email);
 		$e->send();
