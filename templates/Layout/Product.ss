@@ -56,7 +56,7 @@
 				</table>
 			</div>
 		<% else %>
-			<% if Price %><p class="price_display">$Price.Nice $Currency $TaxInfo.PriceSuffix</p><% end_if %>
+			<% if Price != 0 %><p class="price_display">$Price.Nice $Currency $TaxInfo.PriceSuffix</p><% end_if %>
 			<% if AllowPurchase %>
 				<% if IsInCart %>
 					<% control Item %>
