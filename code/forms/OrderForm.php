@@ -10,12 +10,13 @@
 class OrderForm extends Form {
 	
 	function __construct($controller, $name) {
-		Requirements::javascript('ecommerce/javascript/Ajax.js');
 		Requirements::themedCSS('OrderForm');
 		
 		// 1) Member and shipping fields
-		$member = Member::currentUser() ? Member::currentUser() : new Member();
-		$memberFields = $member->getEcommerceFields();
+		$member = Member::currentUser() ? Member::currentUser() : singleton('Member');
+		
+		$memberFields = new CompositeField($member->getEcommerceFields());
+		
 		$requiredFields = $member->getEcommerceRequiredFields();
 		
 		if(ShoppingCart::uses_different_shipping_address()) {
@@ -94,7 +95,7 @@ class OrderForm extends Form {
 		parent::__construct($controller, $name, $fields, $actions, $requiredFields);
 		
 		// 7) Member details loading
-		if($member->ID) $this->loadNonBlankDataFrom($member);
+		if($member->ID) $this->loadDataFrom($member);
 		
 		// 8) Country field value update
 		$currentOrder = ShoppingCart::current_order();
