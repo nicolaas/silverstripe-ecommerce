@@ -1,16 +1,12 @@
 <?php
-
-/**
- * @package ecommerce
- */
-
 /**
  * EcommerceSideReport classes are to allow quick reports that can be accessed
  * on the Reports tab to the left inside the SilverStripe CMS.
  * Currently there are reports to show products flagged as 'FeatuedProduct',
  * as well as a report on all products within the system.
+ * 
+ * @package ecommerce
  */
-
 class EcommerceSideReport_FeaturedProducts extends SideReport {
 	
 	function title() {
@@ -45,5 +41,4 @@ class EcommerceSideReport_AllProducts extends SideReport {
 	}
 	
 }
-
 ?>

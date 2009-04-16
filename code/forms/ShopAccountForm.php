@@ -1,49 +1,36 @@
 <?php
  /**
-  * MemberForm has a set of fields for the AccountPage object.
-  * It allows the shop member to edit their details.
+  * ShopAccountForm allows shop members to update
+  * their details with the shop.
   * 
   * @package ecommerce
   */
-class MemberForm extends Form {
+class ShopAccountForm extends Form {
 	
 	function __construct($controller, $name) {
 		$member = Member::currentUser();
 		
 		if($member && $member->exists()) {
-			$contactFields = $member->getEcommerceFields();
-			$logoutField = new LiteralField('LogoutNote', "<p class=\"message good\">" . _t("MemberForm.LOGGEDIN","You are currently logged in as ") . $member->FirstName . ' ' . $member->Surname . ". Click <a href=\"Security/logout\" title=\"Click here to log out\">here</a> to log out.</p>");
-			$passwordField = new ConfirmedPasswordField("Password", "Password");
+			$fields = $member->getEcommerceFields();
+			$passwordField = new ConfirmedPasswordField('Password', 'Password');
 			
 			if($member->Password != '') {
 				$passwordField->setCanBeEmpty(true);
 			}
 			
-			$fields = new FieldSet(
-				$logoutField,
-				$contactFields,
-	
-				new HeaderField("Login Details", 3),
-				$passwordField
-			);
+			$fields->push(new LiteralField('LogoutNote', "<p class=\"message good\">" . _t("MemberForm.LOGGEDIN","You are currently logged in as ") . $member->FirstName . ' ' . $member->Surname . ". Click <a href=\"Security/logout\" title=\"Click here to log out\">here</a> to log out.</p>"));
+			$fields->push(new HeaderField('Login Details', 3));
+			$fields->push($passwordField);
+			
+			$requiredFields = new RequiredFields($member->getEcommerceRequiredFields());
 		} else {
 			$fields = new FieldSet();
 		}
 		
 		$actions = new FieldSet(
-			new FormAction("submit", "Save Changes"),
-			new FormAction("proceed", "Save and proceed to checkout")
+			new FormAction('submit', 'Save Changes'),
+			new FormAction('proceed', 'Save and proceed to checkout')
 		);
-		
-		$requiredFieldList = array(
-			"FirstName",
-			"Surname",
-			"Address",
-			"Email",
-			"City"
-		);
-		
-		$requiredFields = new CustomRequiredFields($requiredFieldList);
 
 		parent::__construct($controller, $name, $fields, $actions, $requiredFields);
 		
@@ -53,7 +40,7 @@ class MemberForm extends Form {
 	/**
 	 * Save the changes to the form
 	 */
-	function submit($data, $form) {
+	function submit($data, $form, $request) {
 		$member = Member::currentUser();
 		if(!$member) return false;
 		
@@ -68,7 +55,7 @@ class MemberForm extends Form {
 	/**
 	 * Save the changes to the form, and redirect to the checkout page
 	 */
-	function proceed($data, $form) {
+	function proceed($data, $form, $request) {
 		$member = Member::currentUser();
 		if(!$member) return false;
 

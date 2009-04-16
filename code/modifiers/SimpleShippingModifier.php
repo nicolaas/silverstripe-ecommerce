@@ -1,5 +1,4 @@
 <?php
-
 /**
  * SimpleShoppingModifier is the default shipping calculation
  * scheme. It lets you set fixed shipping* costs, or a fixed
@@ -102,5 +101,4 @@ class SimpleShippingModifier extends OrderModifier {
 		$this->ShippingChargeType = $this->LiveIsDefaultCharge() ? 'Default' : 'ForCountry';
 	}
 }
-
 ?>

@@ -1,5 +1,4 @@
 <?php 
-
 /** 
  * The order class is a databound object for handling Orders
  * within SilverStripe.
@@ -770,5 +769,4 @@ class Order_CancelForm extends Form {
 	}
 	
 }
-
 ?>

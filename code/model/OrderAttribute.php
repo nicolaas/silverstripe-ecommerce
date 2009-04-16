@@ -1,9 +1,5 @@
 <?php
-
 /**
- * OrderAttribute is an attribute which makes up
- * an Order. 
- * 
  * @see OrderModifier
  * @see OrderItem
  * @see OrderModifier
@@ -119,5 +115,4 @@ class OrderAttribute extends DataObject {
 	}
 
 }
-
 ?>

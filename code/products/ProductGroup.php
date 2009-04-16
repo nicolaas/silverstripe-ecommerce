@@ -1,5 +1,4 @@
 <?php
-
  /**
   * Product Group is a 'holder' for Products within the CMS
   * It contains functions for versioning child products
@@ -152,7 +151,6 @@ class ProductGroup extends Page {
 	}
 	
 }
-
 class ProductGroup_Controller extends Page_Controller {
 
 	function init() {
@@ -163,5 +161,4 @@ class ProductGroup_Controller extends Page_Controller {
 	}
 
 }
-
 ?>

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * The ShoppingCart class is a 'data handler' for the Order object.
  * It turns the order into a shopping cart.
@@ -376,3 +375,4 @@ class ShoppingCart_Controller extends Controller {
 	}
 	
 }
+?>

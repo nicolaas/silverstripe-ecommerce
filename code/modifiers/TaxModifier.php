@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Handles calculation of sales tax on Orders.
  * If you would like to make your own tax calculator, create a subclass of
@@ -135,5 +134,4 @@ class TaxModifier extends OrderModifier {
 		$this->TaxType = $this->LiveIsExclusive() ? 'Exclusive' : 'Inclusive';
 	}
 }
-
 ?>

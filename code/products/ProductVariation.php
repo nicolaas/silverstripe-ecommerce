@@ -1,5 +1,4 @@
 <?php
-
 class ProductVariation extends DataObject {
 	
 	static $db = array(
@@ -144,5 +143,4 @@ class ProductVariation_OrderItem extends Product_OrderItem {
 HTML;
 	}
 }
-
 ?>

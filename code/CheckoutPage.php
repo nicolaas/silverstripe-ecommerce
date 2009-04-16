@@ -1,11 +1,8 @@
 <?php
-
-/**
- * @package ecommerce
- */
- 
 /**
  * Checkout page shows the order details to make a checkout
+ * 
+ * @package ecommerce
  */
 class CheckoutPage extends Page {
 		
@@ -196,6 +193,4 @@ class CheckoutPage_Controller extends Page_Controller {
 		}
 	}
 }
-
-
 ?>

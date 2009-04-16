@@ -1,11 +1,9 @@
 <?php
-
 /**
+ * Account page shows order history and a form to allow
+ * the member to edit his/her details.
+ * 
  * @package ecommerce
- */
- 
-/**
- * Account page shows order history and a form to allow the member to edit its details
  */
 class AccountPage extends Page {
 	
@@ -70,11 +68,8 @@ class AccountPage_Controller extends Page_Controller {
 		}
 	}
 
-	/**
-	 * Returns the MemberForm object
-	 */
 	function MemberForm() {
-		return new MemberForm($this, 'MemberForm');
+		return new ShopAccountForm($this, 'MemberForm');
 	}
 	
 	/**
@@ -143,6 +138,6 @@ class AccountPage_Controller extends Page_Controller {
 		$orderID = Director::urlParam('ID');
 		return new Order_CancelForm($this, 'CancelForm', $orderID);
 	}
+	
 }
-
 ?>

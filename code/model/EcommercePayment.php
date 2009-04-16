@@ -1,6 +1,12 @@
 <?php
-
+/**
+ * Customisations to {@link Payment} specifically
+ * for the ecommerce module.
+ * 
+ * @package ecommerce
+ */
 class EcommercePayment extends DataObjectDecorator {
+	
 	function extraStatics() {
 		return array(
 			'has_one' => array(
@@ -23,6 +29,6 @@ class EcommercePayment extends DataObjectDecorator {
 		Director::redirect($order->Link());
 		return;
 	}
+	
 }
-
 ?>

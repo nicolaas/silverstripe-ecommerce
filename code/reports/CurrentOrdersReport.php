@@ -1,5 +1,4 @@
 <?php
-
 /**
  * An extension to {@link SSReport} that allows a user
  * to view all Order instances that are "current",
@@ -70,5 +69,4 @@ class CurrentOrdersReport extends SSReport {
 	}
 
 }
-
 ?>

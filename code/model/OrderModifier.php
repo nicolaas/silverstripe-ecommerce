@@ -1,5 +1,4 @@
 <?php
-
 /** 
  * The OrderModifier class is a databound object for
  * handling the additional charges or deductions of
@@ -199,5 +198,4 @@ class OrderModifier extends OrderAttribute {
 HTML;
 	}
 }
-
 ?>

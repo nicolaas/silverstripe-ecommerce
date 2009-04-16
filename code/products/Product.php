@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Product contains the actual individual products
  * data - including extra fields like Price and Weight
@@ -398,5 +397,4 @@ class Product_OrderItem extends OrderItem {
 HTML;
 	}
 }
-
 ?>

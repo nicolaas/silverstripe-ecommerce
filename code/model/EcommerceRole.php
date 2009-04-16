@@ -39,7 +39,7 @@ class EcommerceRole extends DataObjectDecorator {
 			new TextField('MobilePhone', 'Mobile'),
 			new EmailField('Email', 'Email'),
 			new TextField('Address', 'Address'),
-			new TextField('AddressLine2', ''),
+			new TextField('AddressLine2', '&nbsp;'),
 			new TextField('City', 'City'),
 			new DropdownField('Country', 'Country', Geoip::getCountryDropDown(), self::findCountry())
 		);
@@ -51,7 +51,7 @@ class EcommerceRole extends DataObjectDecorator {
 
 	/**
 	 * Return which member fields should be required on {@link OrderForm}
-	 * and {@link MemberForm}.
+	 * and {@link ShopAccountForm}.
 	 * 
 	 * @return array
 	 */

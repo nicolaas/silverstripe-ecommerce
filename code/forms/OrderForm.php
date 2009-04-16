@@ -1,5 +1,4 @@
 <?php
-
  /**
   * Order form that allows a user to purchase their
   * order items on the 
@@ -183,5 +182,4 @@ class OrderForm extends Form {
 		return;
 	}
 }
-
 ?>

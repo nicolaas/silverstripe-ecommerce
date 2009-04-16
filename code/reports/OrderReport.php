@@ -1,5 +1,4 @@
 <?php
-
 /**
  * This is a stand-alone controller, designed to be
  * used with the eCommerce reporting system.
@@ -222,5 +221,4 @@ class OrderReport_Popup extends Controller {
 	}	
 	
 }
-
 ?>
