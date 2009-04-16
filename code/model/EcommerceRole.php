@@ -1,5 +1,4 @@
 <?php
-
 /**
  * EcommerceRole is a DataObjectDecorator for the member class to allow additional
  * member fields for the module. It has a base set of contact fields that can be
@@ -10,10 +9,7 @@
  */
 class EcommerceRole extends DataObjectDecorator {
 
-	/**
-	 * Define extra database fields for this extension.
-	 */
-	function extraDBFields() {
+	function extraStatics() {
 		return array(
 			'db' => array(
 				'Address' => 'Varchar',
@@ -27,25 +23,14 @@ class EcommerceRole extends DataObjectDecorator {
 		);
 	}
 
-	/**
-	 * Add fields to the member popup box in the CMS.
-	 */
-	function updateCMSFields(FieldSet &$fields) {
-		$fields->addFieldToTab('Root.Ecommerce',new TextField('HomePhone', 'Phone'));
-		$fields->addFieldToTab('Root.Ecommerce',new TextField('MobilePhone', 'Mobile'));
-		$fields->addFieldToTab('Root.Ecommerce',new TextField('Address', 'Address'));
-		$fields->addFieldToTab('Root.Ecommerce',new TextField('AddressLine2', 'Address Line 2'));
-		$fields->addFieldToTab('Root.Ecommerce',new TextField('City', 'City'));
-		
-		if(!$fields->fieldByName('Country')) {
-			$fields->push(new DropdownField('Country', 'Country', Geoip::getCountryDropDown()));
-		}
+	function updateCMSFields($fields) {
+		$fields->removeByName('Country');
+		$fields->addFieldToTab('Root.Main', new DropdownField('Country', 'Country', Geoip::getCountryDropDown()));
 	}
 	
 	/**
-	 * Return the member fields to be shown on order forms.
-	 * For orders made by existing members, this will be called on that memeber.
-	 * For new orders, this will be called on the singleton object.
+	 * Return the member fields to be shown on {@link OrderForm}.
+	 * @return FieldSet
 	 */
 	function getEcommerceFields() {
 		$fields = new FieldSet(
@@ -63,11 +48,17 @@ class EcommerceRole extends DataObjectDecorator {
 		
 		$this->owner->extend('augmentEcommerceFields', $fields);
 		
-		return new CompositeField($fields);
+		return $fields;
 	}
-	
+
+	/**
+	 * Return which member fields should be required on {@link OrderForm}
+	 * and {@link MemberForm}.
+	 * 
+	 * @return array
+	 */
 	function getEcommerceRequiredFields() {
-		return array(
+		$fields = array(
 			'FirstName',
 			'Surname',
 			'Email',
@@ -75,6 +66,10 @@ class EcommerceRole extends DataObjectDecorator {
 			'City',
 			'Country'
 		);
+		
+		$this->owner->extend('augmentEcommerceRequiredFields', $fields);
+		
+		return $fields;
 	}
 	
 	function CountryTitle() {
@@ -131,5 +126,4 @@ class EcommerceRole extends DataObjectDecorator {
 	}
 
 }
-
 ?>
