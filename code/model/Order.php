@@ -628,8 +628,8 @@ class Order extends DataObject {
 		
 		$member = $this->Member();
 		
- 		if(self::$receiptEmail) {
- 			$adminEmail = self::$receiptEmail;
+ 		if(self::$receipt_email) {
+ 			$adminEmail = self::$receipt_email;
  		} else {
  			$adminEmail = Email::getAdminEmail();
  		}		

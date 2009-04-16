@@ -41,8 +41,8 @@ class OrderReport_Popup extends Controller {
 		return $this->renderWith('OrderInformation_Print');
 	}
 
-	function Link() {
-		return 'OrderReport_Popup/index/';
+	function Link($action = null) {
+		return "OrderReport_Popup/$action";
 	}
 	
 	/**
