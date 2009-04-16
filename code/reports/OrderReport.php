@@ -168,7 +168,7 @@ class OrderReport_Popup extends Controller {
 		);
 
 		$table->setFieldCasting(array(
-			'Created' => 'Date->Nice',
+			'Created' => 'Date',
 			'SentToCustomer' => 'Boolean->Nice',
 		));
 
