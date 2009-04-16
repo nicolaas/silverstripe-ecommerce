@@ -16,7 +16,7 @@ class EcommerceTest extends FunctionalTest {
 	function testCanViewAccountPage() {
 		/* If we're not logged in we get directed to the log-in page */
 		$this->get('account/');
-		$this->assertPartialMatchBySelector('#Layout p.message', array(
+		$this->assertPartialMatchBySelector('p.message', array(
 			"You'll need to login before you can access the account page. If you are not registered, you won't be able to access it until you'll make your first order, otherwise please enter your details below.", ));
 
 		/* But if we're logged on you can see */
