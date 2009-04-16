@@ -1,9 +1,7 @@
 <?php
 /**
- * EcommerceRole is a DataObjectDecorator for the member class to allow additional
- * member fields for the module. It has a base set of contact fields that can be
- * statically called anywhere in the system using singleton('Member')->getEcommerceFields();
- * The OrderForm and MemberForm class uses this call.
+ * EcommerceRole provides customisations to the {@link Member}
+ * class specifically for this ecommerce module.
  * 
  * @package ecommerce
  */
