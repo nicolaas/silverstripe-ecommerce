@@ -45,45 +45,51 @@ class Product extends Page {
 	function getCMSFields() {
 		$fields = parent::getCMSFields();
 
-				// standard extra fields like weight and price
-		$fields->addFieldToTab("Root.Content.Main", new TextField("Weight", "Weight (kg)", "", 12));
-		$fields->addFieldToTab("Root.Content.Main", new TextField("Price", "Price", "", 12));
-		$fields->addFieldToTab("Root.Content.Main", new TextField("Model", "Author", "", 50));
-
-		$fields->addFieldToTab("Root.Content.Main", new TextField("InternalItemID","Product Code","",7));
-
-		// product image field
-		if(!$fields->dataFieldByName("Image")) {
-			$fields->addFieldToTab("Root.Content.Images", new ImageField("Image", "Product Image"));
-		}
-
-		// flags for this product which affect it's behaviour on the site
-		$fields->addFieldToTab("Root.Content.Main", new CheckboxField("FeaturedProduct", "Featured Product"));
-		$fields->addFieldToTab("Root.Content.Main", new CheckboxField("AllowPurchase", "Allow product to be purchased",1));
-
-		$productVariationstable = $this->getCMSVariations();
-		$fields->addFieldsToTab('Root.Content.Variations', 
+		// Standard product detail fields
+		$fields->addFieldsToTab(
+			'Root.Content.Main',
 			array(
-				new HeaderField('Which variations do I want to set on this product ?'),
-				new LiteralField('VariationsNote', '<p class="message good">If this product has active variations, the price of the product will be the price of the variation added by the member to the shopping cart.</p>'),
-				$productVariationstable
+				new TextField('Weight', _t('Product.WEIGHT', 'Weight (kg)'), '', 12),
+				new TextField('Price', _t('Product.PRICE', 'Price'), '', 12),
+				new TextField('Model', _t('Product.MODEL', 'Model/Author'), '', 50),
+				new TextField('InternalItemID', _t('Product.CODE', 'Product Code'), '', 7)
 			)
 		);
-		
-		$productGroupsTable = $this->getCMSProductGroups();
-		$fields->addFieldToTab(
-			'Root.Content',
-			new Tab(
-				'Product Groups',
-				new HeaderField('Which other groups I want this product to appear in ?'),
-				$productGroupsTable
+
+		if(!$fields->dataFieldByName('Image')) {
+			$fields->addFieldToTab('Root.Content.Images', new ImageField('Image', _t('Product.IMAGE', 'Product Image')));
+		}
+
+		// Flags for this product which affect it's behaviour on the site
+		$fields->addFieldsToTab(
+			'Root.Content.Main',
+			array(
+				new CheckboxField('FeaturedProduct', _t('Product.FEATURED', 'Featured Product')),
+				new CheckboxField('AllowPurchase', _t('Product.ALLOWPURCHASE', 'Allow product to be purchased'), 1)
+			)
+		);
+
+		$fields->addFieldsToTab(
+			'Root.Content.Variations', 
+			array(
+				new HeaderField(_t('Product.VARIATIONSSET', 'This product has the following variations set')),
+				new LiteralField('VariationsNote', '<p class="message good">If this product has active variations, the price of the product will be the price of the variation added by the member to the shopping cart.</p>'),
+				$this->getVariationsTable()
+			)
+		);
+
+		$fields->addFieldsToTab(
+			'Root.Content.Product Groups',
+			array(
+				new HeaderField(_t('Product.ALSOAPPEARS', 'This product also appears in the following groups')),
+				$this->getProductGroupsTable()
 			)
 		);
 		
 		return $fields;
 	}
 	
-	function getCMSVariations() {
+	function getVariationsTable() {
 		$singleton = singleton('ProductVariation');
 		$query = $singleton->buildVersionSQL("`ProductID` = '{$this->ID}'");
 		$variations = $singleton->buildDataObjectSet($query->execute());
@@ -109,7 +115,7 @@ class Product extends Page {
 		return $tableField;
 	}
 	
-	protected function getCMSProductGroups() {
+	protected function getProductGroupsTable() {
 		$tableField = new ManyManyComplexTableField(
 			$this,
 			'ProductGroups',
@@ -118,8 +124,10 @@ class Product extends Page {
 				'Title' => 'Product Group Page Title'
 			)
 		);
+		
 		$tableField->setPageSize(30);
 		$tableField->setPermissions(array());
+		
 		return $tableField;
 	}
 	
