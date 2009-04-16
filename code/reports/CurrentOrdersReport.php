@@ -30,12 +30,10 @@ class CurrentOrdersReport extends SSReport {
 		$fields['Invoice'] = '';
 		$fields['Print'] = '';
 		
-		$table = new ComplexTableField(
-			$this,
+		$table = new TableListField(
 			'Orders',
 			'Order',
-			$fields,
-			'getCMSFields'
+			$fields
 		);
 		
 		// Customise the SQL query for Order, because we don't want it querying
@@ -50,11 +48,11 @@ class CurrentOrdersReport extends SSReport {
 		// another template for viewing an Order instance
 		$table->setFieldFormatting(array(
 			'Invoice' => '<a href=\"OrderReport_Popup/invoice/$ID\">Invoice</a>',
-			'Print' => '<a href=\"OrderReport_Popup/index/$ID?print=1\">Print</a>'
+			'Print' => '<a target=\"_blank\" href=\"OrderReport_Popup/index/$ID?print=1\">Print</a>'
 		));
 
 		$table->setFieldCasting(array(
-			'Created' => 'Date->Nice',
+			'Created' => 'Date',
 			'Total' => 'Currency->Nice'
 		));
 		
