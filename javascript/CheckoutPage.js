@@ -1,40 +1,19 @@
-_ALL_PAYMENT_METHODS = [];
-
-function PaymentMethodChanged() {
-	var i, divEl;
-	for(i = 0; i < _ALL_PAYMENT_METHODS.length; i++) {
-		divEl = $('MethodFields_' + _ALL_PAYMENT_METHODS[i]);
-		if(divEl) {
-			divEl.style.display = (_ALL_PAYMENT_METHODS[i] == this.value) ? 'block' : 'none';
-		} 
-	}
-}
-
-Behaviour.register({
-	'#PaymentMethod input[type=radio]' : {
-		initialise: function() {
-			_ALL_PAYMENT_METHODS[_ALL_PAYMENT_METHODS.length] = this.value;
-
-			var i, divEl;
-			for(i = 0; i < _ALL_PAYMENT_METHODS.length; i++) {
-				divEl = $('MethodFields_' + _ALL_PAYMENT_METHODS[i]);
-				if(i == 0) {
-					divEl.style.display = 'block';
-				} else {
-					divEl.style.display = 'none';
-				}
+(function($){
+	$(window).load(function() {
+		var paymentInputs = $('#PaymentMethod input[type=radio]');
+		var methodFields = $('div.paymentfields');
+		
+		methodFields.hide();
+		
+		paymentInputs.each(function(e) {
+			if($(this).attr('checked') == true) {
+				$('#MethodFields_' + $(this).attr('value')).show();
 			}
-		},
-		onclick: PaymentMethodChanged
-	},
-	'#OrderForm_OrderForm_action_useDifferentShippingAddress' : {
-		onclick: function() {
-			$('OrderForm_OrderForm').onsubmit = function() {return true;}
-		}
-	},
-	'#OrderForm_OrderForm_action_useMemberShippingAddress' : {
-		onclick: function() {
-			$('OrderForm_OrderForm').onsubmit = function() {return true;}
-		}
-	}
-});
+		});
+		
+		paymentInputs.click(function(e) {
+			methodFields.hide();
+			$('#MethodFields_' + $(this).attr('value')).show();
+		});
+	});
+})(jQuery);

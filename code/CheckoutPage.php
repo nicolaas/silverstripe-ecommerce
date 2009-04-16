@@ -101,9 +101,13 @@ class CheckoutPage_Controller extends Page_Controller {
 		}
 		
 		// include extra js requirements for this page
-		Requirements::javascript('jsparty/behaviour.js');
+		Requirements::javascript(THIRDPARTY_DIR . '/jquery/jquery.js');
 		Requirements::javascript('ecommerce/javascript/CheckoutPage.js');
-		
+		Requirements::block(THIRDPARTY_DIR . '/behaviour.js');
+		Requirements::block(THIRDPARTY_DIR . '/prototype.js');
+		Requirements::block(THIRDPARTY_DIR . '/prototype_improvements.js');
+		Requirements::block(SAPPHIRE_DIR . '/javascript/Validator.js');
+				
 		// include stylesheet for the checkout page
 		Requirements::themedCSS('CheckoutPage');
 				
