@@ -139,7 +139,7 @@ class OrderForm extends Form {
 		if(!ShoppingCart::has_items()) {
 			$form->sessionMessage('Please add some items to your cart', 'warning');
 	   	Director::redirectBack();
-	   	return;
+	   	return false;
 		}
 					
 		// 2) Save the member details
@@ -180,7 +180,7 @@ class OrderForm extends Form {
 		else if($result->isSuccess()) $order->sendReceipt();
 		
 		Director::redirect($order->Link());
-		return;
+		return true;
 	}
 }
 ?>
