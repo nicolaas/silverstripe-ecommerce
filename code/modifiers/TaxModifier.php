@@ -104,7 +104,7 @@ class TaxModifier extends OrderModifier {
 	
 	function TaxableAmount() {
 		$order = $this->Order();
-		return $order->SubTotal() + $order->ModifiersSubTotal(array($this));
+		return $order->SubTotal() + $order->ModifiersSubTotal($this->class);
 	}
 					
 	// Display Functions

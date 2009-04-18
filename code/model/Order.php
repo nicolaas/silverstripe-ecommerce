@@ -383,15 +383,27 @@ class Order extends DataObject {
 	}
 	
 	/**
-	 * Returns the subtotal of the modifiers of this order without those in the optional array parameter (usefull for the tax calculation).
+	 * Returns the subtotal of the modifiers for this order.
+	 * If a modifier appears in the excludedModifiers array, it is not counted.
+	 * 
+	 * @param $excluded string|array Class(es) of modifier(s) to ignore in the calculation.
+	 * @todo figure out what the return type is? double? float?
 	 */
-	function _ModifiersSubTotal($modifiersNameExcluded = null) {
+	function _ModifiersSubTotal($excluded = null) {
 		$total = 0;
+		
 		if($modifiers = $this->Modifiers()) {
 			foreach($modifiers as $modifier) {
-				if(! $modifiersNameExcluded || ! is_array($modifiersNameExcluded) || ! in_array(self::$modifiersName, get_class($modifier))) $total += $modifier->Total();
+				if(is_array($excluded) && in_array($modifier->class, $excluded)) {
+					continue;
+				} elseif($excluded && ($modifier->class == $excluded)) {
+					continue;
+				}
+				
+				$total += $modifier->Total();
 			}
 		}
+		
 		return $total;
 	}
 	
@@ -430,21 +442,25 @@ class Order extends DataObject {
 	 * Returns if the order can be cancelled
 	 * Precondition: Order is in DB
 	 * 
-	 * @TODO clean up the formatting of this code.
+	 * @return boolean
 	 */
 	function CanCancel() {
 		switch($this->Status) {
 			case 'Unpaid' : return self::$can_cancel_before_payment;
 			case 'Paid' : return self::$can_cancel_before_processing;
-			case 'Processing' :	case 'Query' : return self::$can_cancel_before_sending;
+			case 'Processing' : case 'Query' : return self::$can_cancel_before_sending;
 			case 'Sent' : case 'Complete' : return self::$can_cancel_after_sending;
 			default : return false;
 		}
 	}
 		
 	/**
-	 * Returns the payments of the order
-	 * Precondition : Order is in DB
+	 * Returns the {@link Payment} records linked
+	 * to this order.
+	 * 
+	 * Precondition: Order is in DB.
+	 * 
+	 * @return DataObjectSet
 	 */
 	function Payments() {
 		return DataObject::get('Payment', "`OrderID` = '$this->ID'", '`LastEdited` DESC');
@@ -452,7 +468,9 @@ class Order extends DataObject {
 	
 	/**
 	 * Return the currency of this order.
-	 * Note: this is a fixed value across the entire site. 
+	 * Note: this is a fixed value across the entire site.
+	 * 
+	 * @return string
 	 */
 	function Currency() {
 		return Payment::site_currency();
@@ -518,7 +536,7 @@ class Order extends DataObject {
 	 * @return boolean
 	 */
 	function IsPaid() {
-		return $this->IsValidate();
+		return $this->Status == 'Paid';
 	}
 	
 	/**
