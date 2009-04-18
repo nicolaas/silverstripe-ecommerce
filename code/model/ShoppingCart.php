@@ -167,11 +167,16 @@ class ShoppingCart extends Object {
 		$itemsTableIndex = self::items_table_name();
 		return Session::get($itemsTableIndex) != null;
 	}
-		
+
+	/**
+	 * Return the items currently in the shopping cart.
+	 * @return array
+	 */
 	static function get_items() {
+		$items = array();
 		$itemsTableIndex = self::items_table_name();
+		
 		if($serializedItems = Session::get($itemsTableIndex)) {
-			$items = array();
 			foreach($serializedItems as $itemIndex => $serializedItem) {
 				if($serializedItem != null) {
 					$unserializedItem = unserialize($serializedItem);
@@ -179,9 +184,9 @@ class ShoppingCart extends Object {
 					array_push($items, $unserializedItem);
 				}
 			}
-			return $items;
 		}
-		return null;
+		
+		return $items;
 	}
 	
 	protected static function set_item($itemIndex, OrderItem $item) {
