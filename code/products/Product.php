@@ -1,13 +1,23 @@
 <?php
 /**
- * Product contains the actual individual products
- * data - including extra fields like Price and Weight
+ * This is a standard Product page-type with fields like
+ * Price, Weight, Model/Author and basic management of
+ * groups.
+ * 
+ * It also has an associated Product_OrderItem class,
+ * an extension of OrderItem, which is the mechanism
+ * that links this page type class to the rest of the
+ * eCommerce platform. This means you can create an
+ * OrderItem class for any page type in a similar way
+ * to how this is implemented.
+ * 
+ * @see Product_OrderItem
  * 
  * @package ecommerce
  */
 class Product extends Page {
 	
-	static $db = array(
+	public static $db = array(
 		'Price' => 'Currency',
 		'Weight' => 'Decimal(9,2)',
 		'Model' => 'Varchar',
@@ -16,19 +26,21 @@ class Product extends Page {
 		'InternalItemID' => 'Varchar(30)'
 	);
 	
-	static $has_one = array(
+	public static $has_one = array(
 		'Image' => 'Product_Image'
 	);
 	
-	static $has_many = array(
+	public static $has_many = array(
 		'Variations' => 'ProductVariation'
 	);
 	
-	static $many_many = array(
+	public static $many_many = array(
 		'ProductGroups' => 'ProductGroup'
 	);
 	
-	static $defaults = array(
+	public static $belongs_many_many = array();
+	
+	public static $defaults = array(
 		'AllowPurchase' => true
 	);
 	
@@ -38,9 +50,6 @@ class Product extends Page {
 	
 	static $icon = 'cms/images/treeicons/book';
 	
-	/**
-	 * Create the fields for a product within the CMS
-	 */
 	function getCMSFields() {
 		$fields = parent::getCMSFields();
 
@@ -131,7 +140,10 @@ class Product extends Page {
 	}
 	
 	/**
-	 * Returns the shopping cart
+	 * Returns the shopping cart.
+	 * @todo Does HTTP::set_cache_age() still need to be set here?
+	 * 
+	 * @return Order
 	 */
 	function Cart() {
 		HTTP::set_cache_age(0);
@@ -176,18 +188,19 @@ class Product extends Page {
 				}
 			}
 		}
-		else return null;
 	}
 	
 	/**
 	 * Return the currency being used on the site.
+	 * @return string Currency code, e.g. "NZD" or "USD"
 	 */
 	function Currency() {
 		return Payment::site_currency();
 	}
 	
 	/**
-	 * Return the gloal tax information of the site.
+	 * Return the global tax information of the site.
+	 * @return TaxModifier
 	 */
 	function TaxInfo() {
 		$currentOrder = ShoppingCart::current_order();
@@ -246,53 +259,44 @@ class Product extends Page {
 
 class Product_Controller extends Page_Controller {
 	
-	/**
-	 * Include the product group's requirements, override if the project has the file,
-	 * otherwise use the module one instead
-	 */	
-	function init(){
+	function init() {
 		parent::init();
 		
 		Requirements::themedCSS('Product');
 		Requirements::themedCSS('Cart');
 	}
 	
-	### This is used by the OrderForm to add more of this product to the current cart. ###
-	
-	/**
-	 * @TODO replace return false
-	 */
 	function add() {
 		if($this->AllowPurchase() && $this->Variations()->Count() == 0) {
 			ShoppingCart::add_new_item(new Product_OrderItem($this));
-			Director::redirectBack();
+			if(!$this->isAjax()) Director::redirectBack();
 		}
-		else return false;
 	}
 	
-	/**
-	 * @TODO replace return false
-	 */
 	function addVariation() {
 		if($this->AllowPurchase && $id = $this->urlParams['ID']) {
 			if($variation = DataObject::get_one('ProductVariation', "`ID` = '{$id}' AND `ProductID` = '{$this->ID}'")) {
 				if($variation->AllowPurchase()) {
 					ShoppingCart::add_new_item(new ProductVariation_OrderItem($variation));
-					Director::redirectBack();
+					if(!$this->isAjax()) Director::redirectBack();
 				}
 			}
 		}
-		else return false;
 	}
+	
 }
-
-/**
- * Class to support product images
- */
 class Product_Image extends Image {
 
-	static $db = null;
-
+	public static $db = array();
+	
+	public static $has_one = array();
+	
+	public static $has_many = array();
+	
+	public static $many_many = array();
+	
+	public static $belongs_many_many = array();
+	
 	function generateThumbnail($gd) {
 		$gd->setQuality(80);
 		return $gd->paddedResize(140,100);
@@ -309,7 +313,6 @@ class Product_Image extends Image {
 	}
 	
 }
-
 class Product_OrderItem extends OrderItem {
 	
 	protected $_productID;
@@ -325,35 +328,41 @@ class Product_OrderItem extends OrderItem {
 	);
 	
 	public function __construct($product = null, $quantity = 1) {
-		
-		// Case 1 : Constructed by the static function get of DataObject
+		// Case 1: Constructed by getting OrderItem from DB
 		if(is_array($product)) {
 			$this->ProductID = $this->_productID = $product['ProductID'];
 			$this->ProductVersion = $this->_productVersion = $product['ProductVersion'];
-			
-			parent::__construct($product, $quantity);
 		}
 		
-		// Case 2 : Constructed in memory
-		else if(is_object($product)) {		
+		// Case 2: Constructed in memory
+		if(is_object($product)) {		
 			$this->_productID = $product->ID;
  			$this->_productVersion = $product->Version;
  			
- 			parent::__construct($product, $quantity);
 		}
+		
+ 		parent::__construct($product, $quantity);
 	}
 	
-	## Product Access Function ##
-	
 	/**
-	 * @TODO Add live/draft value management
+	 * Overloaded Product accessor method.
+	 *  
+	 * Overloaded from the default has_one accessor to
+	 * retrieve a product by it's version, this is extremely
+	 * useful because we can set in stone the version of
+	 * a product at the time when the user adds the item to
+	 * their cart, so if the CMS admin changes the price, it
+	 * remains the same for this order.
+	 * 
+	 * @param $current boolean If set to TRUE, returns the latest published version of the Product,
+	 * 								If set to FALSE, returns the set version number of the Product
+	 * 						 		(instead of the latest published version)
+	 * @return Product object
 	 */
 	public function Product($current = false) {
 		if($current) return DataObject::get_by_id('Product', $this->_productID);
 		else return Versioned::get_version('Product', $this->_productID, $this->_productVersion);
 	}
-	
-	## Overloaded functions ##
 	
 	function hasSameContent($orderItem) {
 		$equals = parent::hasSameContent($orderItem);
