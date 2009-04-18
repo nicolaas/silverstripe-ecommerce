@@ -11,16 +11,16 @@ class Order extends DataObject {
  	 * Status codes and what they mean:
  	 * 
  	 * Unpaid (default): Order created but no successful payment by customer yet
+ 	 * Query: Order not being processed yet (customer has a query, or could be out of stock)
  	 * Paid: Order successfully paid for by customer
- 	 * Query: Order paid for, but is not being processed yet (customer has a query, or could be out of stock)
  	 * Processing: Order paid for, package is currently being processed before shipping to customer
  	 * Sent: Order paid for, processed for shipping, and now sent to the customer
  	 * Complete: Order completed (paid and shipped). Customer assumed to have received their goods
  	 * AdminCancelled: Order cancelled by the administrator
  	 * MemberCancelled: Order cancelled by the customer (Member)
  	 */
-	static $db = array(
-		'Status' => "Enum('Unpaid,Paid,Query,Processing,Sent,Complete,AdminCancelled,MemberCancelled','Unpaid')",
+	public static $db = array(
+		'Status' => "Enum('Unpaid,Query,Paid,Processing,Sent,Complete,AdminCancelled,MemberCancelled','Unpaid')",
 		'Country' => 'Text',
 		'UseShippingAddress' => 'Boolean',
 		'ShippingName' => 'Text',
@@ -31,27 +31,26 @@ class Order extends DataObject {
 		'Printed' => 'Boolean'
 	);
 	
-	static $has_one = array (
+	public static $has_one = array(
 		'Member' => 'Member'
 	);
 	
-	static $has_many = array(
+	public static $has_many = array(
 		'Attributes' => 'OrderAttribute',
 		'OrderStatusLogs' => 'OrderStatusLog',
 		'Payments' => 'Payment'
 	);
 	
-	static $casting = array(
-		"SubTotal" => "Currency",
-		"Total" => "Currency",
-		"Shipping" => "Currency",
-		"TotalOutstanding" => "Currency",
+	public static $casting = array(
+		'SubTotal' => 'Currency',
+		'Total' => 'Currency',
+		'Shipping' => 'Currency',
+		'TotalOutstanding' => 'Currency'
 	);
 	
 	/**
-	 * Status which stand for already paid because the order has a payment successful
-	 * 
-	 * @TODO Determine what this actually does, and document it.
+	 * Any order with one of these values for the Status
+	 * field indicates that the customer has paid for their order.
 	 * 
 	 * @var array
 	 */
