@@ -166,8 +166,7 @@ class Order extends DataObject {
 	/**
 	 * Set the modifiers that apply to this site.
 	 *
-	 * @param array $modifiers An array of
-	 * 				{@link OrderModifier} objects
+	 * @param array $modifiers An array of {@link OrderModifier} subclass names
 	 */
 	public static function set_modifiers($modifiers) {
 		self::$modifiers = $modifiers;
