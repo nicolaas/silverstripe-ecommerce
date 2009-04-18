@@ -531,11 +531,14 @@ class Order extends DataObject {
 	}
 	
 	/**
-	 * Has this order been paid for? (in "Paid" status).
+	 * Return whether this Order has been paid for (Status == Paid)
+	 * or Status == Processing, where it's been paid for, but is
+	 * currently in a processing state.
+	 * 
 	 * @return boolean
 	 */
 	function IsPaid() {
-		return $this->Status == 'Paid';
+		return $this->IsValidate();
 	}
 	
 	/**
