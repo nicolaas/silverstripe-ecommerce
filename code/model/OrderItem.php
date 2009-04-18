@@ -28,27 +28,116 @@ class OrderItem extends OrderAttribute {
 		if(is_array($object)) {
 			$this->_id = $object['ID'];
 			$this->_quantity = $object['Quantity'];
-			
-		} elseif(is_object($object)) {
-			
-			// Case 2: Constructed in memory
+		}
+		
+		// Case 2: Constructed in memory
+		if(is_object($object)) {
 			$this->_id = $object->ID;
 			$this->_quantity = $quantity;
 		}
 		
 		parent::__construct();
 	}
+
+	function updateForAjax(array &$js) {
+		$total = DBField::create('Currency', $this->Total())->Nice();
+		$js[] = array('id' => $this->TableTotalID(), 'parameter' => 'innerHTML', 'value' => $total);
+		$js[] = array('id' => $this->CartTotalID(), 'parameter' => 'innerHTML', 'value' => $total);
+		$js[] = array('id' => $this->CartQuantityID(), 'parameter' => 'innerHTML', 'value' => $this->getQuantity());
+		$js[] = array('name' => $this->AjaxQuantityFieldName(), 'parameter' => 'value', 'value' => $this->getQuantity());
+	}
 	
-	// Functions to overload
+	/**
+	 * Populate some OrderItem object attributes before
+	 * writing them to the OrderItem DB record.
+	 * 
+	 * PRECONDITION: The order item is not saved in the database yet.
+	 */
+	function onBeforeWrite() {
+		parent::onBeforeWrite();
+		
+		$this->Quantity = $this->_quantity;
+	}
+	
+	/**
+	 * Get the quantity attribute from memory.
+	 * @return int
+	 */
+	public function getQuantity() {
+		return $this->_quantity;
+	}
+	
+	/**
+	 * Set the quantity attribute in memory.
+	 * PRECONDITION: The order item is not saved in the database yet.
+	 * 
+	 * @param $quantity int The quantity to set
+	 */
+	public function setQuantityAttribute($quantity) {
+		$this->_quantity = $quantity;
+	}
+	
+	/**
+	 * Increment the quantity attribute in memory by a given amount.
+	 * PRECONDITION: The order item is not saved in the database yet.
+	 * 
+	 * @param $quantity int The amount to increment the quantity by.
+	 */
+	public function addQuantityAttribute($quantity) {
+		$this->_quantity += $quantity;
+	}
 	
 	function hasSameContent($orderItem) {
 		return $orderItem instanceof OrderItem;
 	}
-	
-	function UnitPrice() {
-		user_error("Please implement UnitPrice() on $this->class", E_USER_ERROR);
+
+	public function debug() {
+		$id = $this->ID ? $this->ID : $this->_id;
+		$quantity = $this->_quantity;
+		$orderID = $this->ID ? $this->OrderID : 'The order has not been saved yet, so there is no ID';
+		
+		return <<<HTML
+			<h2>$this->class</h2> 
+			<h3>OrderItem class details</h3>
+			<p>
+				<b>ID : </b>$id<br/>
+				<b>Quantity : </b>$quantity<br/>
+				<b>Order ID : </b>$orderID
+			</p>
+HTML;
 	}
 	
+	
+	######################
+	## TEMPLATE METHODS ##
+	######################
+
+	function UnitPrice() {
+		user_error("OrderItem::UnitPrice() called. Please implement UnitPrice() on $this->class", E_USER_ERROR);
+	}
+	
+	protected function AjaxQuantityFieldName() {
+		return $this->MainID() . '_Quantity';
+	}
+	
+	function AjaxQuantityField() {
+		Requirements::javascript(THIRDPARTY_DIR . '/jquery/jquery.js');
+		Requirements::javascript('ecommerce/javascript/ecommerce.js');
+		
+		$quantityName = $this->AjaxQuantityFieldName();
+		$setQuantityLinkName = $quantityName . '_SetQuantityLink';
+		$setQuantityLink = $this->setquantityLink();
+		
+		return <<<HTML
+			<input name="$quantityName" class="ajaxQuantityField" type="text" value="$this->_quantity" size="3" maxlength="3" disabled="disabled"/>
+			<input name="$setQuantityLinkName" type="hidden" value="$setQuantityLink"/>
+HTML;
+	}
+	
+	function Total() {
+		return $this->UnitPrice() * $this->_quantity;
+	}
+
 	function TableTitle() {
 		return 'Product';
 	}
@@ -57,58 +146,8 @@ class OrderItem extends OrderAttribute {
 		return $this->Product()->Title;
 	}
 	
-	// Functions not to overload
-	
-	public function getQuantity() {
-		return $this->_quantity;
-	}
-	
-	/*
-	 * Precondition : The order item is not saved in the database yet
-	 */
-	public function setQuantityAttribute($quantity) {
-		$this->_quantity = $quantity;
-	}
-	
-	/*
-	 * Precondition : The order item is not saved in the database yet
-	 */
-	public function addQuantityAttribute($quantity) {
-		$this->_quantity += $quantity;
-	}
-	
-	protected function AjaxQuantityFieldName() {
-		return $this->MainID() . '_Quantity';
-	}
-	
-	function AjaxQuantityField() {
-		Requirements::javascript('jsparty/jquery/jquery.js');
-		Requirements::javascript('ecommerce/javascript/ecommerce.js');
-		$quantityName = $this->AjaxQuantityFieldName();
-		$setQuantityLinkName = $quantityName . '_SetQuantityLink';
-		$setQuantityLink = $this->setquantityLink();
-		return <<<HTML
-			<input name="$quantityName" class="ajaxQuantityField" type="text" value="$this->_quantity" size="3" maxlength="3" disabled="disabled"/>
-			<input name="$setQuantityLinkName" type="hidden" value="$setQuantityLink"/>
-HTML;
-	}
-	
-	// Display Functions
-	
-	function Total() {
-		return $this->UnitPrice() * $this->_quantity;
-	}
-	
 	function CartQuantityID() {
 		return $this->CartID() . '_Quantity';
-	}
-	
-	function updateForAjax(array &$js) {
-		$total = DBField::create('Currency', $this->Total())->Nice();
-		$js[] = array('id' => $this->TableTotalID(), 'parameter' => 'innerHTML', 'value' => $total);
-		$js[] = array('id' => $this->CartTotalID(), 'parameter' => 'innerHTML', 'value' => $total);
-		$js[] = array('id' => $this->CartQuantityID(), 'parameter' => 'innerHTML', 'value' => $this->getQuantity());
-		$js[] = array('name' => $this->AjaxQuantityFieldName(), 'parameter' => 'value', 'value' => $this->getQuantity());
 	}
 	
 	function addLink() {
@@ -131,31 +170,5 @@ HTML;
 		return CheckoutPage::find_link();
 	}
 	
-	// Database Writing Function
-	
-	/*
-	 * Precondition : The order item is not saved in the database yet
-	 */
-	function onBeforeWrite() {
-		parent::onBeforeWrite();
-		$this->Quantity = $this->_quantity;
-	}
-	
-	// Debug Function
-	
-	public function debug() {
-		$id = $this->ID ? $this->ID : $this->_id;
-		$quantity = $this->_quantity;
-		$orderID = $this->ID ? $this->OrderID : 'The order has not been saved yet, so there is no ID';
-		return <<<HTML
-			<h2>$this->class</h2> 
-			<h3>OrderItem class details</h3>
-			<p>
-				<b>ID : </b>$id<br/>
-				<b>Quantity : </b>$quantity<br/>
-				<b>Order ID : </b>$orderID
-			</p>
-HTML;
-	}
 }
 ?>
