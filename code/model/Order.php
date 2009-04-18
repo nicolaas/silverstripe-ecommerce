@@ -10,12 +10,12 @@ class Order extends DataObject {
  	/**
  	 * Status codes and what they mean:
  	 * 
- 	 * Unpaid (default): Order created but no successful payment yet
- 	 * Paid: Order successfully paid for
- 	 * Query: Order assumed paid for, but is not being processed yet
- 	 * Processing: Order paid for, package is currently being processed
- 	 * Sent: Order paid, processed, and now sent to the customer
- 	 * Complete: Order completed. Customer assumed to have received their goods
+ 	 * Unpaid (default): Order created but no successful payment by customer yet
+ 	 * Paid: Order successfully paid for by customer
+ 	 * Query: Order paid for, but is not being processed yet (customer has a query, or could be out of stock)
+ 	 * Processing: Order paid for, package is currently being processed before shipping to customer
+ 	 * Sent: Order paid for, processed for shipping, and now sent to the customer
+ 	 * Complete: Order completed (paid and shipped). Customer assumed to have received their goods
  	 * AdminCancelled: Order cancelled by the administrator
  	 * MemberCancelled: Order cancelled by the customer (Member)
  	 */
