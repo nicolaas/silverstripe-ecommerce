@@ -76,7 +76,9 @@ class EcommerceRole extends DataObjectDecorator {
 
 	/**
 	 * Create a new member from the given data or merge with the built-in fields.
+	 * 
 	 * @param data the array data from a submitted form.
+	 * @return Member record that was updated or created
 	 */
 	public static function createOrMerge($data) {
 		// Because we are using a ConfirmedPasswordField, the password will
@@ -87,10 +89,12 @@ class EcommerceRole extends DataObjectDecorator {
 		
 		if($existingMember = Member::currentUser()) {
 			$existingMember->update($data);
+			
 			return $existingMember;
 		} else {
 			$member = new Member();
 			$member->update($data);
+			
 			return $member;
 		}
 	}
@@ -99,13 +103,15 @@ class EcommerceRole extends DataObjectDecorator {
 	 * Find the member country, if the member doesn't exist then return
 	 * the Geoip visitor country based on their IP address.
 	 */
-	static function findCountry(){
+	static function findCountry() {
 		$member = Member::currentUser();
+		
 		if($member && $member->Country) {
 			$country = $member->Country;
 		} else {
 			$country = Geoip::visitor_country();
 		}
+		
 		return $country;
 	}
 	

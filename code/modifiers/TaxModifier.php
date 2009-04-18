@@ -70,15 +70,21 @@ class TaxModifier extends OrderModifier {
 	}
 	
 	protected function LiveRate() {
-		return self::$rates_by_country[$this->LiveCountry()];
+		if($this->LiveCountry() && isset(self::$rates_by_country[$this->LiveCountry()])) {
+			return self::$rates_by_country[$this->LiveCountry()];
+		}
 	}
 	
 	protected function LiveName() {
-		return self::$names_by_country[$this->LiveCountry()];
+		if($this->LiveCountry() && isset(self::$names_by_country[$this->LiveCountry()])) {
+			return self::$names_by_country[$this->LiveCountry()];
+		}
 	}
 	
 	protected function LiveIsExclusive() {
-		return self::$excl_by_country[$this->LiveCountry()];
+		if($this->LiveCountry() && isset(self::$excl_by_country[$this->LiveCountry()])) {
+			return self::$excl_by_country[$this->LiveCountry()];
+		}
 	}
 	
 	function LiveAmount() {
