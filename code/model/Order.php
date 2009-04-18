@@ -8,25 +8,27 @@
 class Order extends DataObject {
  	
  	/**
- 	 * Unpaid(Default) : Order created but no successful payment yet
- 	 * Paid : Order successfully paid
- 	 * Query : 
- 	 * Processing : Order already paid and the package is currently processed
- 	 * Sent : Order already paid and now sent
- 	 * Complete : 
- 	 * AdminCancelled : Order cancelled by the administrator
- 	 * MemberCancelled : Order cancelled by the member
+ 	 * Status codes and what they mean:
+ 	 * 
+ 	 * Unpaid (default): Order created but no successful payment yet
+ 	 * Paid: Order successfully paid for
+ 	 * Query: Order assumed paid for, but is not being processed yet
+ 	 * Processing: Order paid for, package is currently being processed
+ 	 * Sent: Order paid, processed, and now sent to the customer
+ 	 * Complete: Order completed. Customer assumed to have received their goods
+ 	 * AdminCancelled: Order cancelled by the administrator
+ 	 * MemberCancelled: Order cancelled by the customer (Member)
  	 */
 	static $db = array(
-		'Status' => "Enum('Unpaid,Paid,Query,Processing,Sent,Complete,AdminCancelled,MemberCancelled', 'Unpaid')",
-		"Country" => "Text",
-		"UseShippingAddress" => "Boolean",
-		"ShippingName" => "Text",
-		"ShippingAddress" => "Text",
-		"ShippingAddress2" => "Text",
-		"ShippingCity" => "Text",
-		"ShippingCountry" => "Text",
-		"Printed" => "Boolean"
+		'Status' => "Enum('Unpaid,Paid,Query,Processing,Sent,Complete,AdminCancelled,MemberCancelled','Unpaid')",
+		'Country' => 'Text',
+		'UseShippingAddress' => 'Boolean',
+		'ShippingName' => 'Text',
+		'ShippingAddress' => 'Text',
+		'ShippingAddress2' => 'Text',
+		'ShippingCity' => 'Text',
+		'ShippingCountry' => 'Text',
+		'Printed' => 'Boolean'
 	);
 	
 	static $has_one = array (
