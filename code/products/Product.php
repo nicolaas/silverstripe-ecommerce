@@ -7,11 +7,8 @@
  * It also has an associated Product_OrderItem class,
  * an extension of OrderItem, which is the mechanism
  * that links this page type class to the rest of the
- * eCommerce platform. This means you can create an
- * OrderItem class for any page type in a similar way
- * to how this is implemented.
- * 
- * @see Product_OrderItem
+ * eCommerce platform. This means you can add an instance
+ * of this page type to the shopping cart.
  * 
  * @package ecommerce
  */
