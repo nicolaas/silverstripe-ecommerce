@@ -315,7 +315,7 @@ class ShoppingCart_Controller extends Controller {
 		$itemId = $this->urlParams['ID'];
 		if($itemId) {
 			ShoppingCart::add_item($itemId);
-			if(!Director::is_ajax()) Director::redirectBack();
+			if(!$this->isAjax()) Director::redirectBack();
 		}
 	}
 	
@@ -323,7 +323,7 @@ class ShoppingCart_Controller extends Controller {
 		$itemId = $this->urlParams['ID'];
 		if($itemId) {
 			ShoppingCart::remove_item($itemId);
-			if(!Director::is_ajax()) Director::redirectBack();
+			if(!$this->isAjax()) Director::redirectBack();
 		}
 	}
 	
@@ -331,7 +331,7 @@ class ShoppingCart_Controller extends Controller {
 		$itemId = $this->urlParams['ID'];
 		if($itemId) {
 			ShoppingCart::remove_all_item($itemId);
-			if(!Director::is_ajax()) Director::redirectBack();
+			if(!$this->isAjax()) Director::redirectBack();
 		}
 	}
 	
