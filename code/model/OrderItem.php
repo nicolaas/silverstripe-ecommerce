@@ -59,16 +59,6 @@ class OrderItem extends OrderAttribute {
 	
 	// Functions not to overload
 	
-	/**
-	 * Return the item's index for the shopping cart,
-	 * which is the product/item's ID stored in memory.
-	 * 
-	 * @return int
-	 */
-	public function getItemIndex() {
-		return $this->_id;
-	}
-	
 	public function getQuantity() {
 		return $this->_quantity;
 	}
