@@ -114,6 +114,7 @@ class ShoppingCart extends Object {
 		
 	static function add_new_item(OrderItem $item) {
 		$itemsTableIndex = self::items_table_name();
+		
 		if($serializedItems = Session::get($itemsTableIndex)) {
 			foreach($serializedItems as $itemIndex => $serializedItem) {
 				if($serializedItem != null) {
@@ -122,7 +123,8 @@ class ShoppingCart extends Object {
 				}
 			}
 		}
-		Session::addToArray($itemsTableIndex, serialize($item));
+		
+		self::set_item($item->getItemIndex(), $item);
 	}
 	
 	static function add_item($itemIndex, $quantity = 1) {
@@ -311,20 +313,26 @@ class ShoppingCart_Controller extends Controller {
 	
 	function additem() {
 		$itemId = $this->urlParams['ID'];
-		ShoppingCart::add_item($itemId);
-		Director::redirectBack();
+		if($itemId) {
+			ShoppingCart::add_item($itemId);
+			if(!Director::is_ajax()) Director::redirectBack();
+		}
 	}
 	
 	function removeitem() {
 		$itemId = $this->urlParams['ID'];
-		ShoppingCart::remove_item($itemId);
-		Director::redirectBack();
+		if($itemId) {
+			ShoppingCart::remove_item($itemId);
+			if(!Director::is_ajax()) Director::redirectBack();
+		}
 	}
 	
 	function removeallitem() {
 		$itemId = $this->urlParams['ID'];
-		ShoppingCart::remove_all_item($itemId);
-		Director::redirectBack();
+		if($itemId) {
+			ShoppingCart::remove_all_item($itemId);
+			if(!Director::is_ajax()) Director::redirectBack();
+		}
 	}
 	
 	/**
@@ -333,20 +341,22 @@ class ShoppingCart_Controller extends Controller {
 	function setquantityitem() {
 		$itemId = $this->urlParams['ID'];
 		$quantity = $_REQUEST['quantity'];
-		if(is_numeric($quantity) && is_int($quantity + 0)) {
+		if($itemId && is_numeric($quantity) && is_int($quantity + 0)) {
 			if($quantity > 0) {
 				ShoppingCart::set_quantity_item($itemId, $quantity);
 				return self::json_code();
+			} else {
+				user_error("Bad data to Product->setQuantity: quantity=$quantity", E_USER_WARNING);
 			}
-			else user_error("Bad data to Product->setQuantity: quantity=$quantity", E_USER_WARNING);
+		} else {
+			user_error("Bad data to Product->setQuantity: quantity=$quantity", E_USER_WARNING);
 		}
-		else user_error("Bad data to Product->setQuantity: quantity=$quantity", E_USER_WARNING);
 	}
 	
 	function removemodifier() {
 		$modifierId = $this->urlParams['ID'];
 		if(ShoppingCart::can_remove_modifier($modifierId)) ShoppingCart::remove_modifier($modifierId);
-		Director::redirectBack();
+		if(!Director::is_ajax()) Director::redirectBack();
 	}
 	
 	/**
@@ -358,12 +368,10 @@ class ShoppingCart_Controller extends Controller {
 			ShoppingCart::set_country($country);
 			return self::json_code();
 		}
-		else user_error("Bad data to Product->setQuantity: quantity=$quantity", E_USER_WARNING);
 	}
 	
 	protected static function json_code() {
 		$currentOrder = ShoppingCart::current_order();
-		
 		$js = array();
 		
 		if($items = $currentOrder->Items()) {
@@ -376,7 +384,7 @@ class ShoppingCart_Controller extends Controller {
 		
 		$currentOrder->updateForAjax($js);
 		
-		return function_exists('json_encode') ? json_encode($js) : Convert::array2json($js);
+		return Convert::array2json($js);
 	}
 	
 }

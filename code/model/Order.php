@@ -288,8 +288,7 @@ class Order extends DataObject {
 	 */
 	function Items() {
  		if($this->ID) return $this->itemsFromDatabase();
- 		else if($items = ShoppingCart::get_items()) return $this->createItems($items);
- 		else return null;
+ 		elseif($items = ShoppingCart::get_items()) return $this->createItems($items);
 	}
 	
 	/**

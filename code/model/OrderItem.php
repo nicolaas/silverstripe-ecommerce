@@ -9,6 +9,8 @@
  */
 class OrderItem extends OrderAttribute {
 	
+	protected $_id;
+	
 	protected $_quantity;
 	
 	static $db = array(
@@ -24,13 +26,17 @@ class OrderItem extends OrderAttribute {
 
 		// Case 1: Constructed by getting OrderItem from DB
 		if(is_array($object)) {
+			$this->_id = $object['ID'];
 			$this->_quantity = $object['Quantity'];
-			parent::__construct($object);
-		} else {		
+			
+		} elseif(is_object($object)) {
+			
 			// Case 2: Constructed in memory
-			parent::__construct();
+			$this->_id = $object->ID;
 			$this->_quantity = $quantity;
 		}
+		
+		parent::__construct();
 	}
 	
 	// Functions to overload
@@ -52,6 +58,16 @@ class OrderItem extends OrderAttribute {
 	}
 	
 	// Functions not to overload
+	
+	/**
+	 * Return the item's index for the shopping cart,
+	 * which is the product/item's ID stored in memory.
+	 * 
+	 * @return int
+	 */
+	public function getItemIndex() {
+		return $this->_id;
+	}
 	
 	public function getQuantity() {
 		return $this->_quantity;

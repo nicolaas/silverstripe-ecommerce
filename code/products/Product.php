@@ -327,7 +327,6 @@ class Product_OrderItem extends OrderItem {
 	public function __construct($product = null, $quantity = 1) {
 		
 		// Case 1 : Constructed by the static function get of DataObject
-		
 		if(is_array($product)) {
 			$this->ProductID = $this->_productID = $product['ProductID'];
 			$this->ProductVersion = $this->_productVersion = $product['ProductVersion'];
@@ -336,15 +335,12 @@ class Product_OrderItem extends OrderItem {
 		}
 		
 		// Case 2 : Constructed in memory
-		
-		else if(is_object($product)) {
-			parent::__construct($product, $quantity);
-			
+		else if(is_object($product)) {		
 			$this->_productID = $product->ID;
  			$this->_productVersion = $product->Version;
+ 			
+ 			parent::__construct($product, $quantity);
 		}
-		
-		else parent::__construct();
 	}
 	
 	## Product Access Function ##
