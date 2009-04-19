@@ -112,75 +112,82 @@ class OrderForm extends Form {
 		else return parent::beforeProcessing();
 	}
 	
-	/*
+	/**
 	 * Save in the session that the current member wants to use a different shipping address.
 	 */
-	function useDifferentShippingAddress($data, $form) {
+	function useDifferentShippingAddress($data, $form, $request) {
 		ShoppingCart::set_uses_different_shipping_address(true);
 		Director::redirectBack();
 	}
 	
-	/*
+	/**
 	 * Save in the session that the current member wants to use his address as a shipping address.
 	 */
-	function useMemberShippingAddress($data, $form) {
+	function useMemberShippingAddress($data, $form, $request) {
 		ShoppingCart::set_uses_different_shipping_address(false);
 		Director::redirectBack();
 	}
 	
 	/** 
-	 * Processes the order information from the Shopping cart, creates or merges
-	 * the member from the database, and then processes the payment.
-	 * This function concerns only the current order
+	 * Process the items in the shopping cart from session,
+	 * creating a new {@link Order} record, and updating the
+	 * customer's details {@link Member} record.
+	 * 
+	 * {@link Payment} instance is created, linked to the order,
+	 * and payment is processed {@link Payment::processPayment()}
+	 * 
+	 * @param array $data Form request data submitted from OrderForm
+	 * @param Form $form Form object for this action
+	 * @param HTTPRequest $request Request object for this action
 	 */
-	function processOrder($data, $form) {
+	function processOrder($data, $form, $request) {
+		$paymentClass = (!empty($data['PaymentMethod'])) ? $data['PaymentMethod'] : null;
+		$payment = class_exists($paymentClass) ? new $paymentClass() : null;
 		
-		// 1) Check to see if there are still items in the current order
+		if(!($payment && $payment instanceof Payment)) {
+			user_error(get_class($payment) . ' is not a valid Payment object!', E_USER_ERROR);
+		}
+		
 		if(!ShoppingCart::has_items()) {
-			$form->sessionMessage('Please add some items to your cart', 'warning');
+			$form->sessionMessage('Please add some items to your cart', 'bad');
 	   	Director::redirectBack();
 	   	return false;
 		}
 					
-		// 2) Save the member details
+		// Create new OR update logged in {@link Member} record
 		$member = EcommerceRole::createOrMerge($data);
 		$member->write();
 		$member->logIn();
 		
-		// 3) Save the current order details (items and modifiers)
-		// (which are at the moment in the session) in the database
-		// and clear the session
+		// Create new Order from shopping cart, discard cart contents in session
 		$order = ShoppingCart::save_current_order();
 		ShoppingCart::clear();
 		
-		// 4) Save shipping address details
+		// Write new record {@link Order} to database
 		$form->saveInto($order);
-		
 		$order->write();
 
-		// 5) Proceed to payment
 		// Save payment data from form and process payment
-		$payment = Object::create($data['PaymentMethod']);
-		
-		if(!$payment instanceof Payment) {
-			user_error(get_class($payment) . ' is not a Payment object!', E_USER_ERROR);
-		}
-		
 		$form->saveInto($payment);
 		$payment->OrderID = $order->ID;
 		$payment->Amount = $order->Total();
 		$payment->write();
 		
+		// Process payment, get the result back
 		$result = $payment->processPayment($data, $form);
 		
-		// a) Long payment process redirected to another website (PayPal, Worldpay)
-		if($result->isProcessing()) return $result->getValue();
+		// isProcessing(): Long payment process redirected to another website (PayPal, Worldpay)
+		if($result->isProcessing()) {
+			return $result->getValue();
+		}
 		
-		// b) Successful payment
-		else if($result->isSuccess()) $order->sendReceipt();
+		if($result->isSuccess()) {
+			$order->sendReceipt();
+		}
 		
 		Director::redirect($order->Link());
 		return true;
 	}
+	
 }
 ?>
