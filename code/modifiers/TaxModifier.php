@@ -122,7 +122,8 @@ class TaxModifier extends OrderModifier {
 	 * inclusive price not 1/8.
 	 */
 	function Charge() {
-		return $this->TaxableAmount() * ($this->IsExclusive() ? $this->Rate() : (1 - (1 / (1 + $this->Rate())))) ;
+		$rate = ($this->IsExclusive() ? $this->Rate() : (1 - (1 / (1 + $this->Rate()))));
+		return $this->TaxableAmount() * $rate;
 	}
 	
 	/**
@@ -133,7 +134,7 @@ class TaxModifier extends OrderModifier {
 		$order = $this->Order();
 		return $order->SubTotal() + $order->ModifiersSubTotal($this->class);
 	}
-					
+	
 	function ShowInTable() {
 		return $this->Rate();
 	}
