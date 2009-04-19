@@ -17,7 +17,7 @@ Product:
         Price: 500
         Parent:=>ProductGroup.g1
         URLSegment: product-1a
-        AllowPurchase: 1
+        AllowPurchase: 0
     p1b:
         Title: Product 1b
         Price: 600
@@ -51,5 +51,6 @@ Member:
     member:
         FirstName: Test
         Surname: User
+        Country: NZ
         Email: test@example.com
         Password: 23u90oijlJKsa

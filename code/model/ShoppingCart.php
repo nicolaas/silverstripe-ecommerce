@@ -356,7 +356,7 @@ class ShoppingCart_Controller extends Controller {
 	function removemodifier() {
 		$modifierId = $this->urlParams['ID'];
 		if(ShoppingCart::can_remove_modifier($modifierId)) ShoppingCart::remove_modifier($modifierId);
-		if(!Director::is_ajax()) Director::redirectBack();
+		if(!$this->isAjax()) Director::redirectBack();
 	}
 	
 	/**

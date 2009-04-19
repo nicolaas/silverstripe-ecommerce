@@ -444,9 +444,9 @@ class Order extends DataObject {
 		return AccountPage::get_order_link($this->ID);
 	}
 	
-	/*
-	 * Returns if the order can be cancelled
-	 * Precondition: Order is in DB
+	/**
+	 * Returns TRUE if the order can be cancelled
+	 * PRECONDITION: Order is in the DB.
 	 * 
 	 * @return boolean
 	 */
@@ -464,7 +464,7 @@ class Order extends DataObject {
 	 * Returns the {@link Payment} records linked
 	 * to this order.
 	 * 
-	 * Precondition: Order is in DB.
+	 * PRECONDITION: Order is in DB.
 	 * 
 	 * @return DataObjectSet
 	 */
@@ -618,8 +618,12 @@ class Order extends DataObject {
 	 * @return string
 	 */
 	function findShippingCountry($codeOnly = false) {
-		if(!$this->ID)	$country = ShoppingCart::has_country() ? ShoppingCart::get_country() : EcommerceRole::findCountry();
-		else if(!$this->UseShippingAddress || !$country = $this->ShippingCountry) $country = EcommerceRole::findCountry();
+		if(!$this->ID) {
+			$country = ShoppingCart::has_country() ? ShoppingCart::get_country() : EcommerceRole::findCountry();
+		} elseif(!$this->UseShippingAddress || !$country = $this->ShippingCountry) {
+			$country = EcommerceRole::findCountry();
+		}
+		
 		return $codeOnly ? $country : EcommerceRole::findCountryTitle($country);
 	}
 							

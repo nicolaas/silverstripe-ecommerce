@@ -1,18 +1,24 @@
 <?php
-
+/**
+ * Test {@link CheckoutPage}
+ * 
+ * @package ecommerce
+ */
 class CheckoutPageTest extends FunctionalTest {
+	
 	static $fixture_file = 'ecommerce/tests/ecommerce.yml';
+	
 	static $disable_theme = true;
+	
 	static $use_draft_site = true;
 
 	function testFindLink() {
-		/* find_link returns a link to the checkout page, ending in a slash */
 		$link = CheckoutPage::find_link();
-		$this->assertEquals(Director::baseURL() . 'checkout/', $link);
+		$this->assertEquals(Director::baseURL() . 'checkout/', $link, 'find_link() returns the correct link to checkout.');
 
 		/* If there is no checkout page, then an exception is thrown */
-		$page = DataObject::get_one("CheckoutPage");
-		$page->delete();		
+		$page = DataObject::get_one('CheckoutPage');
+		$page->delete();
 		$page->flushCache();
 		
 		$this->setExpectedException('Exception');
@@ -21,15 +27,15 @@ class CheckoutPageTest extends FunctionalTest {
 	
 	function testCheckout() {
 		/* Add a couple of items to the cart */
-		$this->get('product-1a/add');
 		$this->get('product-1b/add');
 		$this->get('product-1b/add');
+		$this->get('product-2a/add');
 		
 		/* Check the cart */
 		$this->get('checkout/');
 		$this->assertExactMatchBySelector('#InformationTable tr.orderitem td.product a', array(
-			'Product 1a',
 			'Product 1b',
+			'Product 2a'
 		));
 		/* the HTML tags aren't consistently output at this stage
 		$this->assertExactHTMLMatchBySelector('#InformationTable tr.orderitem td.quantity input.ajaxQuantityField', array(
@@ -38,13 +44,14 @@ class CheckoutPageTest extends FunctionalTest {
 		));
 		*/
 		$this->assertExactMatchBySelector('#InformationTable tr.orderitem td.total', array(
-			'$500.00',
 			'$1,200.00',
+			'$800.00',
 		));
 
 		$this->assertExactMatchBySelector('#Table_Order_SubTotal', array(
-			'$1,700.00',
+			'$2,000.00',
 		));
 	}
 	
 }
+?>

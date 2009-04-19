@@ -109,7 +109,13 @@ class EcommerceRole extends DataObjectDecorator {
 		if($member && $member->Country) {
 			$country = $member->Country;
 		} else {
-			$country = Geoip::visitor_country();
+			// HACK Avoid CLI tests from breaking (GeoIP gets in the way of unbiased tests!)
+			// @todo Introduce a better way of disabling GeoIP as needed (Geoip::disable() ?)
+			if(Director::is_cli()) {
+				$country = null;
+			} else {
+				$country = Geoip::visitor_country();
+			}
 		}
 		
 		return $country;
