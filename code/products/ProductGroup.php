@@ -97,7 +97,7 @@ class ProductGroup extends Page {
 		}
 		
 		if(in_array($this->ChildGroupsPermission, $permissions)) {
-			if($childGroups = DataObject::get('ProductGroup', "`ParentID` = '$this->ID' AND `ShowInMenus` = 1")) {
+			if($childGroups = $this->ChildGroups()) {
 				foreach($childGroups as $childGroup) {
 					$products->merge($childGroup->ProductsShowable($extraFilter, $permissions));
 				}
