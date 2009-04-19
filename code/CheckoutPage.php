@@ -1,73 +1,107 @@
 <?php
 /**
- * Checkout page shows the order details to make a checkout
+ * CheckoutPage is a CMS page-type that shows the order
+ * details to the customer for their current shopping
+ * cart on the site. It also lets the customer review
+ * the items in their cart, and manipulate them (add more,
+ * deduct or remove items completely). The most important
+ * thing is that the {@link CheckoutPage_Controller} handles
+ * the {@link OrderForm} form instance, allowing the customer
+ * to fill out their shipping details, confirming their order
+ * and making a payment.
+ * 
+ * @see CheckoutPage_Controller->Order()
+ * @see OrderForm
+ * @see CheckoutPage_Controller->OrderForm()
+ * 
+ * The CheckoutPage_Controller is also responsible for setting
+ * up the modifier forms for each of the OrderModifiers that are
+ * enabled on the site (if applicable - some don't require a form
+ * for user input). A usual implementation of a modifier form would
+ * be something like allowing the customer to enter a discount code
+ * so they can receive a discount on their order.
+ * 
+ * @see OrderModifier
+ * @see CheckoutPage_Controller->ModifierForms()
  * 
  * @package ecommerce
  */
 class CheckoutPage extends Page {
 		
-	static $db = array(
+	public static $db = array(
 		'PurchaseComplete' => 'HTMLText',
 		'ChequeMessage' => 'HTMLText'
 	);
 	
-	static $has_one = array(
+	public static $has_one = array(
 		'TermsPage' => 'Page'
 	);
+	
+	public static $has_many = array();
+	
+	public static $many_many = array();
+	
+	public static $belongs_many = array();
+	
+	public static $defaults = array();
 	
 	static $add_action = 'a Checkout Page';
 	
 	/**
-	 * Returns the link or the URLSegment to the first checkout page on this site
-	 * @param urlSegment : returns the URLSegment only if true
+	 * Returns the link to the checkout page on this site, using
+	 * a specific Order ID that already exists in the database.
+	 * 
+	 * @param $urlSegment boolean If set to TRUE, only returns the URLSegment field
+	 * @return string Link to checkout page
 	 */
 	static function find_link($urlSegment = false) {
 		$page = DataObject::get_one('CheckoutPage');
-		if(!$page) throw new Exception(_t('CheckoutPage.NOPAGE', 'No CheckoutPage on this site - please create one!'));
+		if(!$page) throw new Exception(_t('CheckoutPage.NOPAGE', 'No page of CheckoutPage type on the site. Please create one!'));
 		else return $urlSegment ? $page->URLSegment : $page->Link();
 	}
 	
 	/**
-	 * Returns the link or the URLSegment to the first checkout page on this site
-	 * to checkout the order which id is under the Action parameter
-	 * @param orderID : ID of the order
-	 * @param urlSegment : returns the URLSegment only if true
+	 * Returns the link to the checkout page on this site, using
+	 * a specific Order ID that already exists in the database.
+	 * 
+	 * @param $orderID int ID of the {@link Order}
+	 * @param $urlSegment boolean If set to TRUE, only returns the URLSegment field
+	 * @return string Link to checkout page
 	 */
 	static function get_checkout_order_link($orderID, $urlSegment = false) {
 		$page = DataObject::get_one('CheckoutPage');
-		if(!$page) throw new Exception(_t('CheckoutPage.NOPAGE', 'No CheckoutPage on this site - please create one!'));
-		else return ($urlSegment ? $page->URLSegment . '/' : $page->Link()) . $orderID; 
+		if(!$page) throw new Exception(_t('CheckoutPage.NOPAGE', 'No page of CheckoutPage type on the site. Please create one!'));
+		else return ($urlSegment ? $page->URLSegment . '/' : $page->Link()) . $orderID;
 	}
 	
-	/**
-	 * Creates the fields for the checkout page within the CMS
-	 */	
 	function getCMSFields() {
 		$fields = parent::getCMSFields();
 		
 		$fields->addFieldToTab('Root.Content.Main', new TreeDropdownField('TermsPageID', 'Terms and Conditions Page', 'SiteTree'));
 		
-		// Information about the messages		
 		$shopMessageComplete = '<p>This message is shown, along with order information after they submit the checkout :<p>';
 		$shopChequeMessage = '<p>This message is shown when a user selects cheque as a payment option on the checkout :</p>';
 		
-		$fields->addFieldToTab('Root.Content.Messages', new HeaderField('Checkout Messages', 2));
-		$fields->addFieldToTab('Root.Content.Messages', new LiteralField('ShopMessageComplete', $shopMessageComplete));
-		$fields->addFieldToTab('Root.Content.Messages', new HtmlEditorField('PurchaseComplete', ''));
-		$fields->addFieldToTab('Root.Content.Messages', new LiteralField('ShopChequeMessage', $shopChequeMessage));
-		$fields->addFieldToTab('Root.Content.Messages', new HtmlEditorField('ChequeMessage', '', 5));
+		$fields->addFieldsToTab('Root.Content.Messages', array(
+			new HeaderField('Checkout Messages', 2),
+			new LiteralField('ShopMessageComplete', $shopMessageComplete),
+			new HtmlEditorField('PurchaseComplete', ''),
+			new LiteralField('ShopChequeMessage', $shopChequeMessage),
+			new HtmlEditorField('ChequeMessage', '', 5)
+		));
 
 		return $fields;
 	}
 	
 	/**
-	 * Creates automatically a checkout page when the ecommerce module is
-	 * added to a project and transfers the EcommerceTermsPage table to Page
+	 * This automatically creates a CheckoutPage whenever dev/build
+	 * is invoked and there is no page on the site with CheckoutPage
+	 * applied to it.
 	 */
 	function requireDefaultRecords() {
 		parent::requireDefaultRecords();
 		
-		if(! $page = DataObject::get_one('CheckoutPage')) {
+		if(!$page = DataObject::get_one('CheckoutPage')) {
 			$page = new CheckoutPage();
 			$page->Title = 'Checkout';
 			$page->Content = '<p>This is the checkout page. The order summary and order form appear below this content.</p>';
@@ -77,6 +111,7 @@ class CheckoutPage extends Page {
 			$page->ShowInMenus = 0;
 			$page->writeToStage('Stage');
 			$page->publish('Stage', 'Live');
+			
 			Database::alteration_message('Checkout page \'Checkout\' created', 'created');
 		}
 		
@@ -84,23 +119,18 @@ class CheckoutPage extends Page {
 			$page->TermsPageID = $termsPage->ID;
 			$page->writeToStage('Stage');
 			$page->publish('Stage', 'Live');
+
 			Database::alteration_message("Page '{$termsPage->Title}' linked to the Checkout page '{$page->Title}'", 'changed');
 		}
  	}
 }
-
 class CheckoutPage_Controller extends Page_Controller {
 	
-	/**
-	 * Includes the checkout requirements, overrides if the project
-	 * has the file, otherwise uses the module one instead
-	 */
 	public function init() {
 		if(!class_exists('Payment')) {
 			trigger_error('The payment module must be installed for the ecommerce module to function.', E_USER_WARNING);
 		}
 		
-		// include extra js requirements for this page
 		Requirements::javascript(THIRDPARTY_DIR . '/jquery/jquery.js');
 		Requirements::javascript('ecommerce/javascript/CheckoutPage.js');
 		Requirements::block(THIRDPARTY_DIR . '/behaviour.js');
@@ -108,10 +138,8 @@ class CheckoutPage_Controller extends Page_Controller {
 		Requirements::block(THIRDPARTY_DIR . '/prototype_improvements.js');
 		Requirements::block(SAPPHIRE_DIR . '/javascript/Validator.js');
 				
-		// include stylesheet for the checkout page
 		Requirements::themedCSS('CheckoutPage');
 				
-		// init the virtual methods for the order modifiers
 		$this->initVirtualMethods();
 		
 		parent::init();
@@ -123,78 +151,104 @@ class CheckoutPage_Controller extends Page_Controller {
 	 */
 	protected function initVirtualMethods() {
 		if($forms = $this->ModifierForms()) {
-			foreach($forms as $form) $this->addWrapperMethod($form->Name(), 'getOrderModifierForm');
+			foreach($forms as $form) {
+				$this->addWrapperMethod($form->Name(), 'getOrderModifierForm');
+			}
 		}
 	}
 	
 	/**
-	 * Returns the form which name is equal to the parameter
-	 * @param methodName : name of the virtual method called
+	 * Return a specific {@link OrderModifierForm} by it's name.
+	 * 
+	 * @param $methodName string The name of the form to return
+	 * @return Form
 	 */
-	protected function getOrderModifierForm($methodName) {
-		// loops for all modifier forms, finds form named $methodName and returns it
+	protected function getOrderModifierForm($name) {
 		if($forms = $this->ModifierForms()) {
 			foreach($forms as $form) {
-				if($form->Name() == $methodName) return $form;
+				if($form->Name() == $name) return $form;
 			}
 		}
 	}
 	
 	/**
-	 * Checks if the user can checkout
+	 * Determine whether the user can checkout the
+	 * specified Order ID in the URL, that isn't
+	 * paid for yet.
+	 * 
+	 * @return boolean
 	 */
 	function CanCheckout() {
-		if($orderID = Director::urlParam('Action')) {
-			if($memberID = Member::currentUserID()) {
-				if($order = DataObject::get_one('Order', "`Order`.`ID` = '$orderID' AND `MemberID` = '$memberID'")) return ! $order->IsPaid();
-				else return false;
-			}
-			else return false;
+		if($order = $this->Order()) {
+			return !$order->IsPaid();
 		}
-		else return true;
 	}
 	
 	/**
 	 * Returns either the current order from the shopping cart or
-	 * if there is an ID in the url the order which has this ID if and only if
-	 * the member logged has done this order and if this order is incomplete.
-	 * Precondition : the user can checkout
+	 * by the specified Order ID in the URL.
+	 * 
+	 * PRECONDITION: The user can checkout.
+	 * 
+	 * @return Order
 	 */
 	function Order() {
-		if($orderID = Director::urlParam('Action')) return DataObject::get_by_id('Order', $orderID);
-		else return ShoppingCart::current_order();
+		if($orderID = Director::urlParam('Action')) {
+			$order = DataObject::get_by_id('Order', $orderID);
+			if($order && $order->MemberID == Member::currentUserID()) {
+				return $order;
+			}
+		} else {
+			return ShoppingCart::current_order();
+		}
 	}
 	
 	/**
-	 * Returns a DataObjectSet which contains the forms to add some modifiers to update the OrderInformation table
-	 * Precondition : the user can checkout
+	 * Returns a DataObjectSet of {@link OrderModifierForm} objects. These
+	 * forms are used in the OrderInformation HTML table for the user to fill
+	 * out as needed for each modifier applied on the site.
+	 * 
+	 * PRECONDITION: The user can checkout.
+	 * 
+	 * @return DataObjectSet
 	 */
 	function ModifierForms() {
 		return Order::get_modifier_forms($this);
 	}
 	
 	/**
-	 * Returns the OrderForm object
-	 * Precondition : the user can checkout
+	 * Returns a form allowing a user to enter their
+	 * details to checkout their order.
+	 * 
+	 * PRECONDITION: The user can checkout.
+	 * 
+	 * @return OrderForm object
 	 */
 	function OrderForm() {
 		return new OrderForm($this, 'OrderForm');
 	}
 	
 	/**
-	 * Returns the reason why the user can not checkout
-	 * Precondition : the user can not checkout
+	 * Returns a message explaining why the customer
+	 * can't checkout the requested order.
+	 * 
+	 * PRECONDITION: The user can not checkout.
+	 * 
+	 * @return string
 	 */
 	function Message() {
 		$orderID = Director::urlParam('Action');
 		if($memberID = Member::currentUserID()) {
-			if($order = DataObject::get_one('Order', "`Order`.`ID` = '$orderID' AND `MemberID` = '$memberID'")) return 'You can not checkout this order because it has been already successfully completed. Click <a href="' . $order->Link() . '">here</a> to see its details, otherwise you can <a href="' . CheckoutPage::find_link() . '">checkout</a> your current order.';
-			else return 'You do not have any order corresponding to this ID, so you can not checkout this order. However you can <a href="' . CheckoutPage::find_link() . '">checkout</a> your current order.';
-		}
-		else {
+			if($order = DataObject::get_one('Order', "`Order`.`ID` = '$orderID' AND `MemberID` = '$memberID'")) {
+				return 'You can not checkout this order because it has been already successfully completed. Click <a href="' . $order->Link() . '">here</a> to see it\'s details, otherwise you can <a href="' . CheckoutPage::find_link() . '">checkout</a> your current order.';
+			} else {
+				return 'You do not have any order corresponding to that ID, so you can\'t checkout this order.';
+			}
+		} else {
 			$redirectLink = CheckoutPage::get_checkout_order_link($orderID);
-			return 'You can not checkout this order because you are not logged. To do so, please <a href="Security/login?BackURL=' . $redirectLink . '">login</a> first, otherwise you can <a href="' . CheckoutPage::find_link() . '">checkout</a> your current order.';
+			return 'You can not checkout this order because you are not logged in. To do so, please <a href="Security/login?BackURL=' . $redirectLink . '">login</a> first, otherwise you can <a href="' . CheckoutPage::find_link() . '">checkout</a> your current order.';
 		}
 	}
+	
 }
 ?>

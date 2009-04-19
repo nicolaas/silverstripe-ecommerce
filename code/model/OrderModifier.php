@@ -56,7 +56,9 @@ class OrderModifier extends OrderAttribute {
 	 * This function returns a form that allows a user
 	 * to change the modifier to the order.
 	 * 
-	 * @TODO When is this used?
+	 * @todo When is this used?
+	 * @todo How is this used?
+	 * @todo How does one create their own OrderModifierForm implementation?
 	 *
 	 * @param Controller $controller $controller The controller
 	 * @return OrderModifierForm or subclass
