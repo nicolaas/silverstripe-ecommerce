@@ -51,7 +51,7 @@ class CheckoutPage extends Page {
 	 * Returns the link to the checkout page on this site, using
 	 * a specific Order ID that already exists in the database.
 	 * 
-	 * @param $urlSegment boolean If set to TRUE, only returns the URLSegment field
+	 * @param boolean $urlSegment If set to TRUE, only returns the URLSegment field
 	 * @return string Link to checkout page
 	 */
 	static function find_link($urlSegment = false) {
@@ -64,8 +64,8 @@ class CheckoutPage extends Page {
 	 * Returns the link to the checkout page on this site, using
 	 * a specific Order ID that already exists in the database.
 	 * 
-	 * @param $orderID int ID of the {@link Order}
-	 * @param $urlSegment boolean If set to TRUE, only returns the URLSegment field
+	 * @param int $orderID ID of the {@link Order}
+	 * @param boolean $urlSegment If set to TRUE, only returns the URLSegment field
 	 * @return string Link to checkout page
 	 */
 	static function get_checkout_order_link($orderID, $urlSegment = false) {
@@ -160,7 +160,7 @@ class CheckoutPage_Controller extends Page_Controller {
 	/**
 	 * Return a specific {@link OrderModifierForm} by it's name.
 	 * 
-	 * @param $methodName string The name of the form to return
+	 * @param string $name The name of the form to return
 	 * @return Form
 	 */
 	protected function getOrderModifierForm($name) {

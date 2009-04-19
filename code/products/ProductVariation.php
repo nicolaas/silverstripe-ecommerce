@@ -1,4 +1,9 @@
 <?php
+/**
+ * @todo How does this class work in relation to Product?
+ * 
+ * @package ecommerce
+ */
 class ProductVariation extends DataObject {
 	
 	static $db = array(

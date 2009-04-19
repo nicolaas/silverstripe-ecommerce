@@ -71,7 +71,7 @@ class OrderItem extends OrderAttribute {
 	 * Set the quantity attribute in memory.
 	 * PRECONDITION: The order item is not saved in the database yet.
 	 * 
-	 * @param $quantity int The quantity to set
+	 * @param int $quantity The quantity to set
 	 */
 	public function setQuantityAttribute($quantity) {
 		$this->_quantity = $quantity;
@@ -81,7 +81,7 @@ class OrderItem extends OrderAttribute {
 	 * Increment the quantity attribute in memory by a given amount.
 	 * PRECONDITION: The order item is not saved in the database yet.
 	 * 
-	 * @param $quantity int The amount to increment the quantity by.
+	 * @param int $quantity The amount to increment the quantity by.
 	 */
 	public function addQuantityAttribute($quantity) {
 		$this->_quantity += $quantity;

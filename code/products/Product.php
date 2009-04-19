@@ -353,7 +353,7 @@ class Product_OrderItem extends OrderItem {
 	 * their cart, so if the CMS admin changes the price, it
 	 * remains the same for this order.
 	 * 
-	 * @param $current boolean If set to TRUE, returns the latest published version of the Product,
+	 * @param boolean $current If set to TRUE, returns the latest published version of the Product,
 	 * 								If set to FALSE, returns the set version number of the Product
 	 * 						 		(instead of the latest published version)
 	 * @return Product object

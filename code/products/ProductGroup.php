@@ -61,35 +61,48 @@ class ProductGroup extends Page {
 	}
 	
 	/**
-	 * Returns the shopping cart
+	 * Returns the shopping cart.
+	 * @todo Does HTTP::set_cache_age() still need to be set here?
+	 * 
+	 * @return Order
 	 */
 	function Cart() {
 		HTTP::set_cache_age(0);
 		return ShoppingCart::current_order();
 	}
 	
+	/**
+	 * Recursively create a set of {@link Product} pages
+	 * that belong to this ProductGroup as a child, related
+	 * Product, or through one of this ProductGroup's nested
+	 * ProductGroup pages.
+	 * 
+	 * @param string $extraFilter Additional SQL filters to apply to the Product retrieval
+	 * @param array $permissions 
+	 * @return DataObjectSet
+	 */
 	function ProductsShowable($extraFilter, array $permissions) {
 		$filter = "`ShowInMenus` = 1 AND $extraFilter";
+		$products = new DataObjectSet();
 		
-		// 1) Children Products
+		$childProducts = DataObject::get('Product', "`ParentID` = $this->ID AND $filter");
+		$relatedProducts = $this->getManyManyComponents('Products', $filter);
 		
-		$products = DataObject::get('Product', "`ParentID` = $this->ID AND $filter");
-		
-		// 2) Products Many Many Related
-		
-		$products2 = $this->getManyManyComponents('Products', $filter);
-		if(!$products) $products = $products2;
-		else $products->merge($products2);
-		
-		// 3) Child Groups Products
-		
-		if(in_array($this->ChildGroupsPermission, $permissions)) {
-			if($groupChildren = DataObject::get('ProductGroup', "`ParentID` = $this->ID AND `ShowInMenus` = 1")) {
-				foreach($groupChildren as $groupChild) $products->merge($groupChild->ProductsShowable($extraFilter, $permissions));
-			}
+		if($childProducts) {
+			$products->merge($childProducts);
 		}
 		
-		// 4) Products Duplicates Removal
+		if($relatedProducts) {
+			$products->merge($relatedProducts);
+		}
+		
+		if(in_array($this->ChildGroupsPermission, $permissions)) {
+			if($childGroups = DataObject::get('ProductGroup', "`ParentID` = '$this->ID' AND `ShowInMenus` = 1")) {
+				foreach($childGroups as $childGroup) {
+					$products->merge($childGroup->ProductsShowable($extraFilter, $permissions));
+				}
+			}
+		}
 		
 		$products->removeDuplicates();
 		
@@ -113,30 +126,34 @@ class ProductGroup extends Page {
 	}
 		
 	/** 
-	 * Return ProductGroups as children of the current page
+	 * Return children ProductGroup pages of this group.
+	 * @return DataObjectSet
 	 */
 	function ChildGroups() {
-		return DataObject::get('ProductGroup', "`ShowInMenus` = 1 AND `ParentID` = '$this->ID'");
+		return DataObject::get('ProductGroup', "`ParentID` = '$this->ID' AND `ShowInMenus` = 1");
 	}
 	
 	/**
-	 * Generate a product menu using this function
+	 * Recursively generate a product menu.
+	 * @return DataObjectSet
 	 */
 	function GroupsMenu() {
 		if($parent = $this->Parent()) {
 			return $parent instanceof ProductGroup ? $parent->GroupsMenu() : $this->ChildGroups();
+		} else {
+			return $this->ChildGroups();
 		}
-		else return $this->ChildGroups();
 	}
 		
 	/**
-	 * Creates automatically two product group pages when the ecommerce module
-	 * is added to a project
+	 * Automatically creates some ProductGroup pages in
+	 * the CMS when the database builds if there hasn't
+	 * been any set up yet.
 	 */
 	function requireDefaultRecords() {
 		parent::requireDefaultRecords();
 		
-		if(! DataObject::get_one('ProductGroup')) {
+		if(!DataObject::get_one('ProductGroup')) {
 			$page1 = new ProductGroup();
 			$page1->Title = 'Products';
 			$page1->Content = "
