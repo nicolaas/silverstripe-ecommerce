@@ -41,6 +41,12 @@ class Order extends DataObject {
 		'Payments' => 'Payment'
 	);
 	
+	public static $many_many = array();
+	
+	public static $belongs_many_many = array();
+	
+	public static $defaults = array();
+	
 	public static $casting = array(
 		'SubTotal' => 'Currency',
 		'Total' => 'Currency',

@@ -10,11 +10,11 @@ class OrderAttribute extends DataObject {
 	
 	protected $_id;
 	
-	static $has_one = array(
+	public static $has_one = array(
 		'Order' => 'Order'
 	);
 	
-	static $casting = array(
+	public static $casting = array(
 		'TableTitle' => 'Text',
 		'CartTitle' => 'Text'
 	);

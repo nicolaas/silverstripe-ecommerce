@@ -7,16 +7,26 @@
  */
 class OrderStatusLog extends DataObject {
 	
-	static $db = array(
+	public static $db = array(
 		'Status' => 'Varchar(255)',
 		'Note' => 'Text',
 		'SentToCustomer' => 'Boolean'
 	);
 	
-	static $has_one = array(
+	public static $has_one = array(
 		'Author' => 'Member',
 		'Order' => 'Order'
 	);
+	
+	public static $has_many = array();
+	
+	public static $many_many = array();
+	
+	public static $belongs_many_many = array();
+	
+	public static $defaults = array();
+	
+	public static $casting = array();
 	
 	function onBeforeSave() {
 		if(!$this->ID) {

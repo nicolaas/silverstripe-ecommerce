@@ -7,13 +7,23 @@
   */
 class ProductGroup extends Page {
 	
-	static $db = array(
+	public static $db = array(
 		'ChildGroupsPermission' => "Enum('Show Only Featured Products,Show All Products')"
 	);
 	
-	static $belongs_many_many = array(
+	public static $has_one = array();
+	
+	public static $has_many = array();
+	
+	public static $many_many = array();
+	
+	public static $belongs_many_many = array(
 		'Products' => 'Product'
 	);
+	
+	public static $defaults = array();
+	
+	public static $casting = array();
 	
 	static $default_child = 'Product';
 	

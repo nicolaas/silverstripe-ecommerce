@@ -41,6 +41,8 @@ class Product extends Page {
 		'AllowPurchase' => true
 	);
 	
+	public static $casting = array();
+	
 	static $default_parent = 'ProductGroup';
 	
 	static $add_action = 'a Product Page';

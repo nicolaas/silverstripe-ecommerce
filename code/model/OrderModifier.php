@@ -8,7 +8,7 @@
  */
 class OrderModifier extends OrderAttribute {
 
-	static $db = array(
+	public static $db = array(
 		'Amount' => 'Currency',
 		'Type' => "Enum('Chargable,Deductable')"
 	);

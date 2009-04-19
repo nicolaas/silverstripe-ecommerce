@@ -13,11 +13,11 @@ class OrderItem extends OrderAttribute {
 	
 	protected $_quantity;
 	
-	static $db = array(
+	public static $db = array(
 		'Quantity' => 'Int'
 	);
 	
-	static $casting = array(
+	public static $casting = array(
 		'UnitPrice' => 'Currency',
 		'Total' => 'Currency'
 	);
