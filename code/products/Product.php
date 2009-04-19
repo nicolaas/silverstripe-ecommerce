@@ -265,7 +265,7 @@ class Product_Controller extends Page_Controller {
 	
 	function add() {
 		if($this->AllowPurchase() && $this->Variations()->Count() == 0) {
-			ShoppingCart::add_new_item(new Product_OrderItem($this));
+			ShoppingCart::add_new_item(new Product_OrderItem($this->dataRecord));
 			if(!$this->isAjax()) Director::redirectBack();
 		}
 	}
