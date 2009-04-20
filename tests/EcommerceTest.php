@@ -25,6 +25,12 @@ class EcommerceTest extends FunctionalTest {
 		TaxModifier::set_for_country('NZ', 0.125, 'GST', 'inclusive');
 		TaxModifier::set_for_country('UK', 0.175, 'VAT', 'exclusive');
 		
+		/* Let's check that we have the Payment module installed properly */
+		$this->assertTrue(class_exists('Payment'), 'Payment module is installed.');
+		
+		/* Set the site currency to NZD - this updates all the pricing labels from USD to NZD */
+		Payment::set_site_currency('NZD');
+		
 		/* Set up the simple shipping calculator to test */
 		SimpleShippingModifier::set_default_charge(10);
 		SimpleShippingModifier::set_charges_for_countries(array(
@@ -48,6 +54,7 @@ class EcommerceTest extends FunctionalTest {
 		));
 
 		/* Let's check the totals to make sure GST wasn't being added (which is important!) */
+		/* NZD is shown as the label, since it was set as the site currency in setUp() */
 		$this->assertExactMatchBySelector('#Table_Order_Total', '$1,205.00 NZD');
 		
 		/* Let's sneakily change the GST to be exclusive, alterting the checkout total */
