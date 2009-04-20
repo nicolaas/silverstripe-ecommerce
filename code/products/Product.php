@@ -343,6 +343,10 @@ class Product_OrderItem extends OrderItem {
  		parent::__construct($product, $quantity);
 	}
 	
+	function getProductID() {
+		return $this->_productID;
+	}
+	
 	/**
 	 * Overloaded Product accessor method.
 	 *  
@@ -379,7 +383,23 @@ class Product_OrderItem extends OrderItem {
 	function Link() {
 		if($product = $this->Product(true)) return $product->Link();
 	}
-				
+	
+	function addLink() {
+		return ShoppingCart_Controller::add_item_link($this->_productID);
+	}
+	
+	function removeLink() {
+		return ShoppingCart_Controller::remove_item_link($this->_productID);
+	}
+	
+	function removeallLink() {
+		return ShoppingCart_Controller::remove_all_item_link($this->_productID);
+	}
+	
+	function setquantityLink() {
+		return ShoppingCart_Controller::set_quantity_item_link($this->_productID);
+	}
+
 	function onBeforeWrite() {
 		parent::onBeforeWrite();
 

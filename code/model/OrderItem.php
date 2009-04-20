@@ -148,22 +148,6 @@ HTML;
 		return $this->CartID() . '_Quantity';
 	}
 	
-	function addLink() {
-		return ShoppingCart_Controller::add_item_link($this->_id);
-	}
-	
-	function removeLink() {
-		return ShoppingCart_Controller::remove_item_link($this->_id);
-	}
-	
-	function removeallLink() {
-		return ShoppingCart_Controller::remove_all_item_link($this->_id);
-	}
-	
-	function setquantityLink() {
-		return ShoppingCart_Controller::set_quantity_item_link($this->_id);
-	}
-	
 	function checkoutLink() {
 		return CheckoutPage::find_link();
 	}
