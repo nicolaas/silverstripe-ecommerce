@@ -57,7 +57,7 @@ class EcommerceTest extends FunctionalTest {
 		/* NZD is shown as the label, since it was set as the site currency in setUp() */
 		$this->assertExactMatchBySelector('#Table_Order_Total', '$1,205.00 NZD');
 		
-		/* Let's sneakily change the GST to be exclusive, alterting the checkout total */
+		/* Let's sneakily change the GST to be exclusive, altering the checkout total */
 		TaxModifier::set_for_country('NZ', 0.125, 'GST', 'exclusive');
 		
 		/* See what the checkout page has got now */
