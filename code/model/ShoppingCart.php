@@ -125,7 +125,7 @@ class ShoppingCart extends Object {
 			}
 		}
 		
-		self::set_item($item->getIdAttribute(), $item);
+		self::set_item($item->getProductID(), $item);
 	}
 	
 	static function add_item($itemIndex, $quantity = 1) {
