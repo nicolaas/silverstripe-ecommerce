@@ -479,7 +479,9 @@ class Order extends DataObject {
 	 * @return string
 	 */
 	function Currency() {
-		return Payment::site_currency();
+		if(class_exists('Payment')) {
+			return Payment::site_currency();
+		}
 	}
 	
 	// Order Template Management

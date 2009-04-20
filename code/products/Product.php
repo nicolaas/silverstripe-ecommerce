@@ -194,7 +194,9 @@ class Product extends Page {
 	 * @return string Currency code, e.g. "NZD" or "USD"
 	 */
 	function Currency() {
-		return Payment::site_currency();
+		if(class_exists('Payment')) {
+			return Payment::site_currency();
+		}
 	}
 	
 	/**
