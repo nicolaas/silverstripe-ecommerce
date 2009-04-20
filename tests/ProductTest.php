@@ -22,12 +22,12 @@ class ProductTest extends FunctionalTest {
 	
 	function testProductAttributes() {
 		// Programmatically check the attributes
-		$product1 = $this->objFromFixture('Product', 'p1a');
-		$this->assertEquals($product1->Price, 500, 'The price of product-1a is 500.');
-		$this->assertEquals($product1->Parent()->URLSegment, 'group-1', 'group-1 is product-1a\'s parent');
+		$product = $this->objFromFixture('Product', 'p1a');
+		$this->assertEquals($product->Price, 500, 'The price of product-1a is 500.');
+		$this->assertEquals($product->Parent()->URLSegment, 'group-1', 'group-1 is product-1a\'s parent');
 		
 		// Check the actual HTML of the elements on the Product page
-		// $this->get('product-1a');
+		//$this->get($product->URLSegment);
 	}
 
 	function testProgrammaticAllowPurchase() {

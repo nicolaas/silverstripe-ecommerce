@@ -1,7 +1,8 @@
 <?php
 /**
- * The ShoppingCart class is a 'data handler' for the Order object.
- * It turns the order into a shopping cart.
+ * ShoppingCart is a session handler that stores
+ * information about what products are in a user's
+ * cart on the site.
  * 
  * @package ecommerce
  */

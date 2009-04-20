@@ -15,14 +15,17 @@ class EcommerceTest extends FunctionalTest {
 	function setUp() {
 		parent::setUp();
 		
+		/* Set the modifiers to test */
 		Order::set_modifiers(array(
 			'SimpleShippingModifier',
 			'TaxModifier'
 		));
 		
+		/* Set the tax configuration on a per-country basis to test */
 		TaxModifier::set_for_country('NZ', 0.125, 'GST', 'inclusive');
 		TaxModifier::set_for_country('UK', 0.175, 'VAT', 'exclusive');
 		
+		/* Set up the simple shipping calculator to test */
 		SimpleShippingModifier::set_default_charge(10);
 		SimpleShippingModifier::set_charges_for_countries(array(
 			'NZ' => 5,
@@ -43,7 +46,19 @@ class EcommerceTest extends FunctionalTest {
 		$this->assertPartialMatchBySelector('tr.taxmodifier td', array(
 			'12.5% GST (included in the above price)'
 		));
+
+		/* Let's check the totals to make sure GST wasn't being added (which is important!) */
+		$this->assertExactMatchBySelector('#Table_Order_Total', '$1,205.00 NZD');
 		
+		/* Let's sneakily change the GST to be exclusive, alterting the checkout total */
+		TaxModifier::set_for_country('NZ', 0.125, 'GST', 'exclusive');
+		
+		/* See what the checkout page has got now */
+		$this->get('checkout/');
+		
+		/* Check the total, it has changed since the GST is now exclusive */
+		$this->assertExactMatchBySelector('#Table_Order_Total', '$1,355.63 NZD');
+				
 		/* Member logs out */
 		$this->session()->inst_set('loggedInAs', null);
 	}
@@ -59,6 +74,9 @@ class EcommerceTest extends FunctionalTest {
 			'$10.00'
 		));
 		
+		/* Check the total is correct */
+		$this->assertExactMatchBySelector('#Table_Order_Total', '$1,210.00 NZD');
+		
 		/* Log in an NZ member in so we can assert a different price set for NZ customers */
 		$this->session()->inst_set('loggedInAs', $this->idFromFixture('Member', 'member'));
 		
@@ -67,6 +85,9 @@ class EcommerceTest extends FunctionalTest {
 		$this->assertPartialMatchBySelector('tr.simpleshippingmodifier td', array(
 			'$5.00'
 		));
+		
+		/* Check the total was updated with the change in shipping applied */
+		$this->assertExactMatchBySelector('#Table_Order_Total', '$1,205.00 NZD');
 		
 		/* Member logs out */
 		$this->session()->inst_set('loggedInAs', null);
