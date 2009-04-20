@@ -26,13 +26,11 @@ class OrderItem extends OrderAttribute {
 
 		// Case 1: Constructed by getting OrderItem from DB
 		if(is_array($object)) {
-			$this->_id = $object['ID'];
 			$this->_quantity = $object['Quantity'];
 		}
 		
 		// Case 2: Constructed in memory
 		if(is_object($object)) {
-			$this->_id = $object->ID;
 			$this->_quantity = $quantity;
 		}
 		
