@@ -12,16 +12,6 @@ class ProductTest extends FunctionalTest {
 	
 	static $use_draft_site = true;
 
-	function testProductGroupsCount() {
-		$groups = DataObject::get('ProductGroup');
-		$this->assertEquals($groups->Count(), 2, 'We have 2 test ProductGroup pages available');
-	}
-	
-	function testProductsCount() {
-		$products = DataObject::get('Product');
-		$this->assertEquals($products->Count(), 4, 'We have 4 test Product pages available.');
-	}
-	
 	function testGroupChildrenCount() {
 		$group1 = DataObject::get_one('ProductGroup', "URLSegment = 'group-1'");
 		$this->assertEquals($group1->Children()->Count(), 2, 'The first group (g1) has 2 children Product pages.');
