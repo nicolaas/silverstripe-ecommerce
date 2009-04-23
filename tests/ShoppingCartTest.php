@@ -18,7 +18,7 @@ class ShoppingCartTest extends FunctionalTest {
 		$this->get('product-2b/add');	// New item
 		$this->get('product-2b/add'); // Incrementing existing item by 1
 
-		/* See what's in the cart in session */
+		/* See what's in the cart */
 		$items = ShoppingCart::get_items();
 		
 		/* There is 1 item in the cart */
@@ -29,7 +29,29 @@ class ShoppingCartTest extends FunctionalTest {
 		$this->assertEquals($items[0]->getQuantity(), 2, 'We have 2 of this product in the cart.');
 	}
 	
-	function testAddAbitraryQuantityToItem() {
+	function testAddArbitraryQuantityToItem() {
+		/* Add an item to the cart */
+		$this->get('product-2b/add');
+		
+		/* See what's in the cart */
+		$items = ShoppingCart::get_items();
+		
+		/* There is 1 item in the cart, with a quantity of 1 */
+		$this->assertEquals(count($items), 1, 'There is 1 item in the cart');
+		$this->assertEquals($items[0]->getQuantity(), 1, 'There is a quantity of 1 for the item in the cart');
+		
+		/* Let's add 7 more of the same product to the cart */
+		ShoppingCart::add_item($items[0]->getIDAttribute(), 7);
+		
+		/* See what's in the cart once more */
+		$items = ShoppingCart::get_items();
+		
+		/* There is still 1 item in the cart, with a quantity of 8 */
+		$this->assertEquals(count($items), 1, 'There is 1 item in the cart');
+		$this->assertEquals($items[0]->getQuantity(), 8, 'There is a quantity of 1 for the item in the cart');
+		
+		/* Clear the shopping cart */
+		ShoppingCart::clear();
 	}
 	
 	function testRemoveItemFromCart() {
@@ -65,7 +87,10 @@ class ShoppingCartTest extends FunctionalTest {
 		$items = ShoppingCart::get_items();
 		
 		/* We have none of the second item in the cart, because we removed both 2 pieces of it that existed */
-		$this->assertTrue(!isset($items[1]), 'There is no index of 1 because the item doesn\'t exist in the cart any longer.');
+		$this->assertTrue(empty($items[1]), 'There is no index of 1 because the item doesn\'t exist in the cart any longer.');
+		
+		/* Clear the shopping cart */
+		ShoppingCart::clear();
 	}
 	
 	function testClearEntireCart() {
@@ -86,6 +111,9 @@ class ShoppingCartTest extends FunctionalTest {
 		
 		/* We have nothing in the cart */
 		$this->assertEquals(count($items), 0, 'There are no items in the cart');
+		
+		/* Clear the shopping cart */
+		ShoppingCart::clear();
 	}
 	
 }
