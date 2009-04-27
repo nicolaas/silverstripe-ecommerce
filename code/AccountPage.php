@@ -112,7 +112,7 @@ class AccountPage_Controller extends Page_Controller {
 		$accountPageLink = self::find_link();
 		
 		if($orderID = $request->param('ID')) {
-			if($order = DataObject::get_one('Order', "ID = '$orderID' AND MemberID = '$memberID'")) {
+			if($order = DataObject::get_one('Order', "Order.ID = '$orderID' AND MemberID = '$memberID'")) {
 				return array('Order' => $order);
 			} else {
 				return array(
