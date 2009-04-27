@@ -450,7 +450,7 @@ class Order extends DataObject {
 	 * 
 	 * @return boolean
 	 */
-	function CanCancel() {
+	function canCancel() {
 		switch($this->Status) {
 			case 'Unpaid' : return self::$can_cancel_before_payment;
 			case 'Paid' : return self::$can_cancel_before_processing;

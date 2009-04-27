@@ -192,8 +192,6 @@ class CheckoutPage_Controller extends Page_Controller {
 	 * Returns either the current order from the shopping cart or
 	 * by the specified Order ID in the URL.
 	 * 
-	 * PRECONDITION: The user can checkout.
-	 * 
 	 * @return Order
 	 */
 	function Order() {
@@ -212,8 +210,6 @@ class CheckoutPage_Controller extends Page_Controller {
 	 * forms are used in the OrderInformation HTML table for the user to fill
 	 * out as needed for each modifier applied on the site.
 	 * 
-	 * PRECONDITION: The user can checkout.
-	 * 
 	 * @return DataObjectSet
 	 */
 	function ModifierForms() {
@@ -223,8 +219,6 @@ class CheckoutPage_Controller extends Page_Controller {
 	/**
 	 * Returns a form allowing a user to enter their
 	 * details to checkout their order.
-	 * 
-	 * PRECONDITION: The user can checkout.
 	 * 
 	 * @return OrderForm object
 	 */
@@ -236,21 +230,21 @@ class CheckoutPage_Controller extends Page_Controller {
 	 * Returns a message explaining why the customer
 	 * can't checkout the requested order.
 	 * 
-	 * PRECONDITION: The user can not checkout.
-	 * 
 	 * @return string
 	 */
 	function Message() {
 		$orderID = Director::urlParam('Action');
+		$checkoutLink = self::find_link();
+		
 		if($memberID = Member::currentUserID()) {
-			if($order = DataObject::get_one('Order', "`Order`.`ID` = '$orderID' AND `MemberID` = '$memberID'")) {
-				return 'You can not checkout this order because it has been already successfully completed. Click <a href="' . $order->Link() . '">here</a> to see it\'s details, otherwise you can <a href="' . CheckoutPage::find_link() . '">checkout</a> your current order.';
+			if($order = DataObject::get_one('Order', "ID = '$orderID' AND MemberID = '$memberID'")) {
+				return 'You can not checkout this order because it has been already successfully completed. Click <a href="' . $order->Link() . '">here</a> to see it\'s details, otherwise you can <a href="' . $checkoutLink . '">checkout</a> your current order.';
 			} else {
 				return 'You do not have any order corresponding to that ID, so you can\'t checkout this order.';
 			}
 		} else {
 			$redirectLink = CheckoutPage::get_checkout_order_link($orderID);
-			return 'You can not checkout this order because you are not logged in. To do so, please <a href="Security/login?BackURL=' . $redirectLink . '">login</a> first, otherwise you can <a href="' . CheckoutPage::find_link() . '">checkout</a> your current order.';
+			return 'You can not checkout this order because you are not logged in. To do so, please <a href="Security/login?BackURL=' . $redirectLink . '">login</a> first, otherwise you can <a href="' . $checkoutLink . '">checkout</a> your current order.';
 		}
 	}
 	

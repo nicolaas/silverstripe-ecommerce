@@ -36,55 +36,6 @@ class AccountPage extends Page {
 	}
 	
 	/**
-	 * Automatically create an AccountPage if one is not found
-	 * on the site at the time the database is built (dev/build).
-	 */
-	function requireDefaultRecords() {
-		parent::requireDefaultRecords();
-		
-		if(!DataObject::get_one('AccountPage')) {
-			$page = new AccountPage();
-			$page->Title = 'Account';
-			$page->Content = '<p>This is the account page. It is used for shop users to login and change their member details if they have an account.</p>';
-			$page->URLSegment = 'account';
-			$page->ShowInMenus = 0;
-			$page->writeToStage('Stage');
-			$page->publish('Stage', 'Live');
-			
-			Database::alteration_message('Account page \'Account\' created', 'created');
-		}
-	}
-}
-
-class AccountPage_Controller extends Page_Controller {
-
-	function init() {
-		parent::init();
-		
-		Requirements::themedCSS('AccountPage');
-		
-		if(!Member::currentUserID()) {
-			$messages = array(
-				'default' => '<p class="message good">' . _t('AccountPage.Message', 'You\'ll need to login before you can access the account page. If you are not registered, you won\'t be able to access it until you make your first order, otherwise please enter your details below.') . '</p>',
-				'logInAgain' => 'You have been logged out. If you would like to log in again, please do so below.'
-			);
-			
-			Security::permissionFailure($this, $messages);
-			return false;
-		}
-	}
-
-	/**
-	 * Return a form allowing the user to edit
-	 * their details with the shop.
-	 *
-	 * @return ShopAccountForm
-	 */
-	function MemberForm() {
-		return new ShopAccountForm($this, 'MemberForm');
-	}
-	
-	/**
 	 * Returns all {@link Order} records for this
 	 * member that are completed.
 	 *
@@ -109,17 +60,58 @@ class AccountPage_Controller extends Page_Controller {
 	}
 	
 	/**
-	 * Returns the order details of the order which id is in the url
-	 * Precondition : a user is logged 
+	 * Automatically create an AccountPage if one is not found
+	 * on the site at the time the database is built (dev/build).
 	 */
-	function order() {
+	function requireDefaultRecords() {
+		parent::requireDefaultRecords();
+		
+		if(!DataObject::get_one('AccountPage')) {
+			$page = new AccountPage();
+			$page->Title = 'Account';
+			$page->Content = '<p>This is the account page. It is used for shop users to login and change their member details if they have an account.</p>';
+			$page->URLSegment = 'account';
+			$page->ShowInMenus = 0;
+			$page->writeToStage('Stage');
+			$page->publish('Stage', 'Live');
+			
+			Database::alteration_message('Account page \'Account\' created', 'created');
+		}
+	}
+}
+
+class AccountPage_Controller extends Page_Controller {
+	
+	function init() {
+		parent::init();
+		
+		Requirements::themedCSS('AccountPage');
+		
+		if(!Member::currentUserID()) {
+			$messages = array(
+				'default' => '<p class="message good">' . _t('AccountPage.Message', 'You\'ll need to login before you can access the account page. If you are not registered, you won\'t be able to access it until you make your first order, otherwise please enter your details below.') . '</p>',
+				'logInAgain' => 'You have been logged out. If you would like to log in again, please do so below.'
+			);
+			
+			Security::permissionFailure($this, $messages);
+			return false;
+		}
+	}
+	
+	/**
+	 * Return the {@link Order} details for the current
+	 * Order ID that we're viewing (ID parameter in URL).
+	 *
+	 * @return array of template variables
+	 */
+	function order($request) {
 		Requirements::themedCSS('Order');
 		Requirements::themedCSS('Order_print', 'print');
 		
 		$memberID = Member::currentUserID();
 		$accountPageLink = self::find_link();
 		
-		if($orderID = Director::urlParam('ID')) {
+		if($orderID = $request->param('ID')) {
 			if($order = DataObject::get_one('Order', "ID = '$orderID' AND MemberID = '$memberID'")) {
 				return array('Order' => $order);
 			} else {
@@ -135,16 +127,15 @@ class AccountPage_Controller extends Page_Controller {
 			);
 		}
 	}
-	
+
 	/**
-	 * Check if the user can cancel their order.
-	 * @return boolean
+	 * Return a form allowing the user to edit
+	 * their details with the shop.
+	 *
+	 * @return ShopAccountForm
 	 */
-	function CanCancel() {
-		if($order = DataObject::get_by_id('Order', Director::urlParam('ID'))) {
-			return $order->CanCancel();
-		}
-		return false;
+	function MemberForm() {
+		return new ShopAccountForm($this, 'MemberForm');
 	}
 	
 	/**
@@ -155,9 +146,12 @@ class AccountPage_Controller extends Page_Controller {
 	 * @return Order_CancelForm
 	 */
 	function CancelForm() {
-		if($this->CanCancel()) {
-			$orderID = (int) Director::urlParam('ID');
-			return new Order_CancelForm($this, 'CancelForm', $orderID);
+		return null; // This needs to be fixed, URL routing is broken so ID doesn't get picked up
+		
+		if($order = DataObject::get_by_id('Order', (int) Director::urlParam('ID'))) {
+			if($order->canCancel()) {
+				return new Order_CancelForm($this, 'CancelForm', $order->ID);
+			}
 		}
 	}
 	
