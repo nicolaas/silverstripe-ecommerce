@@ -469,7 +469,7 @@ class Order extends DataObject {
 	 * @return DataObjectSet
 	 */
 	function Payments() {
-		return DataObject::get('Payment', "`OrderID` = '$this->ID'", '`LastEdited` DESC');
+		return DataObject::get('Payment', "OrderID = '$this->ID'", 'LastEdited DESC');
 	}
 	
 	/**
@@ -513,7 +513,7 @@ class Order extends DataObject {
 	
 	/**
 	 * Has this order been sent to the customer?
-	 * (in "Sent" status).
+	 * (at "Sent" status).
 	 *
 	 * @return boolean
 	 */
@@ -523,20 +523,12 @@ class Order extends DataObject {
 	
 	/**
 	 * Is this order currently being processed?
-	 * (in "Processing" status).
+	 * (at "Sent" OR "Processing" status).
 	 * 
 	 * @return boolean
 	 */
 	function IsProcessing() {
 		return $this->IsSent() || $this->Status == 'Processing';
-	}
-	
-	/**
-	 * @TODO What does IsValidate mean in shop terms?
-	 * @return boolean
-	 */
-	function IsValidate() {
-		return $this->IsProcessing() || $this->Status == 'Paid';
 	}
 	
 	/**
@@ -547,7 +539,7 @@ class Order extends DataObject {
 	 * @return boolean
 	 */
 	function IsPaid() {
-		return $this->IsValidate();
+		return $this->IsProcessing() || $this->Status == 'Paid';
 	}
 	
 	/**

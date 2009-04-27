@@ -55,9 +55,11 @@ class CheckoutPage extends Page {
 	 * @return string Link to checkout page
 	 */
 	static function find_link($urlSegment = false) {
-		$page = DataObject::get_one('CheckoutPage');
-		if(!$page) throw new Exception(_t('CheckoutPage.NOPAGE', 'No page of CheckoutPage type on the site. Please create one!'));
-		else return $urlSegment ? $page->URLSegment : $page->Link();
+		if(!$page = DataObject::get_one('CheckoutPage')) {
+			user_error('No CheckoutPage was found. Please create one in the CMS!', E_USER_ERROR);
+		}
+		
+		return ($urlSegment) ? $page->URLSegment : $page->Link();
 	}
 	
 	/**
@@ -69,9 +71,11 @@ class CheckoutPage extends Page {
 	 * @return string Link to checkout page
 	 */
 	static function get_checkout_order_link($orderID, $urlSegment = false) {
-		$page = DataObject::get_one('CheckoutPage');
-		if(!$page) throw new Exception(_t('CheckoutPage.NOPAGE', 'No page of CheckoutPage type on the site. Please create one!'));
-		else return ($urlSegment ? $page->URLSegment . '/' : $page->Link()) . $orderID;
+		if(!$page = DataObject::get_one('CheckoutPage')) {
+			user_error('No CheckoutPage was found. Please create one in the CMS!', E_USER_ERROR);
+		}
+		
+		return ($urlSegment ? $page->URLSegment . '/' : $page->Link()) . $orderID;
 	}
 	
 	function getCMSFields() {
