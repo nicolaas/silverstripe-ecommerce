@@ -22,7 +22,7 @@ class OrderItem extends OrderAttribute {
 		'Total' => 'Currency'
 	);
 	
-	public function __construct($object = null, $quantity = 1) {		
+	public function __construct($object = null, $quantity = 1) {
 
 		// Case 1: Constructed by getting OrderItem from DB
 		if(is_array($object)) {

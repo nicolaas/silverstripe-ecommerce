@@ -100,8 +100,12 @@ class EcommerceRole extends DataObjectDecorator {
 	}
 	
 	/**
-	 * Find the member country, if the member doesn't exist then return
-	 * the Geoip visitor country based on their IP address.
+	 * Find the member's country.
+	 *
+	 * If there is no member logged in, try to resolve
+	 * their IP address to a country.
+	 *
+	 * @return string Found country of member
 	 */
 	static function findCountry() {
 		$member = Member::currentUser();
@@ -123,7 +127,9 @@ class EcommerceRole extends DataObjectDecorator {
 	
 	/**
 	 * Give the two letter code to resolve the title of the country.
-	 * @param $code - the two letter country code you want the full name of.
+	 *
+	 * @param string $code Country code
+	 * @return string|boolean String if country found, boolean FALSE if nothing found
 	 */
 	static function findCountryTitle($code) {
 		$countries = Geoip::getCountryDropDown();
