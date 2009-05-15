@@ -81,8 +81,9 @@ class ProductGroup extends Page {
 	 * @param array $permissions 
 	 * @return DataObjectSet
 	 */
-	function ProductsShowable($extraFilter, array $permissions) {
-		$filter = "`ShowInMenus` = 1 AND $extraFilter";
+	function ProductsShowable($extraFilter = '', $permissions = array("Show All Products")) {
+		$filter = "`ShowInMenus` = 1";
+		if($extraFilter) $filter .= " AND $extraFilter";
 		$products = new DataObjectSet();
 		
 		$childProducts = DataObject::get('Product', "`ParentID` = $this->ID AND $filter");
