@@ -275,8 +275,16 @@ class Product_Controller extends Page_Controller {
 	}
 	
 	function addVariation() {
-		if($this->AllowPurchase && $id = $this->urlParams['ID']) {
-			if($variation = DataObject::get_one('ProductVariation', "`ID` = '{$id}' AND `ProductID` = '{$this->ID}'")) {
+		if($this->AllowPurchase && $this->urlParams['ID']) {
+			$variation = DataObject::get_one(
+				'ProductVariation', 
+				sprintf(
+					"`ID` = %d AND `ProductID` = %d",
+					(int)$this->urlParams['ID'],
+					(int)$this->ID
+				)
+			);
+			if($variation) {
 				if($variation->AllowPurchase()) {
 					ShoppingCart::add_new_item(new ProductVariation_OrderItem($variation));
 					if(!$this->isAjax()) Director::redirectBack();
