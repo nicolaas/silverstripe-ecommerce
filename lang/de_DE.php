@@ -149,6 +149,7 @@ $lang['de_DE']['Order_Content.ss']['NOITEMS'] = 'Ihre Bestellung weist <strong>k
 $lang['de_DE']['Order_Content.ss']['PRICE'] = 'Preis';
 $lang['de_DE']['Order_Content.ss']['PRODUCT'] = 'Produkt';
 $lang['de_DE']['Order_Content.ss']['QUANTITY'] = 'Menge';
+$lang['de_DE']['Order_Content.ss']['READMORE'] = 'Wenn zu mehr über &quot;%s&quot; erfahren willst, klick hier';
 $lang['de_DE']['Order_Content.ss']['SUBTOTAL'] = 'Zwischensumme';
 $lang['de_DE']['Order_Content.ss']['TOTAL'] = 'Gesamt';
 $lang['de_DE']['Order_Content.ss']['TOTALOUTSTANDING'] = 'Gesamt ausstehend';
