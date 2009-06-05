@@ -54,3 +54,9 @@ Member:
         Country: NZ
         Email: test@example.com
         Password: 23u90oijlJKsa
+    member1:
+        FirstName: Bob
+        Surname: Jones
+        Country: US
+        Email: bob@somewhere.com
+        Password: 3456sdfsd34

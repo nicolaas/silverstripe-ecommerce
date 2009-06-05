@@ -156,6 +156,19 @@ class OrderForm extends Form {
 					
 		// Create new OR update logged in {@link Member} record
 		$member = EcommerceRole::createOrMerge($data);
+		if(!$member) {
+			$form->sessionMessage(
+				_t(
+					'OrderForm.MEMBEREXISTS', 'Sorry, a member already exists with that email address.
+					If this is your email address, please log in first before placing your order.'
+				),
+				'bad'
+			);
+			
+			Director::redirectBack();
+			return false;
+		}
+
 		$member->write();
 		$member->logIn();
 		

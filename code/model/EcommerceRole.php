@@ -75,10 +75,14 @@ class EcommerceRole extends DataObjectDecorator {
 	}
 
 	/**
-	 * Create a new member from the given data or merge with the built-in fields.
+	 * Create a new member with given data for a new member,
+	 * or merge the data into the logged in member.
 	 * 
-	 * @param data the array data from a submitted form.
-	 * @return Member record that was updated or created
+	 * IMPORTANT: Before creating a new Member record, we first
+	 * check that the request email address doesn't already exist.
+	 * 
+	 * @param array $data Form request data to update the member with
+	 * @return boolean|object Member object or boolean FALSE
 	 */
 	public static function createOrMerge($data) {
 		// Because we are using a ConfirmedPasswordField, the password will
@@ -87,16 +91,25 @@ class EcommerceRole extends DataObjectDecorator {
 			$data['Password'] = $data['Password']['_Password'];
 		}
 		
-		if($existingMember = Member::currentUser()) {
-			$existingMember->update($data);
-			
-			return $existingMember;
-		} else {
-			$member = new Member();
-			$member->update($data);
-			
-			return $member;
+		// We need to ensure that the unique field is never overwritten
+		$uniqueField = Member::get_unique_identifier_field();
+		if(isset($data[$uniqueField])) {
+			$SQL_unique = Convert::raw2xml($data[$uniqueField]);
+			$existingUniqueMember = DataObject::get_one('Member', "$uniqueField = '{$SQL_unique}'");
+			if($existingUniqueMember && $existingUniqueMember->exists()) {
+				if(Member::currentUserID() != $existingUniqueMember->ID) {
+					return false;
+				}
+			}
 		}
+		
+		if(!$member = Member::currentUser()) {
+			$member = new Member();
+		}
+		
+		$member->update($data);
+		
+		return $member;
 	}
 	
 	/**
