@@ -109,7 +109,7 @@ class AccountPage_Controller extends Page_Controller {
 		Requirements::themedCSS('Order_print', 'print');
 		
 		$memberID = Member::currentUserID();
-		$accountPageLink = self::find_link();
+		$accountPageLink = AccountPage::find_link();
 		
 		if($orderID = $request->param('ID')) {
 			if($order = DataObject::get_one('Order', "Order.ID = '$orderID' AND MemberID = '$memberID'")) {
